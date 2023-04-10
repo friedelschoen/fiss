@@ -20,13 +20,17 @@ int service_handle_command(service_t* s, sv_command_t command, unsigned char ext
 		case S_START:
 			if (s == NULL)
 				return -ENOSV;
-			if (extra > 2) {
+			if (extra > 1) {
 				return -EBEXT;
 			}
-			if (extra == 1 || extra == 2) {    // pin
-				changed           = !s->restart_manual;
+			if (s->state != STATE_INACTIVE)
+				return 0;
+
+			if (extra == 1) {    // pin
+				changed           = s->restart_manual != S_RESTART;
 				s->restart_manual = S_RESTART;
 			} else {
+				changed           = s->restart_manual != S_ONCE;
 				s->restart_manual = S_ONCE;
 			}
 			if (extra == 0 || extra == 1)
@@ -40,12 +44,18 @@ int service_handle_command(service_t* s, sv_command_t command, unsigned char ext
 		case S_STOP:
 			if (s == NULL)
 				return -ENOSV;
-			if (extra > 2) {
+			if (extra > 1) {
 				return -EBEXT;
 			}
-			if (extra == 1 || extra == 2) {    // pin
-				changed           = s->restart_manual;
+			if (s->state == STATE_INACTIVE)
+				return 0;
+
+			if (extra == 1) {    // pin
+				changed           = s->restart_manual != S_NONE;
 				s->restart_manual = S_NONE;
+			} else {
+				changed           = s->restart_manual != S_ONCE;
+				s->restart_manual = S_ONCE;
 			}
 			if (extra == 0 || extra == 1)
 				service_stop(s, &changed);
@@ -60,23 +70,30 @@ int service_handle_command(service_t* s, sv_command_t command, unsigned char ext
 				return -ENOSV;
 
 			service_send(s, extra);
+			response[0] = s;
 			return 1;
 
 		case S_PAUSE:
 			if (s == NULL)
 				return -ENOSV;
+			if (s->state == STATE_INACTIVE || s->paused)
+				return 0;
 
 			s->paused = true;
 			service_send(s, SIGSTOP);
+
 			response[0] = s;
 			return 1;
 
 		case S_RESUME:
 			if (s == NULL)
 				return -ENOSV;
+			if (s->state == STATE_INACTIVE || !s->paused)
+				return 0;
 
 			s->paused = false;
 			service_send(s, SIGCONT);
+
 			response[0] = s;
 			return 1;
 
@@ -84,11 +101,10 @@ int service_handle_command(service_t* s, sv_command_t command, unsigned char ext
 			if (s == NULL)
 				return -ENOSV;
 
-			s->state = STATE_INACTIVE;
-			service_start(s, &changed);
-
-			if (!changed)
+			if (s->state != STATE_DEAD)
 				return 0;
+
+			s->state = STATE_INACTIVE;
 
 			response[0] = s;
 			return 1;

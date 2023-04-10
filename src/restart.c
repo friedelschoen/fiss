@@ -30,7 +30,7 @@ static void do_finish(service_t* s) {
 			print_error("cannot execute finish process");
 			_exit(1);
 		}
-	} else if (s->fail_count > SV_FAIL_MAX) {
+	} else if (s->fail_count == SV_FAIL_MAX) {
 		s->state = STATE_DEAD;
 		printf(":: %s died\n", s->name);
 	} else {
@@ -80,7 +80,7 @@ void service_check_state(service_t* s, bool signaled, int return_code) {
 			break;
 
 		case STATE_FINISHING:
-			if (s->fail_count > SV_FAIL_MAX) {
+			if (s->fail_count == SV_FAIL_MAX) {
 				s->state = STATE_DEAD;
 				printf(":: %s died\n", s->name);
 			} else {
