@@ -9,43 +9,41 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-service_t* service_register(string name, bool log_service, bool* changed_ptr) {
+service_t* service_register(string name, bool is_log_service) {
 	service_t* s;
 
-	if ((s = service_get(name)) != NULL)
-		return s;
+	if ((s = service_get(name)) == NULL) {
+		s                 = &services[services_size++];
+		s->state          = STATE_INACTIVE;
+		s->status_change  = time(NULL);
+		s->restart_manual = S_NONE;
+		s->restart_file   = S_NONE;
+		s->last_exit      = EXIT_NONE;
+		s->return_code    = 0;
+		s->fail_count     = 0;
+		s->log_service    = NULL;
+		s->paused         = false;
+		s->log_pipe.read  = 0;
+		s->log_pipe.write = 0;
+		s->is_log_service = is_log_service;
 
-	s				  = &services[services_size++];
-	s->state		  = STATE_INACTIVE;
-	s->status_change  = time(NULL);
-	s->restart		  = false;
-	s->restart_once	  = false;
-	s->last_exit	  = EXIT_NONE;
-	s->return_code	  = 0;
-	s->fail_count	  = 0;
-	s->log_service	  = NULL;
-	s->paused		  = false;
-	s->log_pipe.read  = 0;
-	s->log_pipe.write = 0;
-
-	strcpy(s->name, name);
-
-	s->is_log_service = log_service;
+		strcpy(s->name, name);
+	}
 
 	struct stat stat_buf;
+	char        path_buffer[PATH_MAX];
 
-	char path_buffer[PATH_MAX];
 	snprintf(path_buffer, PATH_MAX, "%s/%s/%s", service_dir, s->name, "log");
 
 	if (s->is_log_service) {
 		if (s->log_pipe.read == 0 || s->log_pipe.write == 0)
 			pipe((int*) &s->log_pipe);
 
-	} else if (stat(path_buffer, &stat_buf) > -1 && S_ISDIR(stat_buf.st_mode)) {
+	} else if (!s->log_service && stat(path_buffer, &stat_buf) > -1 && S_ISDIR(stat_buf.st_mode)) {
 		snprintf(path_buffer, PATH_MAX, "%s/%s", s->name, "log");
 
 		if (!s->log_service)
-			s->log_service = service_register(path_buffer, true, NULL);
+			s->log_service = service_register(path_buffer, true);
 	}
 
 	bool autostart, autostart_once;
@@ -56,17 +54,18 @@ service_t* service_register(string name, bool log_service, bool* changed_ptr) {
 	snprintf(path_buffer, PATH_MAX, "%s/%s/once-%s", service_dir, s->name, runlevel);
 	autostart_once = stat(path_buffer, &stat_buf) != -1 && S_ISREG(stat_buf.st_mode);
 
+	s->restart_file = S_NONE;
+
 	if (autostart && autostart_once) {
 		fprintf(stderr, "error: %s is marked for up AND once!\n", s->name);
-	} else {
-		s->restart		= autostart;
-		s->restart_once = autostart_once;
+	} else if (autostart) {
+		s->restart_file = S_RESTART;
+	} else if (autostart_once) {
+		if (s->restart_file == S_NONE)
+			s->restart_file = S_ONCE;
 	}
 
 	s->status_change = time(NULL);
-
-	if (changed_ptr != NULL)
-		*changed_ptr = true;
 
 	return s;
 }

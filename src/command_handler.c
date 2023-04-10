@@ -23,11 +23,11 @@ int service_handle_command(service_t* s, sv_command_t command, unsigned char ext
 			if (extra > 2) {
 				return -EBEXT;
 			}
-			if (extra == 1 || extra == 2) {	   // pin
-				changed	   = !s->restart;
-				s->restart = true;
+			if (extra == 1 || extra == 2) {    // pin
+				changed           = !s->restart_manual;
+				s->restart_manual = S_RESTART;
 			} else {
-				s->restart_once = true;
+				s->restart_manual = S_ONCE;
 			}
 			if (extra == 0 || extra == 1)
 				service_start(s, &changed);
@@ -43,9 +43,9 @@ int service_handle_command(service_t* s, sv_command_t command, unsigned char ext
 			if (extra > 2) {
 				return -EBEXT;
 			}
-			if (extra == 1 || extra == 2) {	   // pin
-				changed	   = s->restart;
-				s->restart = false;
+			if (extra == 1 || extra == 2) {    // pin
+				changed           = s->restart_manual;
+				s->restart_manual = S_NONE;
 			}
 			if (extra == 0 || extra == 1)
 				service_stop(s, &changed);
@@ -96,9 +96,6 @@ int service_handle_command(service_t* s, sv_command_t command, unsigned char ext
 		case S_EXIT:
 			daemon_running = false;
 			return 0;
-
-		case S_REFRESH:
-			return service_refresh(response);
 
 		default:
 			fprintf(stderr, "warning: handling command: unknown command 0x%2x%2x\n", command, extra);

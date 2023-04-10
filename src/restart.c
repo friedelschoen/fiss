@@ -13,7 +13,7 @@
 
 
 static void do_finish(service_t* s) {
-	char		path_buffer[PATH_MAX];
+	char        path_buffer[PATH_MAX];
 	struct stat stat_buffer;
 	snprintf(path_buffer, PATH_MAX, "%s/%s/finish", service_dir, s->name);
 
@@ -41,10 +41,13 @@ static void do_finish(service_t* s) {
 
 void service_check_state(service_t* s, bool signaled, int return_code) {
 	s->status_change = time(NULL);
-	s->pid			 = 0;
-	s->restart_once	 = false;
+	s->pid           = 0;
+	if (s->restart_file == S_ONCE)
+		s->restart_file = S_NONE;
+	if (s->restart_manual == S_ONCE)
+		s->restart_manual = S_NONE;
 
-	char		path_buffer[PATH_MAX];
+	char        path_buffer[PATH_MAX];
 	struct stat stat_buffer;
 
 	switch (s->state) {
@@ -89,7 +92,7 @@ void service_check_state(service_t* s, bool signaled, int return_code) {
 				if (snprintf(path_buffer, PATH_MAX, "%s/%s/stop", service_dir, s->name) && stat(path_buffer, &stat_buffer) == 0 && stat_buffer.st_mode & S_IXUSR) {
 					s->state = STATE_ACTIVE_BACKGROUND;
 				} else if (snprintf(path_buffer, PATH_MAX, "%s/%s/pid", service_dir, s->name) && stat(path_buffer, &stat_buffer) == 0 && stat_buffer.st_mode & S_IRUSR) {
-					s->pid	 = parse_pid_file(s);
+					s->pid   = parse_pid_file(s);
 					s->state = STATE_ACTIVE_PID;
 				} else {
 					do_finish(s);
@@ -99,7 +102,7 @@ void service_check_state(service_t* s, bool signaled, int return_code) {
 				s->return_code = return_code;
 
 				do_finish(s);
-			} else {	// signaled
+			} else {    // signaled
 				s->last_exit   = EXIT_SIGNALED;
 				s->return_code = return_code;
 

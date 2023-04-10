@@ -27,8 +27,8 @@ bool daemon_running = true;
 static void signal_child(int unused) {
 	(void) unused;
 
-	int		   status;
-	pid_t	   died_pid;
+	int        status;
+	pid_t      died_pid;
 	service_t* s = NULL;
 
 	if ((died_pid = wait(&status)) == -1) {
@@ -51,16 +51,6 @@ static void signal_child(int unused) {
 	service_check_state(s, WIFSIGNALED(status), WIFSIGNALED(status) ? WTERMSIG(status) : WEXITSTATUS(status));
 }
 
-static bool is_dependency(service_t* d) {
-	service_t* s;
-	for (int i = 0; i < depends_size; i++) {
-		s = depends[i].service;
-		if (depends[i].depends == d && (s->state != STATE_INACTIVE || s->restart || s->restart_once || is_dependency(s)))
-			return true;
-	}
-	return false;
-}
-
 static void check_deaths() {
 	service_t* s;
 	for (int i = 0; i < services_size; i++) {
@@ -78,7 +68,7 @@ static void check_services() {
 		s = &services[i];
 		if (s->state == STATE_DEAD)
 			continue;
-		if (s->restart || s->restart_once || is_dependency(s)) {
+		if (service_need_restart(s)) {
 			if (s->state == STATE_INACTIVE) {
 				service_start(s, NULL);
 			}
@@ -90,14 +80,27 @@ static void check_services() {
 	}
 }
 
+static void accept_socket() {
+	int client_fd;
+	if ((client_fd = accept(control_socket, NULL, NULL)) == -1) {
+		if (errno == EWOULDBLOCK) {
+			sleep(SV_ACCEPT_INTERVAL);
+		} else {
+			print_error("cannot accept client from control-socket");
+		}
+	} else {
+		service_handle_socket(client_fd);
+	}
+}
+
 int service_supervise(string service_dir_, string runlevel_, bool force_socket) {
 	struct sigaction sigact = { 0 };
-	sigact.sa_handler		= signal_child;
+	sigact.sa_handler       = signal_child;
 	sigaction(SIGCHLD, &sigact, NULL);
 	sigact.sa_handler = SIG_IGN;
 	sigaction(SIGPIPE, &sigact, NULL);
 
-	runlevel	= runlevel_;
+	runlevel    = runlevel_;
 	service_dir = service_dir_;
 
 	setenv("SERVICE_RUNLEVEL", runlevel, true);
@@ -112,7 +115,7 @@ int service_supervise(string service_dir_, string runlevel_, bool force_socket) 
 
 	printf(":: starting services on '%s'\n", runlevel);
 
-	if (service_refresh(NULL) < 0)
+	if (service_refresh() < 0)
 		return 1;
 
 	printf(":: started services\n");
@@ -134,7 +137,7 @@ int service_supervise(string service_dir_, string runlevel_, bool force_socket) 
 
 	// bind socket to address
 	struct sockaddr_un addr = { 0 };
-	addr.sun_family			= AF_UNIX;
+	addr.sun_family         = AF_UNIX;
 	strcpy(addr.sun_path, socket_path);
 	if (bind(control_socket, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
 		print_error("cannot bind %s to socket", socket_path);
@@ -156,21 +159,11 @@ int service_supervise(string service_dir_, string runlevel_, bool force_socket) 
 	}
 
 	// accept connections and handle requests
-	int client_fd;
 	while (daemon_running) {
 		check_deaths();
+		service_refresh();
 		check_services();
-
-		if ((client_fd = accept(control_socket, NULL, NULL)) == -1) {
-			if (errno == EWOULDBLOCK) {
-				sleep(SV_ACCEPT_INTERVAL);
-			} else {
-				print_error("cannot accept client from control-socket");
-				return 1;
-			}
-		} else {
-			service_handle_socket(client_fd);
-		}
+		accept_socket();
 	}
 
 	close(control_socket);
@@ -188,9 +181,9 @@ int service_supervise(string service_dir_, string runlevel_, bool force_socket) 
 	}
 
 	time_t start = time(NULL);
-	int	   running;
+	int    running;
 	do {
-		sleep(1);	 // sleep for one second
+		sleep(1);    // sleep for one second
 		running = 0;
 		for (int i = 0; i < services_size; i++) {
 			if (services[i].state != STATE_INACTIVE)

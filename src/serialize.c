@@ -26,9 +26,10 @@ void service_store(service_t* s, uint8_t* buffer) {
 	buffer[13] = (s->fail_count);
 	buffer[14] = (s->return_code);
 	buffer[15] = (s->last_exit << 0) |
-				 (s->restart << 2) |
-				 (s->is_log_service << 4) |
-				 ((s->log_service != NULL) << 5);
+	             (s->restart_file << 2) |
+	             (s->restart_manual << 4) |
+	             (s->is_log_service << 6) |
+	             ((s->log_service != NULL) << 7);
 
 	// +--+--+--+--+--+--+--+--+
 	// |FS|ZO|LS|AU|PS|DE|SG|RS|
@@ -56,22 +57,23 @@ void service_store(service_t* s, uint8_t* buffer) {
 
 void service_load(service_t* s, const uint8_t* buffer) {
 	s->state = buffer[0];
-	s->pid	 = ((uint32_t) buffer[1] << 0) |
-			 ((uint32_t) buffer[2] << 8) |
-			 ((uint32_t) buffer[3] << 16) |
-			 ((uint32_t) buffer[4] << 24);
+	s->pid   = ((uint32_t) buffer[1] << 0) |
+	         ((uint32_t) buffer[2] << 8) |
+	         ((uint32_t) buffer[3] << 16) |
+	         ((uint32_t) buffer[4] << 24);
 	s->status_change = ((uint64_t) buffer[5] << 0) |
-					   ((uint64_t) buffer[6] << 8) |
-					   ((uint64_t) buffer[7] << 16) |
-					   ((uint64_t) buffer[8] << 24) |
-					   ((uint64_t) buffer[9] << 32) |
-					   ((uint64_t) buffer[10] << 40) |
-					   ((uint64_t) buffer[11] << 48) |
-					   ((uint64_t) buffer[12] << 56);
-	s->fail_count	  = buffer[13];
-	s->return_code	  = buffer[14];
-	s->last_exit	  = buffer[15] & 0x03;
-	s->restart		  = (buffer[15] >> 2) & 0x01;
-	s->is_log_service = (buffer[15] >> 4) & 0x01;
-	s->log_service	  = (buffer[15] >> 5) ? (void*) 1 : NULL;
+	                   ((uint64_t) buffer[6] << 8) |
+	                   ((uint64_t) buffer[7] << 16) |
+	                   ((uint64_t) buffer[8] << 24) |
+	                   ((uint64_t) buffer[9] << 32) |
+	                   ((uint64_t) buffer[10] << 40) |
+	                   ((uint64_t) buffer[11] << 48) |
+	                   ((uint64_t) buffer[12] << 56);
+	s->fail_count     = buffer[13];
+	s->return_code    = buffer[14];
+	s->last_exit      = buffer[15] & 0x03;
+	s->restart_file   = (buffer[15] >> 2) & 0x03;
+	s->restart_manual = (buffer[15] >> 4) & 0x03;
+	s->is_log_service = (buffer[15] >> 6) & 0x01;
+	s->log_service    = (buffer[15] >> 7) ? (void*) 1 : NULL;
 }

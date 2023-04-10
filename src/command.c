@@ -9,28 +9,26 @@
 
 
 string command_error[] = {
-	[0]		  = "success",
+	[0]       = "success",
 	[EBADCMD] = "command not found",
-	[ENOSV]	  = "service required",
+	[ENOSV]   = "service required",
 	[EBADSV]  = "no matching services",
-	[EBEXT]	  = "invalid extra"
+	[EBEXT]   = "invalid extra"
 };
 
 string command_string[] = {
-	(void*) S_START, "start",		 // start if not running and restart if failed
-	(void*) S_START, "up",			 // start if not running and restart if failed
-	(void*) S_STOP, "stop",			 // stop if running and not restart if failed
-	(void*) S_STOP, "down",			 // stop if running and not restart if failed
-	(void*) S_SEND, "send",			 // + signal | send signal to service
-	(void*) S_SEND, "kill",			 // + signal | send signal to service
-	(void*) S_PAUSE, "pause",		 // pause service (send SIGSTOP)
-	(void*) S_RESUME, "resume",		 // unpause service (send SIGCONT)
-	(void*) S_REVIVE, "revive",		 // revive died service
-	(void*) S_UPDATE, "update",		 // force update info // todo
-	(void*) S_REFRESH, "refresh",	 // if service is given refresh command dir otherwise look for new services
-	(void*) S_REFRESH, "reload",	 // if service is given refresh command dir otherwise look for new services
-	(void*) S_STATUS, "status",		 // get status of all services
-	(void*) S_EXIT, "exit",			 // exit
+	(void*) S_START, "start",      // start if not running and restart if failed
+	(void*) S_START, "up",         // start if not running and restart if failed
+	(void*) S_STOP, "stop",        // stop if running and not restart if failed
+	(void*) S_STOP, "down",        // stop if running and not restart if failed
+	(void*) S_SEND, "send",        // + signal | send signal to service
+	(void*) S_SEND, "kill",        // + signal | send signal to service
+	(void*) S_PAUSE, "pause",      // pause service (send SIGSTOP)
+	(void*) S_RESUME, "resume",    // unpause service (send SIGCONT)
+	(void*) S_REVIVE, "revive",    // revive died service
+	(void*) S_UPDATE, "update",    // force update info // todo
+	(void*) S_STATUS, "status",    // get status of all services
+	(void*) S_EXIT, "exit",        // exit
 	(void*) S_CHLEVEL, "chlevel",
 	0, 0
 };

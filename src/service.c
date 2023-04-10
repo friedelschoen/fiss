@@ -19,15 +19,15 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-service_t	 services[SV_SERVICE_MAX];
-int			 services_size = 0;
-string		 runlevel;
-string		 service_dir;
-int			 control_socket;
-int			 null_fd;
-bool		 verbose = false;
+service_t    services[SV_SERVICE_MAX];
+int          services_size = 0;
+string       runlevel;
+string       service_dir;
+int          control_socket;
+int          null_fd;
+bool         verbose = false;
 dependency_t depends[SV_DEPENDENCY_MAX];
-int			 depends_size;
+int          depends_size;
 
 
 service_t* service_get(string name) {
@@ -47,8 +47,8 @@ int service_pattern(string name, service_t** dest, int dest_max) {
 	return size;
 }
 
-int service_refresh(service_t** added) {
-	DIR*		   dp;
+int service_refresh() {
+	DIR*           dp;
 	struct dirent* ep;
 	dp = opendir(service_dir);
 	if (dp == NULL) {
@@ -57,8 +57,7 @@ int service_refresh(service_t** added) {
 	}
 
 	struct stat stat_str;
-	char		path_buffer[PATH_MAX];
-	int			added_len = 0;
+	char        path_buffer[PATH_MAX];
 
 	for (int i = 0; i < services_size; i++) {
 		service_t* s = &services[i];
@@ -81,10 +80,7 @@ int service_refresh(service_t** added) {
 		if (stat(path_buffer, &stat_str) == -1 || !S_ISDIR(stat_str.st_mode))
 			continue;
 
-		bool	   changed;
-		service_t* s = service_register(ep->d_name, false, &changed);
-		if (changed && added != NULL)
-			added[added_len++] = s;
+		service_register(ep->d_name, false);
 	}
 
 	closedir(dp);
@@ -93,5 +89,20 @@ int service_refresh(service_t** added) {
 	for (int i = 0; i < services_size; i++)
 		service_update_dependency(&services[i]);
 
-	return added_len;
+	return 0;
+}
+
+
+static bool is_dependency(service_t* d) {
+	service_t* s;
+	for (int i = 0; i < depends_size; i++) {
+		s = depends[i].service;
+		if (depends[i].depends == d && (s->state != STATE_INACTIVE || service_need_restart(s)))
+			return true;
+	}
+	return false;
+}
+
+bool service_need_restart(service_t* s) {
+	return s->restart_file || s->restart_manual || is_dependency(s);
 }

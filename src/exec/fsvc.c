@@ -81,7 +81,7 @@ void print_service(service_t* s, service_t* log) {
 	printf("- %s (", s->name);
 	print_status(s);
 	printf(")\n");
-	printf("  [ %c ] restart on exit\n", s->restart ? 'x' : ' ');
+	printf("  [ %c ] restart on exit\n", s->restart_file || s->restart_manual ? 'x' : ' ');
 	printf("  [%3d] last return code (%s)\n", s->return_code, s->last_exit == EXIT_SIGNALED ? "signaled" : "exited");
 	if (s->log_service) {
 		printf("        logging: ");
