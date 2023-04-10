@@ -25,11 +25,12 @@ void service_store(service_t* s, uint8_t* buffer) {
 	buffer[12] = (s->status_change >> 56) & 0xff;
 	buffer[13] = (s->fail_count);
 	buffer[14] = (s->return_code);
-	buffer[15] = (s->last_exit << 0) |
-	             (s->restart_file << 2) |
-	             (s->restart_manual << 4) |
-	             (s->is_log_service << 6) |
-	             ((s->log_service != NULL) << 7);
+	buffer[17] = (s->restart_file << 0) |
+	             (s->restart_manual << 2);
+	buffer[16] = (s->last_exit << 0) |
+	             (s->paused << 2) |
+	             (s->is_log_service << 3) |
+	             ((s->log_service != NULL) << 4);
 
 	// +--+--+--+--+--+--+--+--+
 	// |FS|ZO|LS|AU|PS|DE|SG|RS|
@@ -71,9 +72,10 @@ void service_load(service_t* s, const uint8_t* buffer) {
 	                   ((uint64_t) buffer[12] << 56);
 	s->fail_count     = buffer[13];
 	s->return_code    = buffer[14];
-	s->last_exit      = buffer[15] & 0x03;
-	s->restart_file   = (buffer[15] >> 2) & 0x03;
-	s->restart_manual = (buffer[15] >> 4) & 0x03;
-	s->is_log_service = (buffer[15] >> 6) & 0x01;
-	s->log_service    = (buffer[15] >> 7) ? (void*) 1 : NULL;
+	s->restart_file   = (buffer[15] >> 0) & 0x03;
+	s->restart_manual = (buffer[15] >> 2) & 0x03;
+	s->last_exit      = (buffer[16] >> 0) & 0x03;
+	s->paused         = (buffer[16] >> 2) & 0x01;
+	s->is_log_service = (buffer[16] >> 3) & 0x01;
+	s->log_service    = (buffer[16] >> 4) ? (void*) 1 : NULL;
 }

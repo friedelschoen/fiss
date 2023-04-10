@@ -8,7 +8,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#define SV_SERIAL_LEN     19
+#define SV_SERIAL_LEN     17
 #define SV_HAS_LOGSERVICE ((void*) 1)
 
 #define EBADCMD 1    // command not found
