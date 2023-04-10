@@ -1,0 +1,209 @@
+.Dd March 1, 2017
+.Dt VLOGGER 8
+.Os
+.Sh NAME
+.Nm vlogger
+.Nd log messages to syslog or an arbitrary executable
+.Sh SYNOPSIS
+.Nm vlogger
+.Op Fl isS
+.Op Fl f Ar file
+.Op Fl p Ar pri
+.Op Fl t Ar tag
+.Op Ar message ...
+.Sh DESCRIPTION
+The
+.Nm
+utility writes messages to the system log or an arbitrary executable.
+.Pp
+If
+.Nm
+is executed as
+.Nm logger
+it will always use the system log and behave like the regular
+.Xr logger 1 .
+.Pp
+Without
+.Ar message
+arguments
+.Nm
+reads messages from
+.Dv stdin
+or the file specified with the
+.Fl f
+flag.
+If the
+.Pa /etc/vlogger
+executable exists
+.Nm
+executes it with
+.Ar tag ,
+.Ar level
+and
+.Ar facility
+as arguments,
+replacing the
+.Nm
+process.
+.Pp
+If
+.Nm
+is executed as a log service for
+.Xr runit 8
+or another daemontools like
+supervision suite it uses the service name as default
+.Ar tag .
+As example if
+.Nm
+is linked to
+.Pa /var/service/foo/log/run
+it uses
+.Dq foo
+as
+.Ar tag
+and
+.Dq daemon.notice
+as
+.Ar pri .
+.Pp
+The options are as follows:
+.Bl -tag -width "-f file"
+.It Fl f Ar file
+Read lines from the specified
+.Ar file .
+This option cannot be combine
+.Ar message
+arguments.
+.It Fl i
+Log the PID of the
+.Nm
+process.
+Only supported if
+.Xr syslog 3
+is used.
+.It Fl p Ar pri
+The.
+.Ar pri
+can be
+.Pa facility.level
+or just
+.Pa facility .
+See
+.Sx FACILITIES ,
+.Sx LEVELS
+or
+.Xr syslog 3 .
+The default is
+.Dq user.notice .
+.It Fl S
+Force
+.Nm
+to use
+.Xr syslog 3
+even if
+.Pa /etc/vlogger
+exists.
+.It Fl s
+Output the message to standard error, as well as
+.Xr syslog 3 .
+Only supported if
+.Xr syslog 3
+is used.
+.It Fl t Ar tag
+Defines the
+.Xr openlog 3
+.Pa ident
+which is used as prefix for each log message or passed as first argument to
+.Pa /etc/vlogger .
+The default is the
+.Ev LOGNAME
+environment variable.
+.It Ar message
+Write the
+.Ar message
+to the system log.
+.El
+.Sh FACILITIES
+.Bl -tag -width 11n -compact
+.It auth
+.It authpriv
+.It cron
+.It daemon
+.It ftp
+.It kern
+can not be used from userspace replaced with
+.Pa daemon .
+.It lpr
+.It mail
+.It news
+.It syslog
+.It user
+.It uucp
+.It local[0-7]
+.It security
+deprecated synonym for
+.Pa auth .
+.El
+.Sh LEVELS
+.Bl -tag -width 11n -compact
+.It emerg
+.It alert
+.It crit
+.It err
+.It warning
+.It notice
+.It info
+.It debug
+.It panic
+deprecated synonym for
+.Pa emerg .
+.It error
+deprecated synonym for
+.Ar err .
+.It warn
+deprecated synonym for
+.Pa warning .
+.El
+.Sh FILES
+.Bl -tag -width indent
+.It /etc/vlogger
+An optional executable file that is used to handle the messages.
+It is executed with
+.Ar tag ,
+.Ar level
+and
+.Ar facility
+as arguments
+and replaces the
+.Nm
+process.
+.El
+.Sh EXIT STATUS
+.Ex -std
+.Sh EXAMPLES
+.Pa /etc/vlogger :
+.Bd -literal -offset indent
+#!/bin/sh
+exec svlogd /var/log/$1
+.Ed
+.Sh SEE ALSO
+.Xr logger 1 ,
+.Xr syslog 3 ,
+.Xr svlogd 8
+.Sh HISTORY
+This program is a replacement for the
+.Nm logger
+utility provided by
+.Nm util-linux .
+.Sh AUTHORS
+.An Duncan Overbruck Aq Mt mail@duncano.de
+.Sh LICENSE
+.Nm
+is in the public domain.
+.Pp
+To the extent possible under law,
+the creator of this work
+has waived all copyright and related or
+neighboring rights to this work.
+.Pp
+.Lk http://creativecommons.org/publicdomain/zero/1.0/

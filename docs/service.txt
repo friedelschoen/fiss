@@ -1,0 +1,7 @@
+service_get()
+	on success: fill the service_struct
+		returning E_OK
+	on fail: init the service_struct with the path and zero's
+		returning E_ANUL if an argument is nulled
+		returning E_NRUN if runsvdir is not running (aka `supervise/ok` don't have an device)
+		returning E_NOENT if service not found

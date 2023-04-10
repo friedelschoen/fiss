@@ -1,0 +1,25 @@
+Usage as init (pid 1):
+  fiss-sv
+Usage as regular:
+  fiss-sv <0|6>
+  fiss-sv [options] <runlevel>
+
+Options:
+  -a, --autostart .......... autostart every service (<runlevel> not required)
+  -h, --help ............... prints this and exits
+  -i, --as-init ............ execute start/stop script
+  -o, --stdout ............. print service stdout/stderr in console
+  -s, --service-dir <path> . using service-dir (default: )
+  -v, --verbose ............ print more info
+  -V, --version ............ prints current version and exits
+
+Usage:
+  fiss-ctl [options] <command> [service]
+  /etc/init.d/<service> <command>
+
+Options:
+  -h, --help ............... prints this and exits
+  -i, --as-init ............ execute start/stop script
+  -s, --service-dir <path> . using service-dir (default: )
+  -v, --verbose ............ print more info
+  -V, --version ............ prints current version and exits

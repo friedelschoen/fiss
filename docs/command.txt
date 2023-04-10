@@ -1,0 +1,15 @@
+start   (u) [0] <service>: start if not running
+start   (u) [1] <service>: start if not running and pin as up
+start   (u) [2] <service>: only pin as restart
+stop    (d) [0] <service>: stop if running 
+stop    (d) [1] <service>: stop if running and pin as down
+stop    (d) [2] <service>: only pin as down
+send    (k) [s] <service>: send signal $s to service
+pause   (p) [*] <service>: pause service (send SIGSTOP)
+resume  (c) [*] <service>: unpause service (send SIGCONT)
+revive  (v) [*] <service>: revive died service
+update  (g) [*] <service>: force update info // todo
+exit    (x) [*]:           stop all services and kill the fsvs instance
+refresh (y) [*]:           refresh the service directory
+status  (a) [*] <service>: get status of the service
+status  (a) [*]:           get status of all services

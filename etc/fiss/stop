@@ -1,0 +1,16 @@
+#!/bin/sh
+# vim: set ts=4 sw=4 et:
+
+PATH=/usr/bin:/usr/sbin
+
+. /usr/share/fiss/utils
+
+detect_virt
+
+[ -r /etc/rc.conf ] && . /etc/rc.conf
+
+[ -r /etc/rc.shutdown ] && . /etc/rc.shutdown
+
+for f in /etc/fiss/stop.d/*.sh; do
+	[ -r $f ] && . $f
+done
