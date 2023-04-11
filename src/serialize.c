@@ -25,7 +25,7 @@ void service_store(service_t* s, uint8_t* buffer) {
 	buffer[12] = (s->status_change >> 56) & 0xff;
 	buffer[13] = (s->fail_count);
 	buffer[14] = (s->return_code);
-	buffer[17] = (s->restart_file << 0) |
+	buffer[15] = (s->restart_file << 0) |
 	             (s->restart_manual << 2);
 	buffer[16] = (s->last_exit << 0) |
 	             (s->paused << 2) |

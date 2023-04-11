@@ -30,35 +30,35 @@ static const char HELP_MESSAGE[] =
 static const char VERSION_MESSAGE[] =
     "FISS v" SV_VERSION "\n";
 
-void print_status(service_t* s) {
-	const char* state;
+
+void print_status(service_t* s, char* state, size_t size) {
 	switch (s->state) {
 		case STATE_INACTIVE:
-			state = "inactive";
+			strcpy(state, "inactive");
 			break;
 		case STATE_STARTING:
-			state = "starting";
+			strcpy(state, "starting");
 			break;
 		case STATE_ACTIVE_PID:
-			state = "active (pid)";
+			snprintf(state, size, "active (pid) as %d", s->pid);
 			break;
 		case STATE_ACTIVE_BACKGROUND:
-			state = "active (background)";
+			strcpy(state, "active (background)");
 			break;
 		case STATE_ACTIVE_DUMMY:
-			state = "active (dummy)";
+			strcpy(state, "active (dummy)");
 			break;
 		case STATE_ACTIVE_FOREGROUND:
-			state = "active";
+			snprintf(state, size, "active as %d", s->pid);
 			break;
 		case STATE_FINISHING:
-			state = "finishing";
+			strcpy(state, "finishing");
 			break;
 		case STATE_STOPPING:
-			state = "stopping";
+			strcpy(state, "stopping");
 			break;
 		case STATE_DEAD:
-			state = "dead";
+			strcpy(state, "dead");
 			break;
 	}
 	time_t diff      = time(NULL) - s->status_change;
@@ -75,21 +75,61 @@ void print_status(service_t* s) {
 		diff /= 24;
 		diff_unit = "days";
 	}
-	printf("%s since %lu%s", state, diff, diff_unit);
+	int len = strlen(state);
+	snprintf(state + len, size - len, " since %lu%s", diff, diff_unit);
 }
 
 void print_service(service_t* s, service_t* log) {
-	printf("- %s (", s->name);
-	print_status(s);
-	printf(")\n");
+	if (s->is_log_service)
+		return;
+	char state[100];
+	print_status(s, state, sizeof(state));
+
+	printf("- %s (%s)\n", s->name, state);
 	printf("  [ %c ] restart on exit\n", s->restart_file || s->restart_manual ? 'x' : ' ');
 	printf("  [%3d] last return code (%s)\n", s->return_code, s->last_exit == EXIT_SIGNALED ? "signaled" : "exited");
 	if (s->log_service) {
-		printf("        logging: ");
-		print_status(log);
-		printf("\n");
+		print_status(log, state, sizeof(state));
+		printf("        logging: %s\n", state);
 	}
 	printf("\n");
+}
+
+void print_service_short(service_t* s, service_t* log) {
+	bool active = s->state == STATE_ACTIVE_BACKGROUND ||
+	              s->state == STATE_ACTIVE_DUMMY ||
+	              s->state == STATE_ACTIVE_FOREGROUND ||
+	              s->state == STATE_ACTIVE_PID;
+
+	bool restart = s->restart_file == S_ONCE ||
+	               s->restart_file == S_RESTART ||
+	               s->restart_manual == S_ONCE ||
+	               s->restart_manual == S_RESTART;
+
+	bool wants_other = active != restart;
+
+	if (s->state == STATE_STARTING)
+		printf("[    {+}]");
+	else if (s->state == STATE_FINISHING || s->state == STATE_STOPPING)
+		printf("[{-}     ]");
+	else if (active)
+		printf("[  %s + ]", wants_other ? "<-" : "  ");
+	else
+		printf("[ - %s  ]", wants_other ? "->" : "  ");
+
+	printf(" %s", s->name);
+	if (s->state == STATE_ACTIVE_PID || s->state == STATE_ACTIVE_FOREGROUND)
+		printf(" (pid: %d)", s->pid);
+	else if (s->last_exit != EXIT_SIGNALED)
+		printf(" (last exit: SIG%s)", strsignal(s->return_code));
+	else if (s->last_exit != EXIT_NORMAL)
+		printf(" (last exit: %d)", s->return_code);
+	printf("\n");
+
+	if (log) {
+		printf("log: ");
+		print_service_short(log, NULL);
+	}
 }
 
 static const struct option long_options[] = {
@@ -102,6 +142,7 @@ static const struct option long_options[] = {
 	{ "once", no_argument, 0, 'o' },
 	{ "check", no_argument, 0, 'c' },
 	{ "reset", no_argument, 0, 'f' },
+	{ "short", no_argument, 0, 'q' },
 	{ 0 }
 };
 
@@ -112,15 +153,21 @@ int main(int argc, char** argv) {
 	bool check = false,
 	     pin   = false,
 	     once  = false,
-	     reset = false;
+	     reset = false,
+
+	     short_ = false;
+
 	int c;
-	while ((c = getopt_long(argc, argv, ":hVvs:r:pocf", long_options, NULL)) > 0) {
+	while ((c = getopt_long(argc, argv, ":hVvqs:r:pocf", long_options, NULL)) > 0) {
 		switch (c) {
 			case 'r':
 				strcpy(runlevel, optarg);
 				break;
 			case 's':
 				service_dir = optarg;
+				break;
+			case 'q':
+				short_ = true;
 				break;
 			case 'v':
 				verbose = true;
@@ -258,6 +305,16 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
+	if (check)
+		printf("warn: --check specified but not used\n");
+	if (pin)
+		printf("warn: --pin specified but not used\n");
+	if (once)
+		printf("warn: --once specified but not used\n");
+	if (reset)
+		printf("warn: --reset specified but not used\n");
+
+
 	service_t response[50];
 	int       rc;
 
@@ -286,7 +343,10 @@ int main(int argc, char** argv) {
 					}
 				}
 			}
-			print_service(&response[i], log);
+			if (short_)
+				print_service_short(&response[i], log);
+			else
+				print_service(&response[i], log);
 		}
 	}
 }

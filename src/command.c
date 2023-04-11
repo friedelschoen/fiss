@@ -42,7 +42,7 @@ int service_command(char command, char extra, string service, service_t* respons
 	int res;
 	read(sockfd, &res, 1);
 
-	uint8_t service_buffer[19];
+	uint8_t service_buffer[SV_SERIAL_LEN];
 
 	if (res == 0) {
 		if (response) {

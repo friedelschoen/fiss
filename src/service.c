@@ -106,5 +106,9 @@ static bool is_dependency(service_t* d) {
 bool service_need_restart(service_t* s) {
 	if (s->restart_manual == S_FORCE_DOWN)
 		return is_dependency(s);
-	return s->restart_file || s->restart_manual || is_dependency(s);
+	return s->restart_file == S_ONCE ||
+	       s->restart_file == S_RESTART ||
+	       s->restart_manual == S_ONCE ||
+	       s->restart_manual == S_RESTART ||
+	       is_dependency(s);
 }
