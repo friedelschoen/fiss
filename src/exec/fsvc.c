@@ -167,111 +167,92 @@ int main(int argc, char** argv) {
 	char        command, extra = 0;
 
 	if (streq(command_str, "up") || streq(command_str, "start") || streq(command_str, "down") || streq(command_str, "stop")) {
-		for (int i = 0; i < argc; i++) {
-			if (!service) {
-				service = argv[i];
-			} else {
-				printf("redundant argument '%s'\n", argv[i]);
-				return 1;
-			}
-		}
-		if (service == NULL) {
+		if (argc == 0) {
 			printf("service omitted\n");
+			return 1;
+		} else if (argc > 1) {
+			printf("redundant argument '%s'\n", argv[2]);
 			return 1;
 		}
 
 		command = streq(command_str, "down") || streq(command_str, "stop") ? S_STOP : S_START;
 		extra   = pin;
+		service = argv[0];
 		pin     = false;
 	} else if (streq(command_str, "send") || streq(command_str, "kill")) {
-		for (int i = 0; i < argc; i++) {
-			if (!service) {
-				service = argv[i];
-			} else if (!extra) {
-				char* endptr;
-				extra = strtol(argv[1], &endptr, 10);
-				if (endptr == argv[1]) {
-					if ((extra = signame(argv[1])) == 0) {
-						printf("unknown signalname\n");
-						return 1;
-					}
-				} else if (endptr != strchr(argv[1], '\0')) {
-					printf("malformatted signal\n");
-					return 1;
-				}
-			} else {
-				printf("redundant argument '%s'\n", argv[i]);
+		if (argc == 0) {
+			printf("service omitted\n");
+			return 1;
+		} else if (argc == 1) {
+			printf("signal omitted\n");
+			return 1;
+		} else if (argc > 2) {
+			printf("redundant argument '%s'\n", argv[2]);
+			return 1;
+		}
+
+		char* endptr;
+		extra = strtol(argv[1], &endptr, 10);
+		if (endptr == argv[1]) {
+			if ((extra = signame(argv[1])) == 0) {
+				printf("unknown signalname\n");
 				return 1;
 			}
-		}
-		if (service == NULL) {
-			printf("service omitted\n");
+		} else if (endptr != strchr(argv[1], '\0')) {
+			printf("malformatted signal\n");
 			return 1;
 		}
 
 		command = S_SEND;
+		service = argv[0];
 	} else if (streq(command_str, "enable") || streq(command_str, "disable")) {
-		for (int i = 0; i < argc; i++) {
-			if (!service) {
-				service = argv[i];
-			} else {
-				printf("redundant argument '%s'", argv[i]);
-				return 1;
-			}
-		}
-		if (service == NULL) {
+		if (argc == 0) {
 			printf("service omitted\n");
+			return 1;
+		} else if (argc > 1) {
+			printf("redundant argument '%s'\n", argv[2]);
 			return 1;
 		}
 
 		command = streq(command_str, "enable") ? S_ENABLE : S_DISABLE;
 		extra   = once;
 		once    = false;
+		service = argv[0];
 	} else if (streq(command_str, "status")) {
-		for (int i = 0; i < argc; i++) {
-			if (!service) {
-				service = argv[i];
-			} else {
-				printf("redundant argument '%s'\n", argv[i]);
-				return 1;
-			}
+		if (argc == 1) {
+			service = argv[0];
+		} else if (argc > 1) {
+			printf("redundant argument '%s'\n", argv[2]);
+			return 1;
 		}
 
 		command = S_STATUS;
 		extra   = check;
 		check   = false;
 	} else if (streq(command_str, "pause") || streq(command_str, "resume")) {
-		for (int i = 0; i < argc; i++) {
-			if (!service) {
-				service = argv[i];
-			} else {
-				printf("redundant argument '%s'", argv[i]);
-				return 1;
-			}
-		}
-		if (service == NULL) {
+		if (argc == 0) {
 			printf("service omitted\n");
+			return 1;
+		} else if (argc > 1) {
+			printf("redundant argument '%s'\n", argv[2]);
 			return 1;
 		}
 
 		command = streq(command_str, "pause") ? S_PAUSE : S_RESUME;
+		service = argv[0];
 	} else if (streq(command_str, "switch")) {
-		for (int i = 0; i < argc; i++) {
-			if (!service) {
-				service = argv[i];
-			} else {
-				printf("redundant argument '%s'", argv[i]);
-				return 1;
-			}
-		}
-		if (service == NULL) {
+		if (argc == 0) {
 			printf("runlevel omitted\n");
+			return 1;
+		} else if (argc > 1) {
+			printf("redundant argument '%s'\n", argv[2]);
 			return 1;
 		}
 
 		command = S_SWITCH;
 		extra   = reset;
 		reset   = false;
+		service = argv[0];
 	} else {
 		printf("unknown command '%s'\n", command_str);
 		return 1;
