@@ -85,6 +85,7 @@ int main(int argc, string* argv) {
 		service_supervise(SV_SERVICE_DIR, SV_RUNLEVEL, true);
 		sigblock_all(false);
 	}
+
 	handle_stage3();
 
 	/* reget stderr */

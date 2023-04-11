@@ -16,8 +16,8 @@ service_t* service_register(string name, bool is_log_service) {
 		s                 = &services[services_size++];
 		s->state          = STATE_INACTIVE;
 		s->status_change  = time(NULL);
-		s->restart_manual = S_NONE;
-		s->restart_file   = S_NONE;
+		s->restart_manual = S_DOWN;
+		s->restart_file   = S_DOWN;
 		s->last_exit      = EXIT_NONE;
 		s->return_code    = 0;
 		s->fail_count     = 0;
@@ -54,14 +54,14 @@ service_t* service_register(string name, bool is_log_service) {
 	snprintf(path_buffer, PATH_MAX, "%s/%s/once-%s", service_dir, s->name, runlevel);
 	autostart_once = stat(path_buffer, &stat_buf) != -1 && S_ISREG(stat_buf.st_mode);
 
-	s->restart_file = S_NONE;
+	s->restart_file = S_DOWN;
 
 	if (autostart && autostart_once) {
 		fprintf(stderr, "error: %s is marked for up AND once!\n", s->name);
 	} else if (autostart) {
 		s->restart_file = S_RESTART;
 	} else if (autostart_once) {
-		if (s->restart_file == S_NONE)
+		if (s->restart_file == S_DOWN)
 			s->restart_file = S_ONCE;
 	}
 

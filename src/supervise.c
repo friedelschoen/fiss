@@ -100,7 +100,7 @@ int service_supervise(string service_dir_, string runlevel_, bool force_socket) 
 	sigact.sa_handler = SIG_IGN;
 	sigaction(SIGPIPE, &sigact, NULL);
 
-	runlevel    = runlevel_;
+	strcpy(runlevel, runlevel_);
 	service_dir = service_dir_;
 
 	setenv("SERVICE_RUNLEVEL", runlevel, true);

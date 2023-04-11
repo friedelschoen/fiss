@@ -1,5 +1,6 @@
 #include "config.h"
 #include "service.h"
+#include "signame.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -97,20 +98,26 @@ static const struct option long_options[] = {
 	{ "version", no_argument, 0, 'V' },
 	{ "runlevel", no_argument, 0, 'r' },
 	{ "service-dir", no_argument, 0, 's' },
-	{ "pin", no_argument, 0, 'n' },
-	{ "now", no_argument, 0, 'p' },
+	{ "pin", no_argument, 0, 'p' },
+	{ "once", no_argument, 0, 'o' },
+	{ "check", no_argument, 0, 'c' },
+	{ "reset", no_argument, 0, 'f' },
 	{ 0 }
 };
 
 int main(int argc, char** argv) {
-	runlevel    = getenv(SV_RUNLEVEL_ENV) ?: SV_RUNLEVEL;
+	strcpy(runlevel, getenv(SV_RUNLEVEL_ENV) ?: SV_RUNLEVEL);
 	service_dir = SV_SERVICE_DIR;
 
+	bool check = false,
+	     pin   = false,
+	     once  = false,
+	     reset = false;
 	int c;
-	while ((c = getopt_long(argc, argv, ":hVvnps:r:", long_options, NULL)) > 0) {
+	while ((c = getopt_long(argc, argv, ":hVvs:r:pocf", long_options, NULL)) > 0) {
 		switch (c) {
 			case 'r':
-				runlevel = optarg;
+				strcpy(runlevel, optarg);
 				break;
 			case 's':
 				service_dir = optarg;
@@ -124,6 +131,18 @@ int main(int argc, char** argv) {
 			case 'h':
 				printf(HELP_MESSAGE, argv[0]);
 				return 0;
+			case 'p':
+				pin = true;
+				break;
+			case 'o':
+				once = true;
+				break;
+			case 'c':
+				check = true;
+				break;
+			case 'f':
+				reset = true;
+				break;
 			case '?':
 				if (optopt)
 					fprintf(stderr, "error: invalid option -%c\n", optopt);
@@ -136,42 +155,150 @@ int main(int argc, char** argv) {
 	argv += optind;
 
 	if (argc < 1) {
-		printf("%s [options] <command> [service]\n", argv[0]);
+		printf("fsvc [options] <command> [service]\n");
 		return 1;
 	}
 
-	char*  command = argv[0];
-	string service = argc >= 2 ? argv[1] : "";
-	int    extra   = argc >= 3 ? atoi(argv[2]) : 0;
+	string command_str = argv[0];
+	argv++;
+	argc--;
+
+	const char* service = NULL;
+	char        command, extra = 0;
+
+	if (streq(command_str, "up") || streq(command_str, "start") || streq(command_str, "down") || streq(command_str, "stop")) {
+		for (int i = 0; i < argc; i++) {
+			if (!service) {
+				service = argv[i];
+			} else {
+				printf("redundant argument '%s'\n", argv[i]);
+				return 1;
+			}
+		}
+		if (service == NULL) {
+			printf("service omitted\n");
+			return 1;
+		}
+
+		command = streq(command_str, "down") || streq(command_str, "stop") ? S_STOP : S_START;
+		extra   = pin;
+		pin     = false;
+	} else if (streq(command_str, "send") || streq(command_str, "kill")) {
+		for (int i = 0; i < argc; i++) {
+			if (!service) {
+				service = argv[i];
+			} else if (!extra) {
+				char* endptr;
+				extra = strtol(argv[1], &endptr, 10);
+				if (endptr == argv[1]) {
+					if ((extra = signame(argv[1])) == 0) {
+						printf("unknown signalname\n");
+						return 1;
+					}
+				} else if (endptr != strchr(argv[1], '\0')) {
+					printf("malformatted signal\n");
+					return 1;
+				}
+			} else {
+				printf("redundant argument '%s'\n", argv[i]);
+				return 1;
+			}
+		}
+		if (service == NULL) {
+			printf("service omitted\n");
+			return 1;
+		}
+
+		command = S_SEND;
+	} else if (streq(command_str, "enable") || streq(command_str, "disable")) {
+		for (int i = 0; i < argc; i++) {
+			if (!service) {
+				service = argv[i];
+			} else {
+				printf("redundant argument '%s'", argv[i]);
+				return 1;
+			}
+		}
+		if (service == NULL) {
+			printf("service omitted\n");
+			return 1;
+		}
+
+		command = streq(command_str, "enable") ? S_ENABLE : S_DISABLE;
+		extra   = once;
+		once    = false;
+	} else if (streq(command_str, "status")) {
+		for (int i = 0; i < argc; i++) {
+			if (!service) {
+				service = argv[i];
+			} else {
+				printf("redundant argument '%s'\n", argv[i]);
+				return 1;
+			}
+		}
+
+		command = S_STATUS;
+		extra   = check;
+		check   = false;
+	} else if (streq(command_str, "pause") || streq(command_str, "resume")) {
+		for (int i = 0; i < argc; i++) {
+			if (!service) {
+				service = argv[i];
+			} else {
+				printf("redundant argument '%s'", argv[i]);
+				return 1;
+			}
+		}
+		if (service == NULL) {
+			printf("service omitted\n");
+			return 1;
+		}
+
+		command = streq(command_str, "pause") ? S_PAUSE : S_RESUME;
+	} else if (streq(command_str, "switch")) {
+		for (int i = 0; i < argc; i++) {
+			if (!service) {
+				service = argv[i];
+			} else {
+				printf("redundant argument '%s'", argv[i]);
+				return 1;
+			}
+		}
+		if (service == NULL) {
+			printf("runlevel omitted\n");
+			return 1;
+		}
+
+		command = S_SWITCH;
+		extra   = reset;
+		reset   = false;
+	} else {
+		printf("unknown command '%s'\n", command_str);
+		return 1;
+	}
 
 	service_t response[50];
-	int       res = 0;
+	int       rc;
 
-	if (streq(command, "check")) {
+	if (check) {
 		service_t s;
-		int       rc;
-		if ((rc = service_command(S_STATUS, 0, service, &s, 1)) != 1) {
-			printf("error: %s (errno: %d)\n", command_error[-res], -res);
+		if ((rc = service_command(command, extra, service, &s, 1)) != 1) {
+			printf("error: %s (errno: %d)\n", command_error[-rc], -rc);
 			return 1;
 		}
 		return s.state == STATE_ACTIVE_PID || s.state == STATE_ACTIVE_DUMMY || s.state == STATE_ACTIVE_FOREGROUND || s.state == STATE_ACTIVE_BACKGROUND;
-
 	} else {
-		char cmd_abbr;
-		if ((cmd_abbr = service_get_command(command)) == 0)
-			res = -EBADCMD;
-		else
-			res = service_command(cmd_abbr, extra, service, response, 50);
+		rc = service_command(command, extra, service, response, 50);
 
-		if (res < 0) {
-			printf("error: %s (errno: %d)\n", command_error[-res], -res);
+		if (rc < 0) {
+			printf("error: %s (errno: %d)\n", command_error[-rc], -rc);
 			return 1;
 		}
 
-		for (int i = 0; i < res; i++) {
+		for (int i = 0; i < rc; i++) {
 			service_t* log = NULL;
 			if (response[i].log_service) {
-				for (int j = 0; j < res; j++) {
+				for (int j = 0; j < rc; j++) {
 					if (strncmp(response[i].name, response[j].name, strlen(response[i].name)) == 0) {
 						log = &response[j];
 						break;

@@ -43,9 +43,9 @@ void service_check_state(service_t* s, bool signaled, int return_code) {
 	s->status_change = time(NULL);
 	s->pid           = 0;
 	if (s->restart_file == S_ONCE)
-		s->restart_file = S_NONE;
+		s->restart_file = S_DOWN;
 	if (s->restart_manual == S_ONCE)
-		s->restart_manual = S_NONE;
+		s->restart_manual = S_DOWN;
 
 	char        path_buffer[PATH_MAX];
 	struct stat stat_buffer;

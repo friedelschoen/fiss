@@ -34,5 +34,7 @@ ssize_t readstr(int fd, char* str) {
 }
 
 ssize_t writestr(int fd, string str) {
+	if (str == NULL)
+		return write(fd, "", 1);
 	return write(fd, str, strlen(str) + 1);
 }

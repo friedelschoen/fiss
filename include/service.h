@@ -23,10 +23,11 @@ typedef enum {
 	S_PAUSE   = 'p',    // pause service (send SIGSTOP)
 	S_RESUME  = 'c',    // unpause service (send SIGCONT)
 	S_REVIVE  = 'v',    // revive died service
-	S_UPDATE  = 'g',    // force update info // todo
 	S_EXIT    = 'x',    // kill the fsvs instance
 	S_STATUS  = 'a',    // get status of all services
-	S_CHLEVEL = 'l',    // change runlevel
+	S_SWITCH  = 'l',    // change runlevel
+	S_ENABLE  = 'E',    // of extra disable
+	S_DISABLE = 'D',    // of extra disable
 } sv_command_t;
 
 typedef enum service_state {
@@ -48,9 +49,10 @@ typedef enum service_exit {
 } service_exit_t;
 
 typedef enum service_restart {
-	S_NONE,
-	S_RESTART,
+	S_DOWN,
+	S_FORCE_DOWN,    // force down (manual)
 	S_ONCE,
+	S_RESTART,
 } service_restart_t;
 
 typedef struct service {
@@ -80,7 +82,7 @@ extern string command_string[];
 
 extern service_t    services[];
 extern int          services_size;
-extern string       runlevel;
+extern char         runlevel[];
 extern int          null_fd;
 extern int          control_socket;
 extern bool         daemon_running;
@@ -92,7 +94,7 @@ extern int          depends_size;
 
 char       service_get_command(string command);
 int        service_command(char command, char extra, string service, service_t* response, int response_max);
-int        service_handle_command(service_t* s, sv_command_t command, uint8_t extra, service_t** response);
+int        service_handle_command(void* s, sv_command_t command, uint8_t extra, service_t** response);
 int        service_pattern(string name, service_t** dest, int dest_max);
 int        service_refresh();
 int        service_supervise(string service_dir, string runlevel, bool force_socket);

@@ -21,7 +21,7 @@
 
 service_t    services[SV_SERVICE_MAX];
 int          services_size = 0;
-string       runlevel;
+char         runlevel[SV_NAME_MAX];
 string       service_dir;
 int          control_socket;
 int          null_fd;
@@ -104,5 +104,7 @@ static bool is_dependency(service_t* d) {
 }
 
 bool service_need_restart(service_t* s) {
+	if (s->restart_manual == S_FORCE_DOWN)
+		return is_dependency(s);
 	return s->restart_file || s->restart_manual || is_dependency(s);
 }
