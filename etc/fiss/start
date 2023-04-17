@@ -22,7 +22,7 @@ else
 	chmod 0644 /var/log/dmesg.log
 fi
 
-# create files for controlling runit
+# create files for controlling fiss
 mkdir -p /run/fiss/log
 
 msg "Initialization complete, running stage 2..."
