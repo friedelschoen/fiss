@@ -8,7 +8,7 @@
 #include <sys/un.h>
 
 
-string command_error[] = {
+const char* command_error[] = {
 	[0]       = "success",
 	[EBADCMD] = "command not found",
 	[ENOSV]   = "service required",
@@ -16,7 +16,7 @@ string command_error[] = {
 	[EBEXT]   = "invalid extra"
 };
 
-int service_command(char command, char extra, string service, service_t* response, int response_max) {
+int service_command(char command, char extra, const char* service, service_t* response, int response_max) {
 	char request[2] = { command, extra };
 
 	int sockfd = socket(AF_UNIX, SOCK_STREAM, 0);

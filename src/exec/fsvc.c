@@ -61,8 +61,8 @@ void print_status(service_t* s, char* state, size_t size) {
 			strcpy(state, "dead");
 			break;
 	}
-	time_t diff      = time(NULL) - s->status_change;
-	string diff_unit = "sec";
+	time_t      diff      = time(NULL) - s->status_change;
+	const char* diff_unit = "sec";
 	if (diff >= 60) {
 		diff /= 60;
 		diff_unit = "min";
@@ -206,7 +206,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-	string command_str = argv[0];
+	const char* command_str = argv[0];
 	argv++;
 	argc--;
 

@@ -30,12 +30,10 @@ static const char HELP_MESSAGE[] =
     "  %s [options] <runlevel>\n"
     "\n"
     "Options:\n"
-    "  -h, --help ............... prints this and exits\n"
-    "  -i, --as-init ............ execute start/stop script\n"
-    "  -o, --stdout ............. print service stdout/stderr in console\n"
-    "  -s, --service-dir <path> . using service-dir (default: " SV_SERVICE_DIR ")\n"
-    "  -v, --verbose ............ print more info\n"
-    "  -V, --version ............ prints current version and exits\n"
+    "  -h, --help ........ prints this and exits\n"
+    "  -v, --verbose ..... print more info\n"
+    "  -V, --version ..... prints current version and exits\n"
+    "  -f, --force ....... forces socket\n"
     "\n";
 
 static const char VERSION_MESSAGE[] =
@@ -50,16 +48,12 @@ static const char VERSION_MESSAGE[] =
     "\n";
 
 static const struct option long_options[] = {
-	{ "autostart", no_argument, 0, 'a' },
 	{ "help", no_argument, 0, 'h' },
 	{ "verbose", no_argument, 0, 'v' },
 	{ "version", no_argument, 0, 'V' },
-	{ "force-socket", no_argument, 0, 'f' },
+	{ "force", no_argument, 0, 'f' },
 	{ 0 }
 };
-
-static bool consider_autostart = false;
-static bool stdout_redirect    = false;
 
 static void signal_interrupt(int signum) {
 	(void) signum;
@@ -71,18 +65,12 @@ int main(int argc, char** argv) {
 	bool force_socket = false;
 
 	int c;
-	while ((c = getopt_long(argc, argv, ":ahiosf:vV", long_options, NULL)) > 0) {
+	while ((c = getopt_long(argc, argv, ":hvVf", long_options, NULL)) > 0) {
 		switch (c) {
-			case 'a':
-				consider_autostart = true;
-				break;
 			case 'h':
 				printf(VERSION_MESSAGE, "<runlevel>");
 				printf(HELP_MESSAGE, argv[0]);
 				return 0;
-			case 'o':
-				stdout_redirect = true;
-				break;
 			case 'v':
 				verbose = true;
 				break;

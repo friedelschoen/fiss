@@ -10,8 +10,6 @@
 #define print_error(msg, ...)   (fprintf(stderr, "error: " msg ": %s\n", ##__VA_ARGS__, strerror(errno)))
 #define print_warning(msg, ...) (fprintf(stderr, "warning: " msg ": %s\n", ##__VA_ARGS__, strerror(errno)))
 
-typedef const char* string;
-
 typedef struct {
 	int read;
 	int write;
@@ -19,4 +17,4 @@ typedef struct {
 
 ssize_t dgetline(int fd, char* line, size_t line_buffer);
 ssize_t readstr(int fd, char* str);
-ssize_t writestr(int fd, string str);
+ssize_t writestr(int fd, const char* str);

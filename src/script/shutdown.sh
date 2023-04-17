@@ -1,5 +1,5 @@
 #!/bin/sh
-# shutdown - shutdown(8) lookalike for runit
+# shutdown - shutdown(8) lookalike for fiss
 
 single() {
   fsvc chlevel single

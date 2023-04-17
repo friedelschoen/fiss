@@ -93,7 +93,7 @@ static void accept_socket() {
 	}
 }
 
-int service_supervise(string service_dir_, string runlevel_, bool force_socket) {
+int service_supervise(const char* service_dir_, const char* runlevel_, bool force_socket) {
 	struct sigaction sigact = { 0 };
 	sigact.sa_handler       = signal_child;
 	sigaction(SIGCHLD, &sigact, NULL);

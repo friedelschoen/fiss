@@ -77,29 +77,29 @@ typedef struct dependency {
 } dependency_t;
 
 
-extern string command_error[];
-extern string command_string[];
+extern const char* command_error[];
+extern const char* command_string[];
 
 extern service_t    services[];
 extern int          services_size;
 extern char         runlevel[];
+extern const char*  service_dir;
 extern int          null_fd;
 extern int          control_socket;
 extern bool         daemon_running;
 extern bool         verbose;
-extern string       service_dir;
 extern dependency_t depends[];
 extern int          depends_size;
 
 
-char       service_get_command(string command);
-int        service_command(char command, char extra, string service, service_t* response, int response_max);
+char       service_get_command(const char* command);
+int        service_command(char command, char extra, const char* service, service_t* response, int response_max);
 int        service_handle_command(void* s, sv_command_t command, uint8_t extra, service_t** response);
-int        service_pattern(string name, service_t** dest, int dest_max);
+int        service_pattern(const char* name, service_t** dest, int dest_max);
 int        service_refresh();
-int        service_supervise(string service_dir, string runlevel, bool force_socket);
-service_t* service_get(string name);
-service_t* service_register(string name, bool is_log_service);
+int        service_supervise(const char* service_dir, const char* runlevel, bool force_socket);
+service_t* service_get(const char* name);
+service_t* service_register(const char* name, bool is_log_service);
 void       service_check_state(service_t* s, bool signaled, int return_code);
 void       service_handle_socket(int client);
 void       service_load(service_t* s, const uint8_t* buffer);    // for fsvc

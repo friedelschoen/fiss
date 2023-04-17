@@ -33,7 +33,7 @@ ssize_t readstr(int fd, char* str) {
 	return rc == -1 ? -1 : len;
 }
 
-ssize_t writestr(int fd, string str) {
+ssize_t writestr(int fd, const char* str) {
 	if (str == NULL)
 		return write(fd, "", 1);
 	return write(fd, str, strlen(str) + 1);

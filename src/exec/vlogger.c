@@ -13,8 +13,8 @@ extern char* __progname;
 static char pwd[PATH_MAX];
 
 typedef struct {
-	string const c_name;
-	int          c_val;
+	const char* const c_name;
+	int               c_val;
 } CODE;
 
 CODE prioritynames[] = {
@@ -58,7 +58,7 @@ CODE facilitynames[] = {
 };
 
 static void
-strpriority(string s, int* facility, int* level) {
+strpriority(const char* s, int* facility, int* level) {
 	char* p;
 	CODE* cp;
 

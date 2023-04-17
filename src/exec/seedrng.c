@@ -344,7 +344,7 @@ static int seed_rng(uint8_t* seed, size_t len, bool credit) {
 	return ret ? -1 : 0;
 }
 
-static int seed_from_file_if_exists(string filename, int dfd, bool credit, struct blake2s_state* hash) {
+static int seed_from_file_if_exists(const char* filename, int dfd, bool credit, struct blake2s_state* hash) {
 	uint8_t seed[MAX_SEED_LEN];
 	ssize_t seed_len;
 	int     fd = -1, ret = 0;
@@ -388,7 +388,7 @@ out:
 }
 
 static bool skip_credit(void) {
-	string skip = getenv("SEEDRNG_SKIP_CREDIT");
+	const char* skip = getenv("SEEDRNG_SKIP_CREDIT");
 	return skip && (!strcmp(skip, "1") || !strcasecmp(skip, "true") ||
 	                !strcasecmp(skip, "yes") || !strcasecmp(skip, "y"));
 }

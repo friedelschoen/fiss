@@ -9,7 +9,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-service_t* service_register(string name, bool is_log_service) {
+service_t* service_register(const char* name, bool is_log_service) {
 	service_t* s;
 
 	if ((s = service_get(name)) == NULL) {

@@ -15,7 +15,7 @@
 // default runlevel
 #define SV_RUNLEVEL "default"
 // path to service-dir
-#define SV_SERVICE_DIR "/etc/fiss/service"
+#define SV_SERVICE_DIR "/etc/fiss/service.d"
 // path to start-script
 #define SV_START_EXEC "/etc/fiss/start"
 // path to stop-script
@@ -40,4 +40,4 @@
 #define SV_ARGUMENTS_MAX 16
 #define SV_ENV_MAX       16
 
-#define SV_LOG_DIR "/run/fiss/log"
+#define SV_LOG_DIR "/var/fiss/log"

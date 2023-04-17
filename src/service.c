@@ -22,7 +22,7 @@
 service_t    services[SV_SERVICE_MAX];
 int          services_size = 0;
 char         runlevel[SV_NAME_MAX];
-string       service_dir;
+const char*  service_dir;
 int          control_socket;
 int          null_fd;
 bool         verbose = false;
@@ -30,7 +30,7 @@ dependency_t depends[SV_DEPENDENCY_MAX];
 int          depends_size;
 
 
-service_t* service_get(string name) {
+service_t* service_get(const char* name) {
 	for (int i = 0; i < services_size; i++) {
 		if (streq(services[i].name, name))
 			return &services[i];
@@ -38,7 +38,7 @@ service_t* service_get(string name) {
 	return NULL;
 }
 
-int service_pattern(string name, service_t** dest, int dest_max) {
+int service_pattern(const char* name, service_t** dest, int dest_max) {
 	int size = 0;
 	for (int i = 0; i < services_size && size < dest_max; i++) {
 		if (pattern_test(name, services[i].name))

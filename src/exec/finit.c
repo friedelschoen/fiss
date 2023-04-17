@@ -19,7 +19,7 @@
 
 void sigblock_all(bool unblock);
 
-int handle_initctl(int argc, string* argv) {
+int handle_initctl(int argc, const char** argv) {
 	if (argc != 2 || argv[1][1] != '\0' || (argv[1][0] != '0' && argv[1][0] != '6')) {
 		printf("Usage: %s <0|6>\n", argv[0]);
 		return 1;
@@ -48,7 +48,7 @@ static void signal_interrupt(int signum) {
 }
 
 
-int main(int argc, string* argv) {
+int main(int argc, const char** argv) {
 	int      ttyfd;
 	sigset_t ss;
 
