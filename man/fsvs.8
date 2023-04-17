@@ -1,0 +1,37 @@
+." Manpage for fsvs.
+.TH fsvs 1 "2023-04-13" "1.0" "fsvs man page"
+.SH NAME
+fsvs - fiss' service supervisor
+.SH SYNOPSIS
+\fBfsvs\fR [options] <runlevel>
+.SH DESCRIPTION
+\fBfsvs\fR is a command line tool for supervising services on a FISS system. It provides various options for executing start/stop scripts, printing service stdout/stderr in the console, using a custom service directory, and enabling verbose output.
+.SH OPTIONS
+The following options are available:
+.TP
+\fB-h, --help\fR
+Prints the help message and exits.
+.TP
+\fB-i, --as-init\fR
+Executes the start/stop script as init process.
+.TP
+\fB-o, --stdout\fR
+Prints the service stdout/stderr in the console.
+.TP
+\fB-s, --service-dir <path>\fR
+Uses the specified service directory instead of the default SV_SERVICE_DIR.
+.TP
+\fB-v, --verbose\fR
+Prints more detailed output.
+.TP
+\fB-V, --version\fR
+Prints the current version of fsvs and exits.
+.SH COMMANDS
+The following command is available:
+.TP
+\fB<runlevel>\fR
+Specifies the runlevel to supervise services for.
+.SH SEE ALSO
+fsvc(1)
+.SH AUTHOR
+fsvs was written by ChatGPT, a language model trained by OpenAI.
