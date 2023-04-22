@@ -16,16 +16,9 @@
 
 static const char HELP_MESSAGE[] =
     "Usage:\n"
-    "  %s [options] <runlevel>\n"
+    "  %s <command> [-cfopqvV] [-r ..] [-s ..] [service]\n"
     "\n"
-    "Options:\n"
-    "  -h, --help ............... prints this and exits\n"
-    "  -i, --as-init ............ execute start/stop script\n"
-    "  -o, --stdout ............. print service stdout/stderr in console\n"
-    "  -s, --service-dir <path> . using service-dir (default: " SV_SERVICE_DIR ")\n"
-    "  -v, --verbose ............ print more info\n"
-    "  -V, --version ............ prints current version and exits\n"
-    "\n";
+    "Check the manual (fsvc 8) for more information.\n";
 
 static const char VERSION_MESSAGE[] =
     "FISS v" SV_VERSION "\n";
@@ -133,7 +126,6 @@ void print_service_short(service_t* s, service_t* log) {
 }
 
 static const struct option long_options[] = {
-	{ "help", no_argument, 0, 'h' },
 	{ "verbose", no_argument, 0, 'v' },
 	{ "version", no_argument, 0, 'V' },
 	{ "runlevel", no_argument, 0, 'r' },
@@ -158,7 +150,7 @@ int main(int argc, char** argv) {
 	     short_ = false;
 
 	int c;
-	while ((c = getopt_long(argc, argv, ":hVvqs:r:pocf", long_options, NULL)) > 0) {
+	while ((c = getopt_long(argc, argv, ":Vvqs:r:pocf", long_options, NULL)) > 0) {
 		switch (c) {
 			case 'r':
 				strcpy(runlevel, optarg);
@@ -174,9 +166,6 @@ int main(int argc, char** argv) {
 				break;
 			case 'V':
 				printf(VERSION_MESSAGE);
-				return 0;
-			case 'h':
-				printf(HELP_MESSAGE, argv[0]);
 				return 0;
 			case 'p':
 				pin = true;
@@ -195,6 +184,7 @@ int main(int argc, char** argv) {
 					fprintf(stderr, "error: invalid option -%c\n", optopt);
 				else
 					fprintf(stderr, "error: invalid option %s\n", argv[optind - 1]);
+				fprintf(stderr, "%s", HELP_MESSAGE);
 				return 1;
 		}
 	}
