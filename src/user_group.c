@@ -35,15 +35,15 @@ static int parse_ugid_num(char* str, uid_t* uid, gid_t* gids) {
 int parse_ugid(char* str, uid_t* uid, gid_t* gids) {
 	struct passwd* pwd;
 	struct group*  gr;
-	char*		   end;
-	char*		   groupstr = NULL;
-	int			   gid_size = 0;
+	char*          end;
+	char*          groupstr = NULL;
+	int            gid_size = 0;
 
 	if (str[0] == ':')
 		return (parse_ugid_num(str + 1, uid, gids));
 
 	if ((end = strchr(str, ':')) != NULL) {
-		end[0]	 = '\0';
+		end[0]   = '\0';
 		groupstr = end + 1;
 	}
 

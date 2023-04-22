@@ -2,16 +2,10 @@
 #include "service.h"
 #include "signame.h"
 
-#include <errno.h>
-#include <fcntl.h>
 #include <getopt.h>
-#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <unistd.h>
 
 
 static const char HELP_MESSAGE[] =

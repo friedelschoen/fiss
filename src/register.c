@@ -1,13 +1,10 @@
-#include "config.h"
 #include "service.h"
 
-#include <errno.h>
-#include <fcntl.h>
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <unistd.h>
+
 
 service_t* service_register(const char* name, bool is_log_service) {
 	service_t* s;

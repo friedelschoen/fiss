@@ -1,7 +1,7 @@
 #include "service.h"
 
 #include <fcntl.h>
-#include <linux/limits.h>
+#include <limits.h>
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>

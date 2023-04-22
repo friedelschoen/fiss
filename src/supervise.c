@@ -1,24 +1,14 @@
-#include "config.h"
-#include "config_parser.h"
 #include "service.h"
-#include "util.h"
 
-#include <asm-generic/errno.h>
-#include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <getopt.h>
 #include <limits.h>
-#include <signal.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/un.h>
 #include <sys/wait.h>
-#include <unistd.h>
 
 
 bool daemon_running = true;

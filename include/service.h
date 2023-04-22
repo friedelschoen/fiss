@@ -6,7 +6,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
-#include <unistd.h>
 
 #define SV_SERIAL_LEN     17
 #define SV_HAS_LOGSERVICE ((void*) 1)

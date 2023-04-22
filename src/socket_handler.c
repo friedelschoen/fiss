@@ -1,8 +1,7 @@
 #include "service.h"
 
-#include <errno.h>
-#include <signal.h>
 #include <stdio.h>
+
 
 void service_handle_socket(int client) {
 	char command[2] = { 0, 0 };

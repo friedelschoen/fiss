@@ -1,19 +1,14 @@
-#include "config.h"
 #include "config_parser.h"
-#include "service.h"
 #include "user_group.h"
-#include "util.h"
 
 #include <errno.h>
 #include <fcntl.h>
 #include <grp.h>
 #include <limits.h>
-#include <pwd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 
 static void set_pipes(service_t* s) {
@@ -25,13 +20,13 @@ static void set_pipes(service_t* s) {
 		close(s->log_pipe.read);
 		dup2(null_fd, STDOUT_FILENO);
 		dup2(null_fd, STDERR_FILENO);
-	} else if (s->log_service) {	// aka has_log_service
+	} else if (s->log_service) {    // aka has_log_service
 		close(s->log_service->log_pipe.read);
 		dup2(s->log_service->log_pipe.write, STDOUT_FILENO);
 		dup2(s->log_service->log_pipe.write, STDERR_FILENO);
 		close(s->log_service->log_pipe.write);
 		dup2(null_fd, STDIN_FILENO);
-	} else if (stat("log", &estat) == 0 && estat.st_mode & S_IWRITE) {	  // is not
+	} else if (stat("log", &estat) == 0 && estat.st_mode & S_IWRITE) {    // is not
 		int log_fd;
 		if ((log_fd = open("log", O_WRONLY | O_TRUNC)) == -1)
 			log_fd = null_fd;
@@ -59,7 +54,7 @@ static void set_pipes(service_t* s) {
 
 static void set_user() {
 	char buffer[1024];
-	int	 user_file;
+	int  user_file;
 	if ((user_file = open("user", O_RDONLY)) != -1) {
 		ssize_t n;
 		if ((n = read(user_file, buffer, sizeof(buffer))) == -1) {
@@ -121,7 +116,7 @@ void service_start(service_t* s, bool* changed) {
 		if ((s->pid = fork()) == -1) {
 			print_error("cannot fork process");
 			exit(1);
-		} else if (s->pid == 0) {	 // child
+		} else if (s->pid == 0) {    // child
 			if (setsid() == -1)
 				print_error("cannot setsid");
 

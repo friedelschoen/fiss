@@ -1,12 +1,9 @@
 /* Based on code from <https://git.zx2c4.com/seedrng/about/>. */
 
-#include "util.h"
-
 #include <endian.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/random.h>
-#include <poll.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -14,11 +11,12 @@
 #include <string.h>
 #include <sys/file.h>
 #include <sys/ioctl.h>
+#include <sys/poll.h>
 #include <sys/random.h>
 #include <sys/stat.h>
-#include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
+
 
 #ifndef LOCALSTATEDIR
 #	define LOCALSTATEDIR "/var/lib"

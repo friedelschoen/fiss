@@ -1,15 +1,15 @@
 #include "config_parser.h"
 
 #include <fcntl.h>
-#include <linux/limits.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 
 void parse_param_file(service_t* s, char* args[]) {
-	int	 param_file;
-	int	 args_size = 0;
-	int	 line_size = 0;
+	int  param_file;
+	int  args_size = 0;
+	int  line_size = 0;
 	char c;
 
 	snprintf(args[args_size++], SV_PARAM_FILE_LINE_MAX, "%s/%s/%s", service_dir, s->name, "run");
@@ -39,9 +39,9 @@ void parse_param_file(service_t* s, char* args[]) {
 }
 
 void parse_env_file(char** env) {
-	int	 env_file;
-	int	 env_size  = 0;
-	int	 line_size = 0;
+	int  env_file;
+	int  env_size  = 0;
+	int  line_size = 0;
 	char c;
 
 	if ((env_file = open("env", O_RDONLY)) != -1) {
@@ -71,7 +71,7 @@ pid_t parse_pid_file(service_t* s) {
 		return 0;
 
 	char buffer[20];
-	int	 n;
+	int  n;
 	if ((n = read(pid_file, buffer, sizeof(buffer))) <= 0) {
 		close(pid_file);
 		return 0;

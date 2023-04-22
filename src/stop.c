@@ -5,7 +5,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/stat.h>
+
 
 void service_stop(service_t* s, bool* changed) {
 	char path_buffer[PATH_MAX];

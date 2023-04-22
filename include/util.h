@@ -1,6 +1,5 @@
 #pragma once
 
-#include <time.h>
 #include <unistd.h>
 
 #define streq(a, b)         (!strcmp((a), (b)))

@@ -1,15 +1,10 @@
 #include "config_parser.h"
-#include "service.h"
-#include "util.h"
 
 #include <errno.h>
 #include <limits.h>
-#include <linux/limits.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/wait.h>
 
 
 static void do_finish(service_t* s) {

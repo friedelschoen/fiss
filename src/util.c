@@ -1,8 +1,6 @@
 #include "util.h"
 
 #include <string.h>
-#include <sys/socket.h>
-#include <unistd.h>
 
 
 ssize_t dgetline(int fd, char* line, size_t line_buffer) {

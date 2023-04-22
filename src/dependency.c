@@ -2,7 +2,7 @@
 #include "util.h"
 
 #include <fcntl.h>
-#include <linux/limits.h>
+#include <limits.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -19,11 +19,11 @@ void service_add_dependency(service_t* s, service_t* d) {
 void service_update_dependency(service_t* s) {
 	service_t* dep;
 
-	if (s->log_service) {	 // aka keep first entry (the log service) if a log service is used
+	if (s->log_service) {    // aka keep first entry (the log service) if a log service is used
 		service_add_dependency(s, s->log_service);
 	}
 
-	int	 depends_file;
+	int  depends_file;
 	char depends_path[PATH_MAX];
 	snprintf(depends_path, PATH_MAX, "%s/%s/%s", service_dir, s->name, "depends");
 

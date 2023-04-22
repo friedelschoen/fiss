@@ -1,12 +1,4 @@
-#include "config.h"
 #include "service.h"
-
-#include <errno.h>
-#include <fcntl.h>
-#include <limits.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
 
 
 void service_store(service_t* s, uint8_t* buffer) {
