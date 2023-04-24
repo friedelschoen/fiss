@@ -2,6 +2,7 @@
 
 #include "util.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 
@@ -13,7 +14,7 @@ typedef struct signal_name {
 	const char* name;
 } signal_name_t;
 
-static signal_name_t SIGNUM_NAME_table[] = {
+static signal_name_t signal_names[] = {
 /* Signals required by POSIX 1003.1-2001 base, listed in
    traditional numeric order where possible.  */
 #ifdef SIGHUP
@@ -171,16 +172,22 @@ static signal_name_t SIGNUM_NAME_table[] = {
 	{ 0, NULL },
 };
 
-int signame(char const* signame) {
+int signame(char const* name) {
+	char* endptr;
+	int   signum;
+	if ((signum = strtol(name, &endptr, 10)) && endptr == strchr(name, '\0')) {
+		return signum;
+	}
+
 	// startswith SIG, remove that so -SIGKILL == -KILL
-	if (strncmp(signame, "SIG", 3) == 0) {
-		signame += 3;
+	if (strncmp(name, "SIG", 3) == 0) {
+		name += 3;
 	}
 
 	// search for name
-	for (signal_name_t* sigpair = SIGNUM_NAME_table; sigpair->num > 0; sigpair++)
-		if (streq(sigpair->name, signame))
+	for (signal_name_t* sigpair = signal_names; sigpair->num != 0; sigpair++)
+		if (streq(sigpair->name, name))
 			return sigpair->num;
 
-	return 0;
+	return -1;
 }
