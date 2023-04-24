@@ -18,11 +18,5 @@ find_modules() {
 		tr '\012' '\0' | xargs -0 -r grep -h -v -e '^[#;]' -e '^$'
 }
 
-# Load modules using modprobe
-load_modules() {
-	# Call modprobe on the list of modules
-	tr '\012' '\0' | xargs -0 -r modprobe -ab "$@"
-}
-
 # Find and load modules
-find_modules | load_modules
+find_modules | tr '\012' '\0' | xargs -0 -r modprobe -ab "$@"
