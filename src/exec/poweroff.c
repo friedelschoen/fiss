@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
 				write_wtmp(1);
 				return 0;
 			default:
-				errx(1, "Usage: reboot [-n] [-f] [-d] [-w] [-B]");
+				errx(1, "Usage: poweroff [-n] [-f] [-d] [-w] [-B]");
 		}
 
 	if (do_wtmp)
@@ -47,10 +47,10 @@ int main(int argc, char* argv[]) {
 
 	if (!noop) {
 		if (do_force)
-			reboot(RB_HALT_SYSTEM);
+			reboot(RB_POWER_OFF);
 		else
-			execl("/sbin/finit", "init", "6", NULL);
-		err(1, "reboot failed");
+			execl("/sbin/finit", "init", "0", NULL);
+		err(1, "poweroff failed");
 	}
 
 	return 0;
