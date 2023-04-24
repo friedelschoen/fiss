@@ -15,11 +15,11 @@
 // default runlevel
 #define SV_RUNLEVEL "default"
 // path to service-dir
-#define SV_SERVICE_DIR "/etc/fiss/service.d"
+#define SV_SERVICE_DIR "/etc/service.d"
 // path to start-script
-#define SV_START_EXEC "/etc/fiss/start"
+#define SV_START_EXEC "/usr/share/fiss/start"
 // path to stop-script
-#define SV_STOP_EXEC "/etc/fiss/stop"
+#define SV_STOP_EXEC "/usr/share/fiss/stop"
 // the current version
 #define SV_VERSION "0.1.0"
 // time to wait to accept new connection
@@ -40,4 +40,4 @@
 #define SV_ARGUMENTS_MAX 16
 #define SV_ENV_MAX       16
 
-#define SV_LOG_DIR "/var/fiss/log"
+#define SV_LOG_DIR "/var/log/fiss"
