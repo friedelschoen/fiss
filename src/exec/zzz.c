@@ -8,44 +8,35 @@
 #include <string.h>
 #include <unistd.h>
 
-#define write_state(state_fd, ident)                                                \
-	do {                                                                            \
-		if (write((state_fd), (ident), sizeof(ident) - 1) == -1)                    \
-			fprintf(stderr, "error writing to /sys/power/: %s\n", strerror(errno)); \
-	} while (0)
-
-typedef enum zzz_mode {
-	ZZZ_NOOP,
-	ZZZ_STANDBY,
-	ZZZ_SUSPEND,
-	ZZZ_HIBERNATE_PLATFORM,
-	ZZZ_HIBERNATE_REBOOT,
-	ZZZ_HIBERNATE_SUSPEND,
-} zzz_mode_t;
 
 int main(int argc, char** argv) {
-	int        opt;
-	zzz_mode_t mode = ZZZ_SUSPEND;
+	int sys_state, sys_disk, opt;
+
+	const char *new_state = "suspend",
+	           *new_disk  = NULL;
 
 	while ((opt = getopt(argc, argv, "nSzZRH")) != -1) {
 		switch (opt) {
 			case 'n':
-				mode = ZZZ_NOOP;
+				new_state = NULL;
 				break;
 			case 'S':
-				mode = ZZZ_STANDBY;
+				new_state = "freeze";
 				break;
 			case 'z':
-				mode = ZZZ_SUSPEND;
+				new_state = "mem";
 				break;
 			case 'Z':
-				mode = ZZZ_HIBERNATE_PLATFORM;
+				new_state = "disk";
+				new_disk  = "platform";
 				break;
 			case 'R':
-				mode = ZZZ_HIBERNATE_REBOOT;
+				new_state = "disk";
+				new_disk  = "reboot";
 				break;
 			case 'H':
-				mode = ZZZ_HIBERNATE_SUSPEND;
+				new_state = "disk";
+				new_disk  = "suspend";
 				break;
 			default:
 				printf("zzz [-n] [-S] [-z] [-Z] [-R] [-H]\n");
@@ -55,47 +46,31 @@ int main(int argc, char** argv) {
 
 	argc -= optind, argv += optind;
 
-	int sys_state, sys_disk;
-	if ((sys_state = open("/sys/power/state", O_WRONLY | O_TRUNC)) == -1) {
-		fprintf(stderr, "cannot open /sys/power/state: %s\n", strerror(errno));
-		return 1;
-	}
-	if ((sys_disk = open("/sys/power/disk", O_WRONLY | O_TRUNC)) == -1) {
-		fprintf(stderr, "cannot open /sys/power/disk: %s\n", strerror(errno));
-		return 1;
-	}
-
 	printf("Zzzz...\n");
 
-	switch (mode) {
-		case ZZZ_STANDBY:
-			write_state(sys_state, "freeze");
-			break;
+	if (new_disk) {
+		if ((sys_disk = open("/sys/power/disk", O_WRONLY | O_TRUNC)) == -1) {
+			fprintf(stderr, "cannot open /sys/power/disk: %s\n", strerror(errno));
+			return 1;
+		}
+		if (write(sys_disk, new_disk, strlen(new_disk)) == -1)
+			fprintf(stderr, "error writing to /sys/power/disk: %s\n", strerror(errno));
 
-		case ZZZ_SUSPEND:
-			write_state(sys_state, "mem");
-			break;
-
-		case ZZZ_HIBERNATE_PLATFORM:
-			write_state(sys_disk, "platform");
-			write_state(sys_state, "disk");
-			break;
-		case ZZZ_HIBERNATE_REBOOT:
-			write_state(sys_disk, "reboot");
-			write_state(sys_state, "disk");
-			break;
-		case ZZZ_HIBERNATE_SUSPEND:
-			write_state(sys_disk, "suspend");
-			write_state(sys_state, "disk");
-			break;
-
-		case ZZZ_NOOP:
-			sleep(5);
-			break;
+		close(sys_disk);
 	}
 
-	close(sys_state);
-	close(sys_disk);
+	if (new_state) {
+		if ((sys_state = open("/sys/power/state", O_WRONLY | O_TRUNC)) == -1) {
+			fprintf(stderr, "cannot open /sys/power/state: %s\n", strerror(errno));
+			return 1;
+		}
+		if (write(sys_state, new_state, strlen(new_state)) == -1)
+			fprintf(stderr, "error writing to /sys/power/state: %s\n", strerror(errno));
+
+		close(sys_state);
+	} else {
+		sleep(5);
+	}
 
 	printf("Yawn!\n");
 }
