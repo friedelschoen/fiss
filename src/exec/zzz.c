@@ -15,10 +15,20 @@
 int main(int argc, char** argv) {
 	int sys_state, sys_disk, opt;
 
-	const char *new_state = "suspend",
+	const char *new_state = "mem",
 	           *new_disk  = NULL;
 
-	while ((opt = getopt(argc, argv, "nSzZRH")) != -1) {
+	struct option long_options[] = {
+		{ "noop", no_argument, 0, 'n' },
+		{ "freeze", no_argument, 0, 'S' },
+		{ "suspend", no_argument, 0, 'z' },
+		{ "hibernate", no_argument, 0, 'Z' },
+		{ "reboot", no_argument, 0, 'R' },
+		{ "hybrid", no_argument, 0, 'H' },
+		{ 0 },
+	};
+
+	while ((opt = getopt_long(argc, argv, "nSzZRH", long_options, NULL)) != -1) {
 		switch (opt) {
 			case 'n':
 				new_state = NULL;
@@ -40,6 +50,9 @@ int main(int argc, char** argv) {
 			case 'H':
 				new_state = "disk";
 				new_disk  = "suspend";
+				break;
+			case 's':
+				new_state = "suspend";
 				break;
 			default:
 				printf("zzz [-n] [-S] [-z] [-Z] [-R] [-H]\n");
