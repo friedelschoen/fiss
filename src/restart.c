@@ -21,7 +21,7 @@ static void do_finish(service_t* s) {
 			dup2(null_fd, STDOUT_FILENO);
 			dup2(null_fd, STDERR_FILENO);
 
-			execlp(path_buffer, path_buffer, NULL);
+			execl(path_buffer, path_buffer, NULL);
 			print_error("cannot execute finish process");
 			_exit(1);
 		}

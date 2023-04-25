@@ -33,7 +33,7 @@ void service_stop(service_t* s, bool* changed) {
 				dup2(null_fd, STDOUT_FILENO);
 				dup2(null_fd, STDERR_FILENO);
 
-				execlp(path_buffer, path_buffer, NULL);
+				execl(path_buffer, path_buffer, NULL);
 				print_error("cannot execute stop process");
 				_exit(1);
 			}

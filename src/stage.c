@@ -52,7 +52,7 @@ void handle_stage1() {
 		sigaction(SIGCONT, &sigact, NULL);
 
 		printf("enter stage1\n");
-		execlp(SV_START_EXEC, SV_START_EXEC, NULL);
+		execl(SV_START_EXEC, SV_START_EXEC, NULL);
 		print_error("unable to exec stage1");
 		_exit(1);
 	}
@@ -143,7 +143,7 @@ void handle_stage3() {
 		sigaction(SIGCONT, &sigact, NULL);
 
 		printf("enter stage3\n");
-		execlp(SV_STOP_EXEC, SV_STOP_EXEC, NULL);
+		execl(SV_STOP_EXEC, SV_STOP_EXEC, NULL);
 		print_error("unable to exec stage3");
 		_exit(1);
 	}
