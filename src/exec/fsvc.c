@@ -2,6 +2,7 @@
 #include "service.h"
 #include "signame.h"
 
+#include <ctype.h>
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -82,6 +83,14 @@ void print_service(service_t* s, service_t* log) {
 	printf("\n");
 }
 
+static char* to_upper(char* str) {
+	for (char* c = str; *c; c++) {
+		if (islower(*c))
+			*c += 'A' - 'a';
+	}
+	return str;
+}
+
 void print_service_short(service_t* s, service_t* log) {
 	bool active = s->state == STATE_ACTIVE_BACKGROUND ||
 	              s->state == STATE_ACTIVE_DUMMY ||
@@ -105,12 +114,14 @@ void print_service_short(service_t* s, service_t* log) {
 		printf("[ - %s  ]", wants_other ? "->" : "  ");
 
 	printf(" %s", s->name);
-	if (s->state == STATE_ACTIVE_PID || s->state == STATE_ACTIVE_FOREGROUND)
-		printf(" (pid: %d)", s->pid);
-	else if (s->last_exit != EXIT_SIGNALED)
-		printf(" (last exit: SIG%s)", strsignal(s->return_code));
-	else if (s->last_exit != EXIT_NORMAL)
-		printf(" (last exit: %d)", s->return_code);
+	if (s->pid) {
+		if (s->state == STATE_ACTIVE_PID || s->state == STATE_ACTIVE_FOREGROUND)
+			printf(" (pid: %d)", s->pid);
+		else if (s->last_exit != EXIT_SIGNALED)
+			printf(" (last exit: SIG%s)", to_upper(strsignal(s->return_code)));
+		else if (s->last_exit != EXIT_NORMAL)
+			printf(" (last exit: %d)", s->return_code);
+	}
 	printf("\n");
 
 	if (log) {
@@ -222,15 +233,8 @@ int main(int argc, char** argv) {
 			return 1;
 		}
 
-		char* endptr;
-		extra = strtol(argv[1], &endptr, 10);
-		if (endptr == argv[1]) {
-			if ((extra = signame(argv[1])) == 0) {
-				printf("unknown signalname\n");
-				return 1;
-			}
-		} else if (endptr != strchr(argv[1], '\0')) {
-			printf("malformatted signal\n");
+		if ((extra = signame(argv[1])) == -1) {
+			printf("unknown signalname\n");
 			return 1;
 		}
 
