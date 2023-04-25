@@ -102,11 +102,11 @@ void service_start(service_t* s, bool* changed) {
 	char path_buf[PATH_MAX];
 
 	struct stat estat;
-	if (sprintf(path_buf, "%s/%s/run", service_dir, s->name) && stat(path_buf, &estat) == 0 && estat.st_mode & S_IXUSR) {
+	if (snprintf(path_buf, PATH_MAX, "%s/%s/run", service_dir, s->name) && stat(path_buf, &estat) == 0 && estat.st_mode & S_IXUSR) {
 		s->state = STATE_ACTIVE_FOREGROUND;
-	} else if (sprintf(path_buf, "%s/%s/start", service_dir, s->name) && stat(path_buf, &estat) == 0 && estat.st_mode & S_IXUSR) {
+	} else if (snprintf(path_buf, PATH_MAX, "%s/%s/start", service_dir, s->name) && stat(path_buf, &estat) == 0 && estat.st_mode & S_IXUSR) {
 		s->state = STATE_STARTING;
-	} else if (sprintf(path_buf, "%s/%s/depends", service_dir, s->name) && stat(path_buf, &estat) == 0 && estat.st_mode & S_IREAD) {
+	} else if (snprintf(path_buf, PATH_MAX, "%s/%s/depends", service_dir, s->name) && stat(path_buf, &estat) == 0 && estat.st_mode & S_IREAD) {
 		s->state = STATE_ACTIVE_DUMMY;
 	} else {
 		printf("error in %s: `run`, `start` or `depends` not found\n", s->name);
