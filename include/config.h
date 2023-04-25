@@ -20,6 +20,10 @@
 #define SV_START_EXEC "/usr/share/fiss/start"
 // path to stop-script
 #define SV_STOP_EXEC "/usr/share/fiss/stop"
+// path to suspend-script
+#define SV_SUSPEND_EXEC "/usr/share/fiss/suspend"
+// path to resume-script
+#define SV_RESUME_EXEC "/usr/share/fiss/resume"
 // the current version
 #define SV_VERSION "0.1.0"
 // time to wait to accept new connection
