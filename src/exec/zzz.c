@@ -1,3 +1,4 @@
+#include "config.h"
 #include "util.h"
 
 #include <errno.h>
@@ -6,6 +7,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 
@@ -48,6 +51,22 @@ int main(int argc, char** argv) {
 
 	printf("Zzzz...\n");
 
+	struct stat st;
+
+	if (stat(SV_SUSPEND_EXEC, &st) == 0 && st.st_mode & S_IXUSR) {
+		pid_t pid;
+		if ((pid = fork()) == -1) {
+			fprintf(stderr, "failed to fork for " SV_SUSPEND_EXEC ": %s\n", strerror(errno));
+			return 1;
+		} else if (pid == 0) {    // child
+			execl(SV_SUSPEND_EXEC, SV_SUSPEND_EXEC, NULL);
+			fprintf(stderr, "failed to execute " SV_SUSPEND_EXEC ": %s\n", strerror(errno));
+			_exit(1);
+		}
+
+		wait(NULL);
+	}
+
 	if (new_disk) {
 		if ((sys_disk = open("/sys/power/disk", O_WRONLY | O_TRUNC)) == -1) {
 			fprintf(stderr, "cannot open /sys/power/disk: %s\n", strerror(errno));
@@ -70,6 +89,20 @@ int main(int argc, char** argv) {
 		close(sys_state);
 	} else {
 		sleep(5);
+	}
+
+	if (stat(SV_RESUME_EXEC, &st) == 0 && st.st_mode & S_IXUSR) {
+		pid_t pid;
+		if ((pid = fork()) == -1) {
+			fprintf(stderr, "failed to fork for " SV_RESUME_EXEC ": %s\n", strerror(errno));
+			return 1;
+		} else if (pid == 0) {    // child
+			execl(SV_RESUME_EXEC, SV_RESUME_EXEC, NULL);
+			fprintf(stderr, "failed to execute " SV_RESUME_EXEC ": %s\n", strerror(errno));
+			_exit(1);
+		}
+
+		wait(NULL);
 	}
 
 	printf("Yawn!\n");

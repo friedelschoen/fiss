@@ -1,0 +1,5 @@
+#!/bin/sh
+
+for f in /etc/zzz.d/resume/*; do
+  [ -x "$f" ] && "$f"
+done
