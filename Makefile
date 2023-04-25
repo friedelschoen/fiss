@@ -10,7 +10,7 @@ ROFF_DIR    := usr/share/man
 
 # Compiler Options
 CC      := gcc
-CCFLAGS := -I$(INCLUDE_DIR) -Wall -Wextra -g
+CCFLAGS := -I$(INCLUDE_DIR) -Wall -Wextra
 LFLAGS  :=
 
 # Executable-specific flags
@@ -30,6 +30,7 @@ MAN_FILES     := $(wildcard $(MAN_DIR)/*)
 ROFF_FILES    := $(patsubst $(MAN_DIR)/%.md,$(ROFF_DIR)/%,$(MAN_FILES)) \
 				 $(patsubst $(MAN_DIR)/%.roff,$(ROFF_DIR)/%,$(MAN_FILES))
 
+# Intermediate directories
 INTERMED_DIRS := $(BIN_DIR) $(BUILD_DIR) $(ROFF_DIR)
 
 # Magic targets
@@ -66,6 +67,8 @@ $(BIN_DIR)/%: $(SCRIPT_DIR)/%.sh | $(BIN_DIR)
 	cp $< $@
 	chmod +x $@
 
+# Manual targets
+
 $(ROFF_DIR)/%: $(MAN_DIR)/%.md | $(ROFF_DIR)
 	md2man-roff $< > $@
 
@@ -75,14 +78,3 @@ $(ROFF_DIR)/%: $(MAN_DIR)/%.roff | $(ROFF_DIR)
 # Debug
 compile_flags.txt: 
 	echo $(CCFLAGS) | tr " " "\n" > compile_flags.txt
-
-# debug
-
-.PHONY: emulator
-
-emulator: $(BIN_FILES)
-	cp -v bin/* rootfs/sbin/
-	cd rootfs && find | cpio -oH newc -R root:root | zstd > ../build/rootfs.cpio
-
-	qemu-system-x86_64 -accel kvm -kernel ~/linux-void/vmlinuz-6.1.21_1 -initrd build/rootfs.cpio -m 4096 -append 'console=ttyS0 edd=off quiet' -serial stdio
-#	qemu-system-x86_64 -accel kvm -kernel /boot/vmlinuz-6.1.21_1 -initrd build/rootfs.cpio -m 4096 -append 'console=ttyS0 edd=off quiet' -serial stdio
