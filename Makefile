@@ -5,6 +5,8 @@ INCLUDE_DIR := include
 BIN_DIR     := bin
 EXEC_DIR    := $(SRC_DIR)/exec
 SCRIPT_DIR  := $(SRC_DIR)/script
+MAN_DIR     := man
+ROFF_DIR    := usr/share/man
 
 # Compiler Options
 CC      := gcc
@@ -20,25 +22,33 @@ EXEC_FILES    := $(wildcard $(EXEC_DIR)/*.c)
 OBJ_FILES     := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SOURCE_FILES))
 SCRIPT_FILES  := $(wildcard $(SCRIPT_DIR)/*)
 BIN_FILES     := $(patsubst $(EXEC_DIR)/%.c,$(BIN_DIR)/%,$(EXEC_FILES)) \
-			     $(patsubst $(SCRIPT_DIR)/%.sh,$(BIN_DIR)/%,$(SCRIPT_FILES)) \
-			     $(patsubst $(SCRIPT_DIR)/%.lnk,$(BIN_DIR)/%,$(SCRIPT_FILES))
+				 $(patsubst $(SCRIPT_DIR)/%.sh,$(BIN_DIR)/%,$(SCRIPT_FILES)) \
+				 $(patsubst $(SCRIPT_DIR)/%.lnk,$(BIN_DIR)/%,$(SCRIPT_FILES))
 INCLUDE_FILES := $(wildcard $(INCLUDE_DIR)/*.h)
 
+MAN_FILES     := $(wildcard $(MAN_DIR)/*)
+ROFF_FILES    := $(patsubst $(MAN_DIR)/%.md,$(ROFF_DIR)/%,$(MAN_FILES)) \
+				 $(patsubst $(MAN_DIR)/%.roff,$(ROFF_DIR)/%,$(MAN_FILES))
+
+INTERMED_DIRS := $(BIN_DIR) $(BUILD_DIR) $(ROFF_DIR)
+
 # Magic targets
-.PHONY: all clean
+.PHONY: all clean manual
 
 .PRECIOUS: $(OBJ_FILES)
 
 
 # Default target
-all: compile_flags.txt $(BIN_FILES)
+all: compile_flags.txt $(BIN_FILES) manual
 
 # Clean target
 clean:
-	rm -rf $(BIN_DIR) $(BUILD_DIR)
+	rm -rf $(INTERMED_DIRS)
+
+manual: $(ROFF_FILES)
 
 # Directory rules
-$(BIN_DIR) $(BUILD_DIR):
+$(INTERMED_DIRS):
 	mkdir -p $@
 
 # Object rules
@@ -55,6 +65,12 @@ $(BIN_DIR)/%: $(SCRIPT_DIR)/%.lnk | $(BIN_DIR)
 $(BIN_DIR)/%: $(SCRIPT_DIR)/%.sh | $(BIN_DIR)
 	cp $< $@
 	chmod +x $@
+
+$(ROFF_DIR)/%: $(MAN_DIR)/%.md | $(ROFF_DIR)
+	md2man-roff $< > $@
+
+$(ROFF_DIR)/%: $(MAN_DIR)/%.roff | $(ROFF_DIR)
+	cp $< $@
 
 # Debug
 compile_flags.txt: 
