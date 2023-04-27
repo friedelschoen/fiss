@@ -1,14 +1,22 @@
 #include "config_parser.h"
+#include "service.h"
 
 #include <errno.h>
 #include <limits.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 
 
+/*void stat_mode(const char* path_format, ...) __attribute__((format(printf, 1, 0)))  {
+	va_list va;
+	va_start(va, path_format);
+		vsnprintf(char *, unsigned long, const char *, struct __va_list_tag *)
+}*/
+
 static void do_finish(service_t* s) {
-	char        path_buffer[PATH_MAX];
+	char		path_buffer[PATH_MAX];
 	struct stat stat_buffer;
 	snprintf(path_buffer, PATH_MAX, "%s/%s/finish", service_dir, s->name);
 
@@ -36,16 +44,19 @@ static void do_finish(service_t* s) {
 
 void service_check_state(service_t* s, bool signaled, int return_code) {
 	s->status_change = time(NULL);
-	s->pid           = 0;
+	s->pid			 = 0;
 	if (s->restart_file == S_ONCE)
 		s->restart_file = S_DOWN;
 	if (s->restart_manual == S_ONCE)
 		s->restart_manual = S_DOWN;
 
-	char        path_buffer[PATH_MAX];
+	char		path_buffer[PATH_MAX];
 	struct stat stat_buffer;
 
 	switch (s->state) {
+		case STATE_SETUP:
+			service_run(s);
+			break;
 		case STATE_ACTIVE_FOREGROUND:
 			if (signaled) {
 				s->last_exit   = EXIT_SIGNALED;
@@ -87,7 +98,7 @@ void service_check_state(service_t* s, bool signaled, int return_code) {
 				if (snprintf(path_buffer, PATH_MAX, "%s/%s/stop", service_dir, s->name) && stat(path_buffer, &stat_buffer) == 0 && stat_buffer.st_mode & S_IXUSR) {
 					s->state = STATE_ACTIVE_BACKGROUND;
 				} else if (snprintf(path_buffer, PATH_MAX, "%s/%s/pid", service_dir, s->name) && stat(path_buffer, &stat_buffer) == 0 && stat_buffer.st_mode & S_IRUSR) {
-					s->pid   = parse_pid_file(s);
+					s->pid	 = parse_pid_file(s);
 					s->state = STATE_ACTIVE_PID;
 				} else {
 					do_finish(s);
@@ -97,7 +108,7 @@ void service_check_state(service_t* s, bool signaled, int return_code) {
 				s->return_code = return_code;
 
 				do_finish(s);
-			} else {    // signaled
+			} else {	// signaled
 				s->last_exit   = EXIT_SIGNALED;
 				s->return_code = return_code;
 

@@ -1,4 +1,5 @@
 #include "config_parser.h"
+#include "service.h"
 #include "user_group.h"
 
 #include <errno.h>
@@ -9,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 
 static void set_pipes(service_t* s) {
@@ -20,13 +22,13 @@ static void set_pipes(service_t* s) {
 		close(s->log_pipe.read);
 		dup2(null_fd, STDOUT_FILENO);
 		dup2(null_fd, STDERR_FILENO);
-	} else if (s->log_service) {    // aka has_log_service
+	} else if (s->log_service) {	// aka has_log_service
 		close(s->log_service->log_pipe.read);
 		dup2(s->log_service->log_pipe.write, STDOUT_FILENO);
 		dup2(s->log_service->log_pipe.write, STDERR_FILENO);
 		close(s->log_service->log_pipe.write);
 		dup2(null_fd, STDIN_FILENO);
-	} else if (stat("log", &estat) == 0 && estat.st_mode & S_IWRITE) {    // is not
+	} else if (stat("log", &estat) == 0 && estat.st_mode & S_IWRITE) {	  // is not
 		int log_fd;
 		if ((log_fd = open("log", O_WRONLY | O_TRUNC)) == -1)
 			log_fd = null_fd;
@@ -54,7 +56,7 @@ static void set_pipes(service_t* s) {
 
 static void set_user() {
 	char buffer[1024];
-	int  user_file;
+	int	 user_file;
 	if ((user_file = open("user", O_RDONLY)) != -1) {
 		ssize_t n;
 		if ((n = read(user_file, buffer, sizeof(buffer))) == -1) {
@@ -80,28 +82,10 @@ static void set_user() {
 	}
 }
 
-
-void service_start(service_t* s, bool* changed) {
-	if (s->state != STATE_INACTIVE)
-		return;
-
-	if (changed)
-		*changed = true;
-
-	printf(":: starting %s \n", s->name);
-	for (int i = 0; i < depends_size; i++) {
-		if (depends[i].service == s)
-			service_start(depends[i].depends, NULL);
-	}
-
-	for (int i = 0; i < depends_size; i++) {
-		if (depends[i].service == s)
-			service_start(depends[i].depends, NULL);
-	}
-
-	char path_buf[PATH_MAX];
-
+void service_run(service_t* s) {
+	char		path_buf[PATH_MAX];
 	struct stat estat;
+
 	if (snprintf(path_buf, PATH_MAX, "%s/%s/run", service_dir, s->name) && stat(path_buf, &estat) == 0 && estat.st_mode & S_IXUSR) {
 		s->state = STATE_ACTIVE_FOREGROUND;
 	} else if (snprintf(path_buf, PATH_MAX, "%s/%s/start", service_dir, s->name) && stat(path_buf, &estat) == 0 && estat.st_mode & S_IXUSR) {
@@ -110,13 +94,14 @@ void service_start(service_t* s, bool* changed) {
 		s->state = STATE_ACTIVE_DUMMY;
 	} else {
 		printf("error in %s: `run`, `start` or `depends` not found\n", s->name);
+		s->state = STATE_INACTIVE;
 	}
 
 	if (s->state != STATE_ACTIVE_DUMMY) {
 		if ((s->pid = fork()) == -1) {
 			print_error("cannot fork process");
 			exit(1);
-		} else if (s->pid == 0) {    // child
+		} else if (s->pid == 0) {	 // child
 			if (setsid() == -1)
 				print_error("cannot setsid");
 
@@ -151,5 +136,44 @@ void service_start(service_t* s, bool* changed) {
 		}
 	}
 	s->status_change = time(NULL);
+}
+
+void service_start(service_t* s, bool* changed) {
+	if (s->state != STATE_INACTIVE)
+		return;
+
+	if (changed)
+		*changed = true;
+
+	printf(":: starting %s \n", s->name);
+	for (int i = 0; i < depends_size; i++) {
+		if (depends[i].service == s)
+			service_start(depends[i].depends, NULL);
+	}
+
+	for (int i = 0; i < depends_size; i++) {
+		if (depends[i].service == s)
+			service_start(depends[i].depends, NULL);
+	}
+
+	char		path_buf[PATH_MAX];
+	struct stat estat;
+
+	if (snprintf(path_buf, PATH_MAX, "%s/%s/setup", service_dir, s->name) && stat(path_buf, &estat) == 0 && estat.st_mode & S_IXUSR) {
+		s->state = STATE_FINISHING;
+		if ((s->pid = fork()) == -1) {
+			print_error("cannot fork process");
+		} else if (s->pid == 0) {
+			dup2(null_fd, STDIN_FILENO);
+			dup2(null_fd, STDOUT_FILENO);
+			dup2(null_fd, STDERR_FILENO);
+
+			execl(path_buf, path_buf, NULL);
+			print_error("cannot execute finish process");
+			_exit(1);
+		}
+	} else {
+		service_run(s);
+	}
 	printf(":: started %s \n", s->name);
 }
