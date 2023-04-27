@@ -34,17 +34,19 @@ ROFF_FILES    := $(patsubst $(MAN_DIR)/%.md,$(ROFF_DIR)/%,$(MAN_FILES)) \
 INTERMED_DIRS := $(BIN_DIR) $(BUILD_DIR) $(ROFF_DIR)
 
 # Magic targets
-.PHONY: all clean manual
+.PHONY: all clean manual binary
 
 .PRECIOUS: $(OBJ_FILES)
 
 
 # Default target
-all: compile_flags.txt $(BIN_FILES) manual
+all: compile_flags.txt binary manual
 
 # Clean target
 clean:
 	rm -rf $(INTERMED_DIRS)
+
+binary: $(BIN_FILES)
 
 manual: $(ROFF_FILES)
 
