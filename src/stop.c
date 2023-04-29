@@ -5,6 +5,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 
 void service_stop(service_t* s, bool* changed) {
