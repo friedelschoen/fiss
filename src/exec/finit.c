@@ -9,6 +9,7 @@
 #include <string.h>
 #include <sys/reboot.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 
 void sigblock_all(bool unblock);
@@ -38,12 +39,12 @@ static bool do_reboot;
 
 static void signal_interrupt(int signum) {
 	daemon_running = false;
-	do_reboot      = signum == SIGINT;
+	do_reboot	   = signum == SIGINT;
 }
 
 
 int main(int argc, const char** argv) {
-	int      ttyfd;
+	int		 ttyfd;
 	sigset_t ss;
 
 	if (getpid() != 1) {
@@ -68,11 +69,11 @@ int main(int argc, const char** argv) {
 
 	handle_stage1();
 
-	if (daemon_running) {    // stage1 succeed
+	if (daemon_running) {	 // stage1 succeed
 		sigblock_all(true);
 
 		struct sigaction sigact = { 0 };
-		sigact.sa_handler       = signal_interrupt;
+		sigact.sa_handler		= signal_interrupt;
 		sigaction(SIGTERM, &sigact, NULL);
 		sigaction(SIGINT, &sigact, NULL);
 
