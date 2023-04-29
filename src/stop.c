@@ -18,6 +18,7 @@ void service_stop(service_t* s, bool* changed) {
 			break;
 		case STATE_ACTIVE_FOREGROUND:
 		case STATE_ACTIVE_PID:
+		case STATE_SETUP:
 			kill(s->pid, SIGTERM);
 			if (changed)
 				*changed = true;
