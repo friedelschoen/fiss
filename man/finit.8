@@ -1,0 +1,55 @@
+.TH finit 1 "MAY 2023" "01.0" "fiss man page"
+.SH NAME
+.PP
+fiss \- a UNIX process no 1
+.SH SYNOPSIS
+.PP
+\fB\fCfsvc\fR
+when running as PID 0 (as init)
+.PP
+\fB\fCfsvc\fR <0|6>
+when running regulary to controll init
+.SH CONTROLLING
+.PP
+If \fB\fCfinit\fR is invoked by any other user than \fIroot\fP, it failes.
+.PP
+\fB\fCfinit\fR 0
+halts the system
+.PP
+\fB\fCfinit\fR 6
+reboots the system
+.SH DESCRIPTION
+.PP
+\fB\fCfiss\fR must be run as Unix process no 1 if invoked without arguments and handles the boot process in user\-land.
+.PP
+This happens in three stages:
+.SH STAGE 1
+.PP
+\fB\fCfiss\fR runs \fI/etc/fiss/start\fP and waits for it to terminate. The system's one time tasks are done here. \fI/etc/fiss/start\fP has full control of \fI/dev/console\fP to be able to start an emergency shell if the one time initialization tasks fail. If \fI/etc/fiss/start\fP crashes, \fB\fCfinit\fR will skip stage 2 and enter stage 3.
+.SH STAGE 2
+.PP
+\fB\fCfiss\fR starts all services in \fI/etc/fiss/service.d\fP which should not return until system shutdown; if it crashes, it will be restarted.
+.SH STAGE 3
+.PP
+If \fB\fCfiss\fR is told to shutdown the system, it terminates stage 2 if it is running, and runs \fI/etc/fiss/stop\fP\&. The systems tasks to shutdown and possibly halt or reboot the system are done here. If stage 3 returns, \fB\fCfinit\fR checks if the file
+.SH SIGNALS
+.PP
+\fB\fCfinit\fR only accepts signals in stage 2.
+.PP
+If \fB\fCfinit\fR receives a CONT signal and the file \fB\fCfinit\fR
+is told to shutdown the system.
+.PP
+if \fB\fCfinit\fR receives an INT signal, \fB\fCfinit\fR restarts the system.
+.SH SEE ALSO
+.PP
+.BR fiss-init (8), 
+.BR runsvdir (8), 
+.BR runsvchdir (8), 
+.BR sv (8), 
+.BR runsv (8), 
+.BR chpst (8), 
+.BR utmpset (8), 
+.BR svlogd (8)
+.SH AUTHOR
+.PP
+Friedel Schön <\[la]derfriedmundschoen@gmail.com\[ra]>
