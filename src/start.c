@@ -83,6 +83,7 @@ static void set_user() {
 }
 
 void service_run(service_t* s) {
+	printf("old state: %d\n", s->state);
 	char		path_buf[PATH_MAX];
 	struct stat estat;
 
@@ -160,7 +161,7 @@ void service_start(service_t* s, bool* changed) {
 	struct stat estat;
 
 	if (snprintf(path_buf, PATH_MAX, "%s/%s/setup", service_dir, s->name) && stat(path_buf, &estat) == 0 && estat.st_mode & S_IXUSR) {
-		s->state = STATE_FINISHING;
+		s->state = STATE_SETUP;
 		if ((s->pid = fork()) == -1) {
 			print_error("cannot fork process");
 		} else if (s->pid == 0) {
