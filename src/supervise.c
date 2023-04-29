@@ -5,6 +5,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/un.h>
@@ -17,8 +18,8 @@ bool daemon_running = true;
 static void signal_child(int unused) {
 	(void) unused;
 
-	int        status;
-	pid_t      died_pid;
+	int		   status;
+	pid_t	   died_pid;
 	service_t* s = NULL;
 
 	if ((died_pid = wait(&status)) == -1) {
@@ -85,7 +86,7 @@ static void accept_socket() {
 
 int service_supervise(const char* service_dir_, const char* runlevel_, bool force_socket) {
 	struct sigaction sigact = { 0 };
-	sigact.sa_handler       = signal_child;
+	sigact.sa_handler		= signal_child;
 	sigaction(SIGCHLD, &sigact, NULL);
 	sigact.sa_handler = SIG_IGN;
 	sigaction(SIGPIPE, &sigact, NULL);
@@ -127,7 +128,7 @@ int service_supervise(const char* service_dir_, const char* runlevel_, bool forc
 
 	// bind socket to address
 	struct sockaddr_un addr = { 0 };
-	addr.sun_family         = AF_UNIX;
+	addr.sun_family			= AF_UNIX;
 	strcpy(addr.sun_path, socket_path);
 	if (bind(control_socket, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
 		print_error("cannot bind %s to socket", socket_path);
@@ -171,9 +172,9 @@ int service_supervise(const char* service_dir_, const char* runlevel_, bool forc
 	}
 
 	time_t start = time(NULL);
-	int    running;
+	int	   running;
 	do {
-		sleep(1);    // sleep for one second
+		sleep(1);	 // sleep for one second
 		running = 0;
 		for (int i = 0; i < services_size; i++) {
 			if (services[i].state != STATE_INACTIVE)

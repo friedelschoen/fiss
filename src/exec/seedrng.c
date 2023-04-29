@@ -11,7 +11,7 @@
 #include <string.h>
 #include <sys/file.h>
 #include <sys/ioctl.h>
-#include <sys/poll.h>
+#include <poll.h>
 #include <sys/random.h>
 #include <sys/stat.h>
 #include <time.h>

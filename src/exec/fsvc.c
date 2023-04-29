@@ -21,6 +21,9 @@ static const char VERSION_MESSAGE[] =
 
 void print_status(service_t* s, char* state, size_t size) {
 	switch (s->state) {
+		case STATE_SETUP:
+			strcpy(state, "setup");
+			break;
 		case STATE_INACTIVE:
 			strcpy(state, "inactive");
 			break;

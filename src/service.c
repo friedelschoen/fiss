@@ -4,21 +4,22 @@
 
 #include <dirent.h>
 #include <errno.h>
+#include <limits.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 
 
-service_t    services[SV_SERVICE_MAX];
-int          services_size = 0;
-char         runlevel[SV_NAME_MAX];
-const char*  service_dir;
-int          control_socket;
-int          null_fd;
-bool         verbose = false;
+service_t	 services[SV_SERVICE_MAX];
+int			 services_size = 0;
+char		 runlevel[SV_NAME_MAX];
+const char*	 service_dir;
+int			 control_socket;
+int			 null_fd;
+bool		 verbose = false;
 dependency_t depends[SV_DEPENDENCY_MAX];
-int          depends_size;
+int			 depends_size;
 
 
 service_t* service_get(const char* name) {
@@ -39,7 +40,7 @@ int service_pattern(const char* name, service_t** dest, int dest_max) {
 }
 
 int service_refresh() {
-	DIR*           dp;
+	DIR*		   dp;
 	struct dirent* ep;
 	dp = opendir(service_dir);
 	if (dp == NULL) {
@@ -48,7 +49,7 @@ int service_refresh() {
 	}
 
 	struct stat stat_str;
-	char        path_buffer[PATH_MAX];
+	char		path_buffer[PATH_MAX];
 
 	for (int i = 0; i < services_size; i++) {
 		service_t* s = &services[i];
@@ -98,8 +99,8 @@ bool service_need_restart(service_t* s) {
 	if (s->restart_manual == S_FORCE_DOWN)
 		return is_dependency(s);
 	return s->restart_file == S_ONCE ||
-	       s->restart_file == S_RESTART ||
-	       s->restart_manual == S_ONCE ||
-	       s->restart_manual == S_RESTART ||
-	       is_dependency(s);
+		   s->restart_file == S_RESTART ||
+		   s->restart_manual == S_ONCE ||
+		   s->restart_manual == S_RESTART ||
+		   is_dependency(s);
 }
