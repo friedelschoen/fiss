@@ -14,8 +14,6 @@
 
 
 static void set_pipes(service_t* s) {
-	struct stat estat;
-
 	if (s->is_log_service) {
 		close(s->log_pipe.write);
 		dup2(s->log_pipe.read, STDIN_FILENO);
@@ -28,7 +26,7 @@ static void set_pipes(service_t* s) {
 		dup2(s->log_service->log_pipe.write, STDERR_FILENO);
 		close(s->log_service->log_pipe.write);
 		dup2(null_fd, STDIN_FILENO);
-	} else if (stat("log", &estat) == 0 && estat.st_mode & S_IWRITE) {	  // is not
+	} else if (stat_mode("log") & S_IWRITE) {	 // is not
 		int log_fd;
 		if ((log_fd = open("log", O_WRONLY | O_TRUNC)) == -1)
 			log_fd = null_fd;
@@ -36,7 +34,7 @@ static void set_pipes(service_t* s) {
 		dup2(null_fd, STDIN_FILENO);
 		dup2(log_fd, STDOUT_FILENO);
 		dup2(log_fd, STDERR_FILENO);
-	} else if (stat("nolog", &estat) == 0 && S_ISREG(estat.st_mode)) {
+	} else if (S_ISREG(stat_mode("nolog"))) {
 		dup2(null_fd, STDIN_FILENO);
 		dup2(null_fd, STDOUT_FILENO);
 		dup2(null_fd, STDERR_FILENO);
@@ -83,15 +81,11 @@ static void set_user() {
 }
 
 void service_run(service_t* s) {
-	printf("old state: %d\n", s->state);
-	char		path_buf[PATH_MAX];
-	struct stat estat;
-
-	if (snprintf(path_buf, PATH_MAX, "%s/%s/run", service_dir, s->name) && stat(path_buf, &estat) == 0 && estat.st_mode & S_IXUSR) {
+	if (stat_mode("%s/%s/run", service_dir, s->name) & S_IXUSR) {
 		s->state = STATE_ACTIVE_FOREGROUND;
-	} else if (snprintf(path_buf, PATH_MAX, "%s/%s/start", service_dir, s->name) && stat(path_buf, &estat) == 0 && estat.st_mode & S_IXUSR) {
+	} else if (stat_mode("%s/%s/start", service_dir, s->name) & S_IXUSR) {
 		s->state = STATE_STARTING;
-	} else if (snprintf(path_buf, PATH_MAX, "%s/%s/depends", service_dir, s->name) && stat(path_buf, &estat) == 0 && estat.st_mode & S_IREAD) {
+	} else if (stat_mode("%s/%s/depends", service_dir, s->name) & S_IREAD) {
 		s->state = STATE_ACTIVE_DUMMY;
 	} else {
 		printf("error in %s: `run`, `start` or `depends` not found\n", s->name);
@@ -157,10 +151,10 @@ void service_start(service_t* s, bool* changed) {
 			service_start(depends[i].depends, NULL);
 	}
 
-	char		path_buf[PATH_MAX];
-	struct stat estat;
+	char path_buf[PATH_MAX];
+	snprintf(path_buf, PATH_MAX, "%s/%s/setup", service_dir, s->name);
 
-	if (snprintf(path_buf, PATH_MAX, "%s/%s/setup", service_dir, s->name) && stat(path_buf, &estat) == 0 && estat.st_mode & S_IXUSR) {
+	if (stat_mode("%s/%s/setup", service_dir, s->name) & S_IXUSR) {
 		s->state = STATE_SETUP;
 		if ((s->pid = fork()) == -1) {
 			print_error("cannot fork process");

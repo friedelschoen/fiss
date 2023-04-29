@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 
 /*void stat_mode(const char* path_format, ...) __attribute__((format(printf, 1, 0)))  {
@@ -16,11 +17,10 @@
 }*/
 
 static void do_finish(service_t* s) {
-	char		path_buffer[PATH_MAX];
-	struct stat stat_buffer;
+	char path_buffer[PATH_MAX];
 	snprintf(path_buffer, PATH_MAX, "%s/%s/finish", service_dir, s->name);
 
-	if (stat(path_buffer, &stat_buffer) == 0 && stat_buffer.st_mode & S_IEXEC) {
+	if (stat_mode("%s/%s/finish", service_dir, s->name) & S_IEXEC) {
 		s->state = STATE_FINISHING;
 		if ((s->pid = fork()) == -1) {
 			print_error("cannot fork process");
@@ -49,9 +49,6 @@ void service_check_state(service_t* s, bool signaled, int return_code) {
 		s->restart_file = S_DOWN;
 	if (s->restart_manual == S_ONCE)
 		s->restart_manual = S_DOWN;
-
-	char		path_buffer[PATH_MAX];
-	struct stat stat_buffer;
 
 	switch (s->state) {
 		case STATE_SETUP:
@@ -95,9 +92,9 @@ void service_check_state(service_t* s, bool signaled, int return_code) {
 			break;
 		case STATE_STARTING:
 			if (!signaled && return_code == 0) {
-				if (snprintf(path_buffer, PATH_MAX, "%s/%s/stop", service_dir, s->name) && stat(path_buffer, &stat_buffer) == 0 && stat_buffer.st_mode & S_IXUSR) {
+				if (stat_mode("%s/%s/stop", service_dir, s->name) & S_IXUSR) {
 					s->state = STATE_ACTIVE_BACKGROUND;
-				} else if (snprintf(path_buffer, PATH_MAX, "%s/%s/pid", service_dir, s->name) && stat(path_buffer, &stat_buffer) == 0 && stat_buffer.st_mode & S_IRUSR) {
+				} else if (stat_mode("%s/%s/stop", service_dir, s->name) & S_IRUSR) {
 					s->pid	 = parse_pid_file(s);
 					s->state = STATE_ACTIVE_PID;
 				} else {

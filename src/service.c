@@ -48,13 +48,10 @@ int service_refresh() {
 		return -1;
 	}
 
-	struct stat stat_str;
-	char		path_buffer[PATH_MAX];
 
 	for (int i = 0; i < services_size; i++) {
 		service_t* s = &services[i];
-		snprintf(path_buffer, PATH_MAX, "%s/%s", service_dir, s->name);
-		if (stat(path_buffer, &stat_str) == -1 || !S_ISDIR(stat_str.st_mode)) {
+		if (!S_ISDIR(stat_mode("%s/%s", service_dir, s->name))) {
 			if (s->pid)
 				kill(s->pid, SIGKILL);
 			if (i < services_size - 1) {
@@ -68,8 +65,7 @@ int service_refresh() {
 	while ((ep = readdir(dp)) != NULL) {
 		if (ep->d_name[0] == '.')
 			continue;
-		snprintf(path_buffer, PATH_MAX, "%s/%s", service_dir, ep->d_name);
-		if (stat(path_buffer, &stat_str) == -1 || !S_ISDIR(stat_str.st_mode))
+		if (!S_ISDIR(stat_mode("%s/%s", service_dir, ep->d_name)))
 			continue;
 
 		service_register(ep->d_name, false);

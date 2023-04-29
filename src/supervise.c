@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <sys/un.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 
 bool daemon_running = true;
