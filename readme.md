@@ -2,7 +2,7 @@
 
 > 0.1.0 (May 2023)
 
-FISS is a lightweight and easy-to-use tool for initializing and supervising long-running services on Unix-like systems. It provides a simple and reliable way to start, stop, and monitor services, and it supports automatic restarts, logging, and customizable startup options.
+FISS is a lightweight and easy-to-use tool for initializing and supervising long-running services on Unix-like systems. It provides a simple and reliable way to start, stop, and monitor services. It supports automatic restarts, logging, and customizable startup options.
 
 FISS is inspired by tools like [runit](http://smarden.org/runit/) and [daemontools](http://cr.yp.to/daemontools.html), but it aims to be simpler and more flexible, while still providing a similar level of reliability and security.
 
@@ -24,7 +24,7 @@ FISS provides the following features:
 
 ## Installation
 
-FISS is written in C and POSIX Shell. To compile this project following tools are required:
+FISS is written in C and POSIX Shell. To compile this project, the following tools are required:
 
 -   `gcc` (or a gcc-compatible compiler like `clang`)
 -   `make`
@@ -44,7 +44,7 @@ Then copy the contents of `bin/` to `/sbin/`, `usr/*` to `/usr/` and `etc/` to `
 
 To use FISS, you need to create a configuration directory for each service you want to supervise.
 
-A service directory must contain either of those files: `run`, `start`, `depends`
+A service directory must contain either of these files: `run`, `start`, `depends`
 
 ```
 /etc/service.d/my-service/
@@ -67,7 +67,7 @@ A service directory must contain either of those files: `run`, `start`, `depends
 
 ### `run`
 
-The `run` file should be marked as executable and is ment be a long-running service, this can be a symbolic link to an executable or a simple script with executes.
+The `run` file should be marked as executable and is meant be a long-running service. This can be a symbolic link to an executable or a simple script that executes.
 
 It must not coexist with `start`.
 
@@ -82,7 +82,7 @@ exec python3 my-service.py $USER $PASSWORD
 
 ### `start`
 
-This file initiates a long-running background-service, this can be a symbolic link to an executable or a simple script.
+This file initiates a long-running background-service. This can be a symbolic link to an executable or a simple script.
 
 It must not coexist with `run`.
 
@@ -98,7 +98,7 @@ myservice --daemon > ./pid   # myservice prints it's PID to stdout
 
 ### `stop`
 
-This file is ment to stop a background-service, this file will be executed whenever a service should terminate a background service.
+This file is meant to stop a background-service and will be executed whenever a service should terminate a background service.
 
 It may not coexist with pid.
 
@@ -131,11 +131,11 @@ This is useful for very verbose daemons, which would cause gigabytes of log-file
 
 If `log` is a directory, it should contain a service, the output or the service (if running as a foreground-service) will be redirected to the `run` of your log-service.
 
-The log-service is a dependency of your service, if the service or the log-service unexpectedly terminates, no data will be lost as data is buffered.
+The log-service is a dependency of your service. If the service or the log-service unexpectedly terminates, no data will be lost as data is buffered.
 
 ### `log` file
 
-Output of the service is redirected to this file if existing, this can be used for simple services with no time-specific output as nothing but the output is redirected.
+Output of the service is redirected to this file if existing. This can be used for simple services with no time-specific output as nothing but the output is redirected.
 
 If formatting or time-prefixed are wished, consider using a log-service.
 
@@ -149,7 +149,7 @@ fiss-user:fiss-user
 
 ### `env`
 
-If existing, environment-variables will be passed to `run` or `start`, this is a simple `key=value`-file with **no variable-substitution**.
+If existing, environment-variables will be passed to `run` or `start`. This is a simple `key=value`-file with **no variable-substitution**.
 
 ```
 HOME=/home/fiss-user/
@@ -179,7 +179,7 @@ mysql -u 'cool user' -p -d
 
 ### `setup`
 
-This file is executed before `start` or `run` is called with an unchanged environment (thus `root`). This file is useful for e.g. creating files which is not permitted by the user specified in `user`.
+This file is executed before `start` or `run` is called with an unchanged environment (thus `root`). It's useful for e.g. creating files which is not permitted by the user specified in `user`.
 
 ```sh
 #!/bin/sh
@@ -190,7 +190,7 @@ chmod a+rw /run/service
 
 ### `finish`
 
-This file is executed after `run` or `stop` with an unchanged environment (thus `root`). This file is useful for e.g. cleaning up files which is not permitted by the user specified in `user`.
+This file is executed after `run` or `stop` with an unchanged environment (thus `root`). It's useful for e.g. cleaning up files which is not permitted by the user specified in `user`.
 
 ```sh
 #!/bin/sh
@@ -200,13 +200,13 @@ rmdir /run/myservice/
 
 ### `<runlevel>-up` and `<runlevel>-once`
 
-If this file is present, this service is started if `finit` is running with specified `runlevel`. If `-up` is present, this service will be restarted whenever it terminated. If `-once` is present, it will be started once and not restarted on exitting.
+If this file is present, this service is started if `finit` is running with specified `runlevel`. If `-up` is present, this service will be restarted whenever it terminated. If `-once` is present, it will be started once and not restarted on exiting.
 
 Both `<runlevel>-up` and `<runlevel>-once` must not coexist.
 
 ## Controlling
 
-To controll fiss (e.g. `finit` and `fsvs`) you use `fsvc` (friedel's service controller).
+To control fiss (e.g. `finit` and `fsvs`) you use `fsvc` (friedel's service controller).
 
 For further information check out [the manual](man/fsvc.8.md).
 
