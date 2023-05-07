@@ -62,8 +62,6 @@ int main(int argc, char** argv) {
 
 	argc -= optind, argv += optind;
 
-	printf("Zzzz...\n");
-
 	struct stat st;
 
 	if (stat(SV_SUSPEND_EXEC, &st) == 0 && st.st_mode & S_IXUSR) {
@@ -117,6 +115,4 @@ int main(int argc, char** argv) {
 
 		wait(NULL);
 	}
-
-	printf("Yawn!\n");
 }
