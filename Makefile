@@ -10,7 +10,7 @@ ROFF_DIR    := usr/share/man
 
 # Compiler Options
 CC      := gcc
-CCFLAGS := -I$(INCLUDE_DIR) -Wall -Wextra
+CCFLAGS := -I$(INCLUDE_DIR) -Wall -Wextra -g
 LFLAGS  :=
 
 # Executable-specific flags
