@@ -6,6 +6,7 @@
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 
 void sigblock_all(bool unblock) {
@@ -22,7 +23,7 @@ void sigblock_all(bool unblock) {
 }
 
 void handle_stage1() {
-	int		 pid, ttyfd, exitstat;
+	int      pid, ttyfd, exitstat;
 	sigset_t ss;
 	while ((pid = fork()) == -1) {
 		print_error("unable to fork for stage1");
@@ -35,7 +36,7 @@ void handle_stage1() {
 		if ((ttyfd = open("/dev/console", O_RDWR)) == -1) {
 			print_error("unable to open /dev/console");
 		} else {
-			ioctl(ttyfd, TIOCSCTTY, NULL);	  // make the controlling process
+			ioctl(ttyfd, TIOCSCTTY, NULL);    // make the controlling process
 			dup2(ttyfd, 0);
 			if (ttyfd > 2) close(ttyfd);
 		}
@@ -44,7 +45,7 @@ void handle_stage1() {
 
 
 		struct sigaction sigact = { 0 };
-		sigact.sa_handler		= SIG_DFL;
+		sigact.sa_handler       = SIG_DFL;
 		sigaction(SIGCHLD, &sigact, NULL);
 		sigaction(SIGINT, &sigact, NULL);
 
@@ -120,7 +121,7 @@ void handle_stage1() {
 
 
 void handle_stage3() {
-	int		 pid, ttyfd, exitstat;
+	int      pid, ttyfd, exitstat;
 	sigset_t ss;
 	while ((pid = fork()) == -1) {
 		print_error("unable to fork for state3");
@@ -135,7 +136,7 @@ void handle_stage3() {
 
 
 		struct sigaction sigact = { 0 };
-		sigact.sa_handler		= SIG_DFL;
+		sigact.sa_handler       = SIG_DFL;
 		sigaction(SIGCHLD, &sigact, NULL);
 		sigaction(SIGINT, &sigact, NULL);
 
