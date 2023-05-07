@@ -4,6 +4,7 @@
 
 #include <ctype.h>
 #include <getopt.h>
+#include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,6 +13,7 @@
 static const char HELP_MESSAGE[] =
     "Usage:\n"
     "  %s <command> [-cfopqvV] [-r ..] [-s ..] [service]\n"
+    "  /etc/init.d/<service> [-cfopqvV] [-r ..] [-s ..] <command>\n"
     "\n"
     "Check the manual (fsvc 8) for more information.\n";
 
@@ -150,6 +152,8 @@ int main(int argc, char** argv) {
 	strcpy(runlevel, getenv(SV_RUNLEVEL_ENV) ?: SV_RUNLEVEL);
 	service_dir = SV_SERVICE_DIR;
 
+	char* argexec = argv[0];
+
 	bool check = false,
 	     pin   = false,
 	     once  = false,
@@ -205,92 +209,73 @@ int main(int argc, char** argv) {
 	}
 
 	const char* command_str = argv[0];
-	argv++;
-	argc--;
+	argv++, argc--;
 
-	const char* service = NULL;
+	const char* service;
 	char        command, extra = 0;
 
+	if (streq(service = basename(argexec), "fsvc")) {
+		if (argc > 0) {
+			service = argv[0];
+			argv++, argc--;
+		} else {
+			service = NULL;
+		}
+	}
+
 	if (streq(command_str, "up") || streq(command_str, "start") || streq(command_str, "down") || streq(command_str, "stop")) {
-		if (argc == 0) {
+		if (!service) {
 			printf("service omitted\n");
-			return 1;
-		} else if (argc > 1) {
-			printf("redundant argument '%s'\n", argv[2]);
 			return 1;
 		}
 
 		command = streq(command_str, "down") || streq(command_str, "stop") ? S_STOP : S_START;
 		extra   = pin;
-		service = argv[0];
 		pin     = false;
 	} else if (streq(command_str, "send") || streq(command_str, "kill")) {
-		if (argc == 0) {
+		if (!service) {
 			printf("service omitted\n");
 			return 1;
-		} else if (argc == 1) {
+		}
+		if (argc == 1) {
 			printf("signal omitted\n");
 			return 1;
-		} else if (argc > 2) {
-			printf("redundant argument '%s'\n", argv[2]);
-			return 1;
 		}
-
 		if ((extra = signame(argv[1])) == -1) {
 			printf("unknown signalname\n");
 			return 1;
 		}
 
 		command = S_SEND;
-		service = argv[0];
 	} else if (streq(command_str, "enable") || streq(command_str, "disable")) {
-		if (argc == 0) {
+		if (!service) {
 			printf("service omitted\n");
-			return 1;
-		} else if (argc > 1) {
-			printf("redundant argument '%s'\n", argv[2]);
 			return 1;
 		}
 
 		command = streq(command_str, "enable") ? S_ENABLE : S_DISABLE;
 		extra   = once;
 		once    = false;
-		service = argv[0];
 	} else if (streq(command_str, "status")) {
-		if (argc == 1) {
-			service = argv[0];
-		} else if (argc > 1) {
-			printf("redundant argument '%s'\n", argv[2]);
-			return 1;
-		}
-
 		command = S_STATUS;
 		extra   = check;
 		check   = false;
 	} else if (streq(command_str, "pause") || streq(command_str, "resume")) {
-		if (argc == 0) {
+		if (!service) {
 			printf("service omitted\n");
-			return 1;
-		} else if (argc > 1) {
-			printf("redundant argument '%s'\n", argv[2]);
 			return 1;
 		}
 
 		command = streq(command_str, "pause") ? S_PAUSE : S_RESUME;
-		service = argv[0];
 	} else if (streq(command_str, "switch")) {
-		if (argc == 0) {
+		if (!service) {
 			printf("runlevel omitted\n");
-			return 1;
-		} else if (argc > 1) {
-			printf("redundant argument '%s'\n", argv[2]);
 			return 1;
 		}
 
 		command = S_SWITCH;
 		extra   = reset;
 		reset   = false;
-		service = argv[0];
 	} else {
 		printf("unknown command '%s'\n", command_str);
 		return 1;
