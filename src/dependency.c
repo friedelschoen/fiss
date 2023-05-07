@@ -5,6 +5,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 
 void service_add_dependency(service_t* s, service_t* d) {

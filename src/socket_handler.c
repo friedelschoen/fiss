@@ -1,6 +1,7 @@
 #include "service.h"
 
 #include <stdio.h>
+#include <unistd.h>
 
 
 void service_handle_socket(int client) {

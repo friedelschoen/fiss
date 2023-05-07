@@ -5,6 +5,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 
 int service_handle_command(void* argv, sv_command_t command, unsigned char extra, service_t** response) {
