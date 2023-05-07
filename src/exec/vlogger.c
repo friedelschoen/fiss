@@ -1,22 +1,22 @@
+#include "util.h"
+
 #include <errno.h>
+#include <libgen.h>
 #include <limits.h>
-#include <stdio.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/syslog.h>
 #include <unistd.h>
 
-
-extern char* __progname;
-
 static char pwd[PATH_MAX];
 
-typedef struct {
-	const char* const c_name;
-	int               c_val;
-} CODE;
+typedef struct ident {
+	const char* name;
+	int         value;
+} ident_t;
 
-CODE prioritynames[] = {
+ident_t prioritynames[] = {
 	{ "alert", LOG_ALERT },
 	{ "crit", LOG_CRIT },
 	{ "debug", LOG_DEBUG },
@@ -31,7 +31,7 @@ CODE prioritynames[] = {
 	{ 0, -1 }
 };
 
-CODE facilitynames[] = {
+ident_t facilitynames[] = {
 	{ "auth", LOG_AUTH },
 	{ "authpriv", LOG_AUTHPRIV },
 	{ "cron", LOG_CRON },
@@ -56,38 +56,40 @@ CODE facilitynames[] = {
 	{ 0, -1 }
 };
 
-static void
-strpriority(const char* s, int* facility, int* level) {
-	char* p;
-	CODE* cp;
+static void strpriority(char* facil_str, int* facility, int* level) {
+	char*    prio_str = NULL;
+	ident_t* ident;
 
-	if ((p = strchr(s, '.'))) {
-		*p++ = 0;
-		for (cp = prioritynames; cp->c_name; cp++) {
-			if (strcmp(cp->c_name, p) == 0)
-				*level = cp->c_val;
+	if ((prio_str = strchr(facil_str, '.'))) {
+		*prio_str = '\0';
+		prio_str++;
+		for (ident = prioritynames; ident->name; ident++) {
+			if (streq(ident->name, prio_str))
+				*level = ident->value;
 		}
 	}
-	if (*s)
-		for (cp = facilitynames; cp->c_name; cp++) {
-			if (strcmp(cp->c_name, s) == 0)
-				*facility = cp->c_val;
+	if (*facil_str) {
+		for (ident = facilitynames; ident->name; ident++) {
+			if (streq(ident->name, facil_str))
+				*facility = ident->value;
 		}
+	}
 }
 
 int main(int argc, char* argv[]) {
 	char  buf[1024];
-	char *p, *argv0;
+	char *p, *e, *argv0;
 	char* tag = NULL;
 	int   c;
-	int   Sflag    = 0;
+	bool  Sflag    = false;
 	int   logflags = 0;
 	int   facility = LOG_USER;
 	int   level    = LOG_NOTICE;
 
 	argv0 = *argv;
 
-	if (strcmp(argv0, "./run") == 0) {
+	if (streq(argv0, "./run")) {
+		// if running as a service, update facility and tag
 		p = getcwd(pwd, sizeof(pwd));
 		if (p != NULL && *pwd == '/') {
 			if (*(p = pwd + (strlen(pwd) - 1)) == '/')
@@ -99,9 +101,9 @@ int main(int argc, char* argv[]) {
 				level    = LOG_NOTICE;
 			}
 		}
-	} else if (strcmp(__progname, "logger") == 0) {
+	} else if (streq(basename(argv0), "logger")) {
 		/* behave just like logger(1) and only use syslog */
-		Sflag++;
+		Sflag = true;
 	}
 
 	while ((c = getopt(argc, argv, "f:ip:Sst:")) != -1)
@@ -119,7 +121,7 @@ int main(int argc, char* argv[]) {
 				strpriority(optarg, &facility, &level);
 				break;
 			case 'S':
-				Sflag++;
+				Sflag = true;
 				break;
 			case 's':
 				logflags |= LOG_PERROR;
@@ -135,40 +137,39 @@ int main(int argc, char* argv[]) {
 	argv += optind;
 
 	if (argc > 0)
-		Sflag++;
+		Sflag = true;
 
 	if (!Sflag && access("/etc/vlogger", X_OK) != -1) {
-		CODE*       cp;
+		ident_t*    ident;
 		const char *sfacility = "", *slevel = "";
-		for (cp = prioritynames; cp->c_name; cp++) {
-			if (cp->c_val == level)
-				slevel = cp->c_name;
+		for (ident = prioritynames; ident->name; ident++) {
+			if (ident->value == level)
+				slevel = ident->name;
 		}
-		for (cp = facilitynames; cp->c_name; cp++) {
-			if (cp->c_val == facility)
-				sfacility = cp->c_name;
+		for (ident = facilitynames; ident->name; ident++) {
+			if (ident->value == facility)
+				sfacility = ident->name;
 		}
-		execl("/etc/vlogger", argv0, tag ? tag : "", slevel, sfacility, (char*) 0);
+		execl("/etc/vlogger", argv0, tag ?: "", slevel, sfacility, NULL);
 		fprintf(stderr, "vlogger: exec: %s\n", strerror(errno));
 		exit(1);
 	}
 
-	openlog(tag ? tag : getlogin(), logflags, facility);
+	openlog(tag ?: getlogin(), logflags, facility);
 
 	if (argc > 0) {
 		size_t len;
-		char * p, *e;
 		p  = buf;
 		*p = '\0';
-		e  = buf + sizeof buf - 2;
-		for (; *argv;) {
+		e  = buf + sizeof(buf) - 2;
+		while (*argv) {
 			len = strlen(*argv);
 			if (p + len > e && p > buf) {
 				syslog(level | facility, "%s", buf);
 				p  = buf;
 				*p = '\0';
 			}
-			if (len > sizeof buf - 1) {
+			if (len > sizeof(buf) - 1) {
 				syslog(level | facility, "%s", *argv++);
 			} else {
 				if (p != buf) {
@@ -184,7 +185,7 @@ int main(int argc, char* argv[]) {
 		return 0;
 	}
 
-	while (fgets(buf, sizeof buf, stdin) != NULL)
+	while (fgets(buf, sizeof(buf), stdin) != NULL)
 		syslog(level | facility, "%s", buf);
 
 	return 0;
