@@ -11,6 +11,6 @@ detect_virt
 
 [ -r /etc/rc.shutdown ] && . /etc/rc.shutdown
 
-for f in /etc/fiss/stop.d/*.sh; do
+for f in /etc/stop.d/*.sh; do
 	[ -r $f ] && . $f
 done
