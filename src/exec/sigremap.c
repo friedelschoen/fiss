@@ -1,24 +1,24 @@
 /*  Copyright (c) 2015 Yelp, Inc.
-	With modification 2023 Friedel Schon
+    With modification 2023 Friedel Schon
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy
-	of this software and associated documentation files (the "Software"), to deal
-	in the Software without restriction, including without limitation the rights
-	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-	copies of the Software, and to permit persons to whom the Software is
-	furnished to do so, subject to the following conditions:
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
 
-	The above copyright notice and this permission notice shall be included in
-	all copies or substantial portions of the Software.
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-	THE SOFTWARE.
-	*/
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
+    */
 
 /*
  * sigremap is a simple wrapper program designed to run as PID 1 and pass
@@ -30,7 +30,9 @@
  * To get debug output on stderr, run with '-v'.
  */
 
+#include "message.h"
 #include "signame.h"
+#include "util.h"
 
 #include <assert.h>
 #include <errno.h>
@@ -43,13 +45,10 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#define PRINTERR(...) \
-	fprintf(stderr, "[sigremap] " __VA_ARGS__)
-
-#define DEBUG(...)                 \
-	do {                           \
-		if (debug)                 \
-			PRINTERR(__VA_ARGS__); \
+#define DEBUG(...)                        \
+	do {                                  \
+		if (debug)                        \
+			fprintf(stderr, __VA_ARGS__); \
 	} while (0)
 
 #define set_signal_undefined(old, new) \
@@ -68,8 +67,8 @@ int signal_remap[MAXSIG + 1] = { [0 ... MAXSIG] = -1 };
 // One-time ignores due to TTY quirks. 0 = no skip, 1 = skip the next-received signal.
 bool signal_temporary_ignores[MAXSIG + 1] = { [0 ... MAXSIG] = false };
 
-pid_t child_pid	 = -1;
-bool  debug		 = false;
+pid_t child_pid  = -1;
+bool  debug      = false;
 bool  use_setsid = true;
 
 void forward_signal(int signum) {
@@ -114,7 +113,7 @@ void handle_signal(int signum) {
 		DEBUG("Ignoring tty hand-off signal %d.\n", signum);
 		signal_temporary_ignores[signum] = 0;
 	} else if (signum == SIGCHLD) {
-		int	  status, exit_status;
+		int   status, exit_status;
 		pid_t killed_pid;
 		while ((killed_pid = waitpid(-1, &status, WNOHANG)) > 0) {
 			if (WIFEXITED(status)) {
@@ -127,7 +126,7 @@ void handle_signal(int signum) {
 			}
 
 			if (killed_pid == child_pid) {
-				kill(use_setsid ? -child_pid : child_pid, SIGTERM);	   // send SIGTERM to any remaining children
+				kill(use_setsid ? -child_pid : child_pid, SIGTERM);    // send SIGTERM to any remaining children
 				DEBUG("Child exited with status %d. Goodbye.\n", exit_status);
 				exit(exit_status);
 			}
@@ -148,54 +147,26 @@ void handle_signal(int signum) {
 	}
 }
 
-void print_help(char* argv[]) {
-	fprintf(stderr,
-			"Usage: %s [option] [old-signal=new-signal] command [[arg] ...]\n"
-			"\n"
-			"sigremap is a simple process supervisor that forwards signals to children.\n"
-			"It is designed to run as PID1 in minimal container environments.\n"
-			"\n"
-			"Optional arguments:\n"
-			"   -s, --single         Run in single-child mode.\n"
-			"                        In this mode, signals are only proxied to the\n"
-			"                        direct child and not any of its descendants.\n"
-			"   -r, --remap s:r      remap received signal s to new signal r before proxying.\n"
-			"                        To ignore (not proxy) a signal, remap it to 0.\n"
-			"                        This option can be specified multiple times.\n"
-			"   -v, --verbose        Print debugging information to stderr.\n"
-			"   -h, --help           Print this help message and exit.\n"
-			"   -V, --version        Print the current version and exit.\n"
-			"\n"
-			"Full help is available online at https://github.com/Yelp/dumb-init\n",
-			argv[0]);
-}
-
-
 char** parse_command(int argc, char* argv[]) {
-	int			  opt;
+	int           opt;
 	struct option long_options[] = {
-		{ "help", no_argument, NULL, 'h' },
 		{ "single", no_argument, NULL, 's' },
 		{ "verbose", no_argument, NULL, 'v' },
 		{ "version", no_argument, NULL, 'V' },
 		{ NULL, 0, NULL, 0 },
 	};
-	while ((opt = getopt_long(argc, argv, "+hvVs", long_options, NULL)) != -1) {
+	while ((opt = getopt_long(argc, argv, "+:hvVs", long_options, NULL)) != -1) {
 		switch (opt) {
-			case 'h':
-				print_help(argv);
-				exit(0);
 			case 'v':
 				debug = true;
 				break;
 			case 'V':
-				//				fprintf(stderr, "sigremap v%.*s", VERSION_len, VERSION);
-				exit(0);
+				print_version_exit();
 			case 'c':
 				use_setsid = false;
 				break;
 			default:
-				exit(1);
+				print_usage_exit(PROG_SIGREMAP, 1);
 		}
 	}
 
@@ -206,7 +177,7 @@ char** parse_command(int argc, char* argv[]) {
 		if ((new = strchr(argv[0], '=')) == NULL)
 			break;
 
-		old	 = argv[0];
+		old  = argv[0];
 		*new = '\0';
 		new ++;
 
@@ -226,12 +197,7 @@ char** parse_command(int argc, char* argv[]) {
 	}
 
 	if (argc < 1) {
-		fprintf(
-			stderr,
-			"Usage: %s [option] program [args]\n"
-			"Try %s --help for full usage.\n",
-			argv[0], argv[0]);
-		exit(1);
+		print_usage_exit(PROG_SIGREMAP, 1);
 	}
 
 	if (use_setsid) {
@@ -252,7 +218,7 @@ void dummy(int signum) {
 }
 
 int main(int argc, char* argv[]) {
-	char**	 cmd = parse_command(argc, argv);
+	char**   cmd = parse_command(argc, argv);
 	sigset_t all_signals;
 	sigfillset(&all_signals);
 	sigprocmask(SIG_BLOCK, &all_signals, NULL);
@@ -271,9 +237,9 @@ int main(int argc, char* argv[]) {
 	if (use_setsid) {
 		if (ioctl(STDIN_FILENO, TIOCNOTTY) == -1) {
 			DEBUG(
-				"Unable to detach from controlling tty (errno=%d %s).\n",
-				errno,
-				strerror(errno));
+			    "Unable to detach from controlling tty (errno=%d %s).\n",
+			    errno,
+			    strerror(errno));
 		} else {
 			/*
 			 * When the session leader detaches from its controlling tty via
@@ -294,32 +260,29 @@ int main(int argc, char* argv[]) {
 
 	child_pid = fork();
 	if (child_pid < 0) {
-		PRINTERR("Unable to fork. Exiting.\n");
+		print_error("error: unable to fork: %s\n");
 		return 1;
 	} else if (child_pid == 0) {
 		/* child */
 		sigprocmask(SIG_UNBLOCK, &all_signals, NULL);
 		if (use_setsid) {
 			if (setsid() == -1) {
-				PRINTERR(
-					"Unable to setsid (errno=%d %s). Exiting.\n",
-					errno,
-					strerror(errno));
+				print_error("error: unable to setsid: %s\n");
 				exit(1);
 			}
 
 			if (ioctl(STDIN_FILENO, TIOCSCTTY, 0) == -1) {
 				DEBUG(
-					"Unable to attach to controlling tty (errno=%d %s).\n",
-					errno,
-					strerror(errno));
+				    "Unable to attach to controlling tty (errno=%d %s).\n",
+				    errno,
+				    strerror(errno));
 			}
 			DEBUG("setsid complete.\n");
 		}
 		execvp(cmd[0], cmd);
 
 		// if this point is reached, exec failed, so we should exit nonzero
-		PRINTERR("%s: %s\n", cmd[0], strerror(errno));
+		print_error("error: unable to execute %s: %s\n", cmd[0]);
 		_exit(2);
 	}
 

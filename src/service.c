@@ -44,7 +44,7 @@ int service_refresh() {
 	struct dirent* ep;
 	dp = opendir(service_dir);
 	if (dp == NULL) {
-		print_error("cannot open directory %s", service_dir);
+		print_error("error: cannot open directory %s: %s\n", service_dir);
 		return -1;
 	}
 

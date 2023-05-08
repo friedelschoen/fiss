@@ -29,14 +29,14 @@ void service_stop(service_t* s, bool* changed) {
 
 			s->state = STATE_STOPPING;
 			if ((s->pid = fork()) == -1) {
-				print_error("cannot fork process");
+				print_error("error: cannot fork process: %s\n");
 			} else if (s->pid == 0) {
 				dup2(null_fd, STDIN_FILENO);
 				dup2(null_fd, STDOUT_FILENO);
 				dup2(null_fd, STDERR_FILENO);
 
 				execl(path_buffer, path_buffer, NULL);
-				print_error("cannot execute stop process");
+				print_error("error: cannot execute stop process: %s\n");
 				_exit(1);
 			}
 			if (changed)

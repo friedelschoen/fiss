@@ -10,11 +10,12 @@ void service_handle_socket(int client) {
 
 	read(client, command, sizeof(command));
 
-	printf("command: %c\n", command[0]);
-
 	ssize_t service_len = readstr(client, service_name);
 
-	printf("command: %c-%02x with service '%s'\n", command[0], command[1], service_name);
+	if (service_len)
+		printf("command issued by user: %c-%02x with service '%s'\n", command[0], command[1], service_name);
+	else
+		printf("command issued by user: %c-%02x without service\n", command[0], command[1]);
 
 	int        res     = 0;
 	int        res_off = 0;

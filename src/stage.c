@@ -26,7 +26,7 @@ void handle_stage1() {
 	int      pid, ttyfd, exitstat;
 	sigset_t ss;
 	while ((pid = fork()) == -1) {
-		print_error("unable to fork for stage1");
+		print_error("error: unable to fork for stage1: %s\n");
 		sleep(5);
 	}
 	if (pid == 0) {
@@ -34,7 +34,7 @@ void handle_stage1() {
 
 		/* stage 1 gets full control of console */
 		if ((ttyfd = open("/dev/console", O_RDWR)) == -1) {
-			print_error("unable to open /dev/console");
+			print_error("error: unable to open /dev/console: %s\n");
 		} else {
 			ioctl(ttyfd, TIOCSCTTY, NULL);    // make the controlling process
 			dup2(ttyfd, 0);
@@ -52,9 +52,8 @@ void handle_stage1() {
 		sigact.sa_handler = SIG_IGN;
 		sigaction(SIGCONT, &sigact, NULL);
 
-		printf("enter stage1\n");
 		execl(SV_START_EXEC, SV_START_EXEC, NULL);
-		print_error("unable to exec stage1");
+		print_error("error: unable to exec stage1: %s\n");
 		_exit(1);
 	}
 	bool dont_wait = false;
@@ -77,7 +76,7 @@ void handle_stage1() {
 		} while (child > 0 && child != pid);
 
 		if (child == -1) {
-			print_error("waitpid failed, pausing");
+			print_error("warn: waitpid failed: %s");
 			sleep(5);
 		}
 
@@ -91,16 +90,14 @@ void handle_stage1() {
 
 		if (child == pid) {
 			if (!WIFEXITED(exitstat) || WEXITSTATUS(exitstat) != 0) {
-				printf("child failed\n");
 				if (WIFSIGNALED(exitstat)) {
 					/* this is stage 1 */
-					printf("leave stage 1\n");
-					printf("skipping stage 2\n");
+					fprintf(stderr, "stage 1 failed: skip stage 2\n");
 					daemon_running = false;
 					break;
 				}
 			}
-			printf("leave stage1\n");
+			printf("leave stage 1\n");
 			break;
 		}
 		if (child != 0) {
@@ -115,7 +112,7 @@ void handle_stage1() {
 			continue;
 		}
 
-		printf("signals only work in stage 2\n");
+		fprintf(stderr, "warn: signals only work in stage 2, ignoring...\n");
 	}
 }
 
@@ -124,7 +121,7 @@ void handle_stage3() {
 	int      pid, ttyfd, exitstat;
 	sigset_t ss;
 	while ((pid = fork()) == -1) {
-		print_error("unable to fork for state3");
+		print_error("warn: unable to fork for state3: %s");
 		sleep(5);
 	}
 	if (pid == 0) {
@@ -145,7 +142,7 @@ void handle_stage3() {
 
 		printf("enter stage3\n");
 		execl(SV_STOP_EXEC, SV_STOP_EXEC, NULL);
-		print_error("unable to exec stage3");
+		print_error("error: unable to exec stage3: %s\n");
 		_exit(1);
 	}
 	bool dont_wait = false;
@@ -168,7 +165,7 @@ void handle_stage3() {
 		} while (child > 0 && child != pid);
 
 		if (child == -1) {
-			print_error("waitpid failed, pausing");
+			print_error("error: waitpid failed, pausing: %s\n");
 			sleep(5);
 		}
 
@@ -181,9 +178,9 @@ void handle_stage3() {
 		}
 
 		if (child == pid) {
-			if (!WIFEXITED(exitstat) || WEXITSTATUS(exitstat) != 0) {
-				printf("child failed\n");
-			}
+			//			if (!WIFEXITED(exitstat) || WEXITSTATUS(exitstat) != 0) {
+			//				printf("child failed\n");
+			//			}
 			printf("leave stage: stage3\n");
 			break;
 		}
@@ -197,6 +194,6 @@ void handle_stage3() {
 		if (sig != SIGCONT && sig != SIGINT) {
 			continue;
 		}
-		printf("signals only work in stage 2\n");
+		fprintf(stderr, "warn: signals only work in stage 2\n");
 	}
 }

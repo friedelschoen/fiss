@@ -23,7 +23,7 @@ int service_command(char command, char extra, const char* service, service_t* re
 
 	int sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
 	if (sockfd == -1) {
-		print_error("cannot connect to socket");
+		print_error("error: cannot connect to socket: %s\n");
 		exit(1);
 	}
 
@@ -34,7 +34,7 @@ int service_command(char command, char extra, const char* service, service_t* re
 
 	int ret = connect(sockfd, (struct sockaddr*) &addr, sizeof(addr));
 	if (ret == -1) {
-		print_error("cannot connect to %s", addr.sun_path);
+		print_error("error: cannot connect to %s: %s\n", addr.sun_path);
 		exit(EXIT_FAILURE);
 	}
 

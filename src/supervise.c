@@ -19,12 +19,12 @@ bool daemon_running = true;
 static void signal_child(int unused) {
 	(void) unused;
 
-	int		   status;
-	pid_t	   died_pid;
+	int        status;
+	pid_t      died_pid;
 	service_t* s = NULL;
 
 	if ((died_pid = wait(&status)) == -1) {
-		print_error("cannot wait for process");
+		print_error("error: cannot wait for process: %s\n");
 		return;
 	}
 
@@ -78,7 +78,7 @@ static void accept_socket() {
 		if (errno == EWOULDBLOCK) {
 			sleep(SV_ACCEPT_INTERVAL);
 		} else {
-			print_error("cannot accept client from control-socket");
+			print_error("error: cannot accept client from control-socket: %s\n");
 		}
 	} else {
 		service_handle_socket(client_fd);
@@ -87,7 +87,7 @@ static void accept_socket() {
 
 int service_supervise(const char* service_dir_, const char* runlevel_, bool force_socket) {
 	struct sigaction sigact = { 0 };
-	sigact.sa_handler		= signal_child;
+	sigact.sa_handler       = signal_child;
 	sigaction(SIGCHLD, &sigact, NULL);
 	sigact.sa_handler = SIG_IGN;
 	sigaction(SIGPIPE, &sigact, NULL);
@@ -101,7 +101,7 @@ int service_supervise(const char* service_dir_, const char* runlevel_, bool forc
 	snprintf(socket_path, PATH_MAX, SV_CONTROL_SOCKET, runlevel);
 
 	if ((null_fd = open("/dev/null", O_RDWR)) == -1) {
-		print_error("cannot open /dev/null");
+		print_error("error: cannot open /dev/null: %s\n");
 		null_fd = 1;
 	}
 
@@ -115,7 +115,7 @@ int service_supervise(const char* service_dir_, const char* runlevel_, bool forc
 	struct stat socket_stat;
 	if (force_socket) {
 		if (unlink(socket_path) == -1 && errno != ENOENT) {
-			print_error("cannot unlink socket");
+			print_error("error: cannot unlink socket: %s\n");
 		}
 	} else if (stat(socket_path, &socket_stat) != -1 && S_ISREG(socket_stat.st_mode)) {
 		printf("error: %s exist and is locking supervision,\nrun this program with '-f' flag if you are sure no other superviser is running.", socket_path);
@@ -123,31 +123,30 @@ int service_supervise(const char* service_dir_, const char* runlevel_, bool forc
 	}
 	// create socket
 	if ((control_socket = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
-		print_error("cannot create socket");
+		print_error("error: cannot create socket: %s\n");
 		return 1;
 	}
 
 	// bind socket to address
 	struct sockaddr_un addr = { 0 };
-	addr.sun_family			= AF_UNIX;
+	addr.sun_family         = AF_UNIX;
 	strcpy(addr.sun_path, socket_path);
 	if (bind(control_socket, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
-		print_error("cannot bind %s to socket", socket_path);
+		print_error("error: cannot bind %s to socket: %s\n", socket_path);
 		return 1;
 	}
 
 	// listen for connections
 	if (listen(control_socket, 5) == -1) {
-		print_error("cannot listen to control socket");
+		print_error("error: cannot listen to control socket: %s\n");
 		return 1;
 	}
 
 	int sockflags = fcntl(control_socket, F_GETFL, 0);
 	if (sockflags == -1) {
-		print_warning("fcntl-getflags on control-socket failed");
-	} else {
-		if (fcntl(control_socket, F_SETFL, sockflags | O_NONBLOCK) == -1)
-			print_warning("fcntl-setflags on control-socket failed");
+		print_error("warn: fcntl-getflags on control-socket failed: %s\n");
+	} else if (fcntl(control_socket, F_SETFL, sockflags | O_NONBLOCK) == -1) {
+		print_error("warn: fcntl-setflags on control-socket failed: %s\n");
 	}
 
 	// accept connections and handle requests
@@ -161,7 +160,7 @@ int service_supervise(const char* service_dir_, const char* runlevel_, bool forc
 	close(control_socket);
 
 	if (unlink(socket_path) == -1 && errno != ENOENT) {
-		print_error("cannot unlink socket");
+		print_error("error: cannot unlink socket: %s\n");
 	}
 
 	printf(":: terminating\n");
@@ -173,9 +172,9 @@ int service_supervise(const char* service_dir_, const char* runlevel_, bool forc
 	}
 
 	time_t start = time(NULL);
-	int	   running;
+	int    running;
 	do {
-		sleep(1);	 // sleep for one second
+		sleep(1);    // sleep for one second
 		running = 0;
 		for (int i = 0; i < services_size; i++) {
 			if (services[i].state != STATE_INACTIVE)

@@ -67,11 +67,11 @@ int main(int argc, char** argv) {
 	if (stat(SV_SUSPEND_EXEC, &st) == 0 && st.st_mode & S_IXUSR) {
 		pid_t pid;
 		if ((pid = fork()) == -1) {
-			fprintf(stderr, "failed to fork for " SV_SUSPEND_EXEC ": %s\n", strerror(errno));
+			print_error("failed to fork for " SV_SUSPEND_EXEC ": %s\n");
 			return 1;
 		} else if (pid == 0) {    // child
 			execl(SV_SUSPEND_EXEC, SV_SUSPEND_EXEC, NULL);
-			fprintf(stderr, "failed to execute " SV_SUSPEND_EXEC ": %s\n", strerror(errno));
+			print_error("failed to execute " SV_SUSPEND_EXEC ": %s\n");
 			_exit(1);
 		}
 
@@ -80,22 +80,22 @@ int main(int argc, char** argv) {
 
 	if (new_disk) {
 		if ((sys_disk = open("/sys/power/disk", O_WRONLY | O_TRUNC)) == -1) {
-			fprintf(stderr, "cannot open /sys/power/disk: %s\n", strerror(errno));
+			print_error("cannot open /sys/power/disk: %s\n");
 			return 1;
 		}
 		if (write(sys_disk, new_disk, strlen(new_disk)) == -1)
-			fprintf(stderr, "error writing to /sys/power/disk: %s\n", strerror(errno));
+			print_error("error writing to /sys/power/disk: %s\n");
 
 		close(sys_disk);
 	}
 
 	if (new_state) {
 		if ((sys_state = open("/sys/power/state", O_WRONLY | O_TRUNC)) == -1) {
-			fprintf(stderr, "cannot open /sys/power/state: %s\n", strerror(errno));
+			print_error("cannot open /sys/power/state: %s\n");
 			return 1;
 		}
 		if (write(sys_state, new_state, strlen(new_state)) == -1)
-			fprintf(stderr, "error writing to /sys/power/state: %s\n", strerror(errno));
+			print_error("error writing to /sys/power/state: %s\n");
 
 		close(sys_state);
 	} else {
@@ -105,11 +105,11 @@ int main(int argc, char** argv) {
 	if (stat(SV_RESUME_EXEC, &st) == 0 && st.st_mode & S_IXUSR) {
 		pid_t pid;
 		if ((pid = fork()) == -1) {
-			fprintf(stderr, "failed to fork for " SV_RESUME_EXEC ": %s\n", strerror(errno));
+			print_error("failed to fork for " SV_RESUME_EXEC ": %s\n");
 			return 1;
 		} else if (pid == 0) {    // child
 			execl(SV_RESUME_EXEC, SV_RESUME_EXEC, NULL);
-			fprintf(stderr, "failed to execute " SV_RESUME_EXEC ": %s\n", strerror(errno));
+			print_error("failed to execute " SV_RESUME_EXEC ": %s\n");
 			_exit(1);
 		}
 

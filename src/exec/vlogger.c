@@ -1,3 +1,4 @@
+#include "message.h"
 #include "util.h"
 
 #include <errno.h>
@@ -110,7 +111,7 @@ int main(int argc, char* argv[]) {
 		switch (c) {
 			case 'f':
 				if (freopen(optarg, "r", stdin) == NULL) {
-					fprintf(stderr, "vlogger: %s: %s\n", optarg, strerror(errno));
+					print_error("error: unable to reopen %s: %s\n", optarg);
 					return 1;
 				}
 				break;
@@ -130,8 +131,7 @@ int main(int argc, char* argv[]) {
 				tag = optarg;
 				break;
 			default:
-				fprintf(stderr, "usage: vlogger [-isS] [-f file] [-p pri] [-t tag] [message ...]\n");
-				exit(1);
+				print_usage_exit(PROG_VLOGGER, 1);
 		}
 	argc -= optind;
 	argv += optind;
@@ -151,7 +151,7 @@ int main(int argc, char* argv[]) {
 				sfacility = ident->name;
 		}
 		execl("/etc/vlogger", argv0, tag ?: "", slevel, sfacility, NULL);
-		fprintf(stderr, "vlogger: exec: %s\n", strerror(errno));
+		print_error("error: unable to exec /etc/vlogger: %s\n");
 		exit(1);
 	}
 
