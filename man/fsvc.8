@@ -12,15 +12,15 @@ fsvc \- fiss' service controller
 .PP
 \fB\fCfsvc\fR \fB\fCdisable\fR [\fIoptions\fP] [\fB\fC\-\-once\fR] <service>
 .PP
-\fB\fCfsvc\fR kill [\fIoptions\fP] <service> <signal|signo>
+\fB\fCfsvc\fR \fB\fCkill\fR [\fIoptions\fP] <service> <signal|signo>
 .PP
-\fB\fCfsvc\fR status [\fIoptions\fP] [\fB\fC\-\-check\fR] [<service>]
+\fB\fCfsvc\fR \fB\fCstatus\fR [\fIoptions\fP] [\fB\fC\-\-check\fR] [<service>]
 .PP
-\fB\fCfsvc\fR pause [\fIoptions\fP] <service>
+\fB\fCfsvc\fR \fB\fCpause\fR [\fIoptions\fP] <service>
 .PP
-\fB\fCfsvc\fR resume [\fIoptions\fP] <service>
+\fB\fCfsvc\fR \fB\fCresume\fR [\fIoptions\fP] <service>
 .PP
-\fB\fCfsvc\fR switch [\fIoptions\fP] [\fB\fC\-\-reset\fR] <runlevel>
+\fB\fCfsvc\fR \fB\fCswitch\fR [\fIoptions\fP] [\fB\fC\-\-reset\fR] <runlevel>
 .SH DESCRIPTION
 .PP
 \fB\fCfsvc\fR is a command line tool for controlling services on a FISS system. It provides various commands for starting, stopping, enabling, disabling, sending signals to, checking the status of, pausing, resuming, and switching the runlevel of services.
@@ -94,7 +94,7 @@ Switches the runlevel to the specified value.
 .BR fsvs (8), 
 .BR halt (8), 
 .BR modules-load (8), 
-.BR shutdown (8), 
+.BR shutdown (8),
 .SH AUTHOR
 .PP
 Friedel Schön <\[la]derfriedmundschoen@gmail.com\[ra]>

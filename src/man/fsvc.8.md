@@ -14,15 +14,15 @@ fsvc - fiss' service controller
 
 `fsvc` `disable` \[_options_] \[`--once`] \<service>
 
-`fsvc` kill \[_options_] \<service> \<signal|signo>
+`fsvc` `kill` \[_options_] \<service> \<signal|signo>
 
-`fsvc` status \[_options_] \[`--check`] \[\<service>]
+`fsvc` `status` \[_options_] \[`--check`] \[\<service>]
 
-`fsvc` pause \[_options_] \<service>
+`fsvc` `pause` \[_options_] \<service>
 
-`fsvc` resume \[_options_] \<service>
+`fsvc` `resume` \[_options_] \<service>
 
-`fsvc` switch \[_options_] \[`--reset`] \<runlevel>
+`fsvc` `switch` \[_options_] \[`--reset`] \<runlevel>
 
 ## DESCRIPTION
 
@@ -95,7 +95,7 @@ Switches the runlevel to the specified value.
 
 ## SEE ALSO
 
-finit(1), fsvc(8), fsvs(8), halt(8), modules-load(8), shutdown(8), 
+finit(1), fsvc(8), fsvs(8), halt(8), modules-load(8), shutdown(8),
 
 ## AUTHOR
 

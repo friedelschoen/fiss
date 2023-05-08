@@ -5,8 +5,8 @@ INCLUDE_DIR := include
 BIN_DIR     := bin
 EXEC_DIR    := $(SRC_DIR)/exec
 SCRIPT_DIR  := $(SRC_DIR)/script
-MAN_DIR     := man
-ROFF_DIR    := usr/share/man
+MAN_DIR     := src/man
+ROFF_DIR    := man
 
 # Compiler Options
 CC      := gcc
