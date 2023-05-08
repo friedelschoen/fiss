@@ -4,7 +4,6 @@ BUILD_DIR   := build
 INCLUDE_DIR := include
 BIN_DIR     := bin
 EXEC_DIR    := $(SRC_DIR)/exec
-SCRIPT_DIR  := $(SRC_DIR)/script
 MAN_DIR     := src/man
 ROFF_DIR    := man
 
@@ -18,12 +17,10 @@ finit_FLAGS := -static
 
 # File lists
 SOURCE_FILES  := $(wildcard $(SRC_DIR)/*.c)
-EXEC_FILES    := $(wildcard $(EXEC_DIR)/*.c)
+EXEC_FILES    := $(wildcard $(EXEC_DIR)/*)
 OBJ_FILES     := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SOURCE_FILES))
-SCRIPT_FILES  := $(wildcard $(SCRIPT_DIR)/*)
 BIN_FILES     := $(patsubst $(EXEC_DIR)/%.c,$(BIN_DIR)/%,$(EXEC_FILES)) \
-				 $(patsubst $(SCRIPT_DIR)/%.sh,$(BIN_DIR)/%,$(SCRIPT_FILES)) \
-				 $(patsubst $(SCRIPT_DIR)/%.lnk,$(BIN_DIR)/%,$(SCRIPT_FILES))
+				 $(patsubst $(EXEC_DIR)/%.sh,$(BIN_DIR)/%,$(EXEC_FILES))
 INCLUDE_FILES := $(wildcard $(INCLUDE_DIR)/*.h)
 
 MAN_FILES     := $(wildcard $(MAN_DIR)/*)
@@ -62,10 +59,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c $(INCLUDE_FILES) | $(BUILD_DIR)
 $(BIN_DIR)/%: $(EXEC_DIR)/%.c $(INCLUDE_FILES) $(OBJ_FILES) | $(BIN_DIR)
 	$(CC) -o $@ $(CCFLAGS) $< $(OBJ_FILES) $($(notdir $@)_FLAGS) $(LFLAGS)
 
-$(BIN_DIR)/%: $(SCRIPT_DIR)/%.lnk | $(BIN_DIR)
-	ln -s $(shell cat $<) $@
-
-$(BIN_DIR)/%: $(SCRIPT_DIR)/%.sh | $(BIN_DIR)
+$(BIN_DIR)/%: $(EXEC_DIR)/%.sh | $(BIN_DIR)
 	cp $< $@
 	chmod +x $@
 
