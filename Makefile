@@ -8,9 +8,9 @@ MAN_DIR     := src/man
 ROFF_DIR    := man
 
 # Compiler Options
-CC      := gcc
-CCFLAGS := -I$(INCLUDE_DIR) -Wall -Wextra -g 
-LFLAGS  := -fPIE
+CC      ?= gcc
+CFLAGS ?= -I$(INCLUDE_DIR) -Wall -Wextra -g 
+LDFLAGS  ?= -fPIE
 
 # Executable-specific flags
 finit_FLAGS := -static
@@ -53,11 +53,11 @@ $(INTERMED_DIRS):
 
 # Object rules
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c $(INCLUDE_FILES) | $(BUILD_DIR)
-	$(CC) -o $@ -c $(CCFLAGS) $<
+	$(CC) -o $@ -c $(CFLAGS) $<
 
 # Executables
 $(BIN_DIR)/%: $(EXEC_DIR)/%.c $(INCLUDE_FILES) $(OBJ_FILES) | $(BIN_DIR)
-	$(CC) -o $@ $(CCFLAGS) $< $(OBJ_FILES) $($(notdir $@)_FLAGS) $(LFLAGS)
+	$(CC) -o $@ $(CFLAGS) $< $(OBJ_FILES) $($(notdir $@)_FLAGS) $(LDFLAGS)
 
 $(BIN_DIR)/%: $(EXEC_DIR)/%.sh | $(BIN_DIR)
 	cp $< $@
@@ -73,4 +73,4 @@ $(ROFF_DIR)/%: $(MAN_DIR)/%.roff | $(ROFF_DIR)
 
 # Debug
 compile_flags.txt: 
-	echo $(CCFLAGS) | tr " " "\n" > compile_flags.txt
+	echo $(CFLAGS) | tr " " "\n" > compile_flags.txt
