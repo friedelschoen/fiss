@@ -12,16 +12,16 @@ service_t* service_register(const char* name, bool is_log_service) {
 	service_t* s;
 
 	if ((s = service_get(name)) == NULL) {
-		s				  = &services[services_size++];
-		s->state		  = STATE_INACTIVE;
+		s                 = &services[services_size++];
+		s->state          = STATE_INACTIVE;
 		s->status_change  = time(NULL);
 		s->restart_manual = S_DOWN;
-		s->restart_file	  = S_DOWN;
-		s->last_exit	  = EXIT_NONE;
-		s->return_code	  = 0;
-		s->fail_count	  = 0;
-		s->log_service	  = NULL;
-		s->paused		  = false;
+		s->restart_file   = S_DOWN;
+		s->last_exit      = EXIT_NONE;
+		s->return_code    = 0;
+		s->fail_count     = 0;
+		s->log_service    = NULL;
+		s->paused         = false;
 		s->log_pipe.read  = 0;
 		s->log_pipe.write = 0;
 		s->is_log_service = is_log_service;
@@ -46,7 +46,7 @@ service_t* service_register(const char* name, bool is_log_service) {
 
 	bool autostart, autostart_once;
 
-	autostart	   = S_ISREG(stat_mode("%s/%s/up-%s", service_dir, s->name, runlevel));
+	autostart      = S_ISREG(stat_mode("%s/%s/up-%s", service_dir, s->name, runlevel));
 	autostart_once = S_ISREG(stat_mode("%s/%s/once-%s", service_dir, s->name, runlevel));
 
 	s->restart_file = S_DOWN;
