@@ -151,12 +151,12 @@ int main(int argc, char* argv[]) {
 			if (ident->value == facility)
 				sfacility = ident->name;
 		}
-		execl("/etc/vlogger", argv0, tag ?: "", slevel, sfacility, NULL);
+		execl("/etc/vlogger", argv0, tag ? tag : "", slevel, sfacility, NULL);
 		print_error("error: unable to exec /etc/vlogger: %s\n");
 		exit(1);
 	}
 
-	openlog(tag ?: getlogin(), logflags, facility);
+	openlog(tag ? tag : getlogin(), logflags, facility);
 
 	if (argc > 0) {
 		size_t len;

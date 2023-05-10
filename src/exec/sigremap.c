@@ -63,13 +63,13 @@
 
 // Indices are one-indexed (signal 1 is at index 1). Index zero is unused.
 // User-specified signal rewriting.
-int signal_remap[MAXSIG + 1] = { [0 ... MAXSIG] = -1 };
+int signal_remap[MAXSIG + 1];
 // One-time ignores due to TTY quirks. 0 = no skip, 1 = skip the next-received signal.
-bool signal_temporary_ignores[MAXSIG + 1] = { [0 ... MAXSIG] = false };
+bool signal_temporary_ignores[MAXSIG + 1];
 
-pid_t child_pid  = -1;
-bool  debug      = false;
-bool  use_setsid = true;
+int  child_pid  = -1;
+bool debug      = false;
+bool use_setsid = true;
 
 void forward_signal(int signum) {
 	if (signum >= 0 && signum <= MAXSIG && signal_remap[signum] != -1) {
@@ -113,8 +113,8 @@ void handle_signal(int signum) {
 		DEBUG("Ignoring tty hand-off signal %d.\n", signum);
 		signal_temporary_ignores[signum] = 0;
 	} else if (signum == SIGCHLD) {
-		int   status, exit_status;
-		pid_t killed_pid;
+		int status, exit_status;
+		int killed_pid;
 		while ((killed_pid = waitpid(-1, &status, WNOHANG)) > 0) {
 			if (WIFEXITED(status)) {
 				exit_status = WEXITSTATUS(status);
@@ -224,6 +224,9 @@ int main(int argc, char* argv[]) {
 	sigprocmask(SIG_BLOCK, &all_signals, NULL);
 
 	for (int i = 1; i <= MAXSIG; i++) {
+		signal_remap[i]             = -1;
+		signal_temporary_ignores[i] = false;
+
 		signal(i, dummy);
 	}
 

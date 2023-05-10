@@ -12,7 +12,7 @@
 
 static void do_finish(service_t* s) {
 	struct stat st;
-	if (fstatat(s->dir, "finish", &st, 0) != -1 && st.st_mode & S_IEXEC) {
+	if (fstatat(s->dir, "finish", &st, 0) != -1 && st.st_mode & S_IXUSR) {
 		s->state = STATE_FINISHING;
 		if ((s->pid = fork_dup_cd_exec(s->dir, "./finish", null_fd, null_fd, null_fd)) == -1) {
 			print_error("error: cannot execute ./finish: %s\n");

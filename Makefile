@@ -9,7 +9,7 @@ ROFF_DIR    := man
 
 # Compiler Options
 CC       ?= gcc
-CFLAGS   ?= -Wall -Wextra -g 
+CFLAGS   ?= -g -std=gnu99 -pedantic
 LDFLAGS  ?= -fPIE
 
 # Executable-specific flags
