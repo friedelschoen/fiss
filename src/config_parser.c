@@ -4,6 +4,7 @@
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 
@@ -13,10 +14,10 @@ void parse_param_file(service_t* s, char* args[]) {
 	int  line_size = 0;
 	char c;
 
-	snprintf(args[args_size++], SV_PARAM_FILE_LINE_MAX, "%s/%s/%s", service_dir, s->name, "run");
+	strcpy(args[args_size++], "./run");
 
 	bool start = true;
-	if ((param_file = open("params", O_RDONLY)) != -1) {
+	if ((param_file = openat(s->dir, "params", O_RDONLY)) != -1) {
 		while (read(param_file, &c, 1) > 0) {
 			if (start && c == '%') {
 				args_size--;
@@ -65,10 +66,8 @@ void parse_env_file(char** env) {
 
 
 pid_t parse_pid_file(service_t* s) {
-	char path_buf[PATH_MAX];
-	snprintf(path_buf, PATH_MAX, "%s/%s/pid", service_dir, s->name);
 	int pid_file;
-	if ((pid_file = open(path_buf, O_RDONLY)) == -1)
+	if ((pid_file = openat(s->dir, "pid", O_RDONLY)) == -1)
 		return 0;
 
 	char buffer[20];

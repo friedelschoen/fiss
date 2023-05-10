@@ -139,7 +139,6 @@ static const struct option long_options[] = {
 	{ "verbose", no_argument, 0, 'v' },
 	{ "version", no_argument, 0, 'V' },
 	{ "runlevel", no_argument, 0, 'r' },
-	{ "service-dir", no_argument, 0, 's' },
 	{ "pin", no_argument, 0, 'p' },
 	{ "once", no_argument, 0, 'o' },
 	{ "check", no_argument, 0, 'c' },
@@ -150,7 +149,6 @@ static const struct option long_options[] = {
 
 int main(int argc, char** argv) {
 	strcpy(runlevel, getenv(SV_RUNLEVEL_ENV) ?: SV_RUNLEVEL);
-	service_dir = SV_SERVICE_DIR;
 
 	char* argexec = argv[0];
 
@@ -162,13 +160,10 @@ int main(int argc, char** argv) {
 	     short_ = false;
 
 	int c;
-	while ((c = getopt_long(argc, argv, ":Vvqs:r:pocf", long_options, NULL)) > 0) {
+	while ((c = getopt_long(argc, argv, ":Vvqr:pocf", long_options, NULL)) > 0) {
 		switch (c) {
 			case 'r':
 				strcpy(runlevel, optarg);
-				break;
-			case 's':
-				service_dir = optarg;
 				break;
 			case 'q':
 				short_ = true;

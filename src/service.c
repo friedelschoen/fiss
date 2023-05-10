@@ -9,12 +9,13 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 
 service_t    services[SV_SERVICE_MAX];
 int          services_size = 0;
 char         runlevel[SV_NAME_MAX];
-const char*  service_dir;
+int          service_dir;
 int          control_socket;
 int          null_fd;
 bool         verbose = false;
@@ -42,18 +43,18 @@ int service_pattern(const char* name, service_t** dest, int dest_max) {
 int service_refresh() {
 	DIR*           dp;
 	struct dirent* ep;
-	dp = opendir(service_dir);
-	if (dp == NULL) {
-		print_error("error: cannot open directory %s: %s\n", service_dir);
+	if ((dp = fdopendir(service_dir)) == NULL) {
+		print_error("error: cannot open service directory: %s\n");
 		return -1;
 	}
 
-
+	struct stat st;
 	for (int i = 0; i < services_size; i++) {
 		service_t* s = &services[i];
-		if (!S_ISDIR(stat_mode("%s/%s", service_dir, s->name))) {
+		if (fstat(s->dir, &st) == -1 || !S_ISDIR(st.st_mode)) {
 			if (s->pid)
 				kill(s->pid, SIGKILL);
+			close(s->dir);
 			if (i < services_size - 1) {
 				memmove(services + i, services + i + 1, services_size - i - 1);
 				i--;
@@ -65,10 +66,11 @@ int service_refresh() {
 	while ((ep = readdir(dp)) != NULL) {
 		if (ep->d_name[0] == '.')
 			continue;
-		if (!S_ISDIR(stat_mode("%s/%s", service_dir, ep->d_name)))
+
+		if (fstatat(service_dir, ep->d_name, &st, 0) == -1 || !S_ISDIR(st.st_mode))
 			continue;
 
-		service_register(ep->d_name, false);
+		service_register(service_dir, ep->d_name, false);
 	}
 
 	closedir(dp);

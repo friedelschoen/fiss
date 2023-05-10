@@ -56,6 +56,7 @@ typedef enum service_restart {
 } service_restart_t;
 
 typedef struct service {
+	int               dir;                  // dirfd
 	char              name[SV_NAME_MAX];    // name of service
 	service_state_t   state;
 	pid_t             pid;               // pid of run
@@ -83,7 +84,7 @@ extern const char* command_string[];
 extern service_t    services[];
 extern int          services_size;
 extern char         runlevel[];
-extern const char*  service_dir;
+extern int          service_dir;
 extern int          null_fd;
 extern int          control_socket;
 extern bool         daemon_running;
@@ -99,7 +100,7 @@ int        service_pattern(const char* name, service_t** dest, int dest_max);
 int        service_refresh();
 int        service_supervise(const char* service_dir, const char* runlevel, bool force_socket);
 service_t* service_get(const char* name);
-service_t* service_register(const char* name, bool is_log_service);
+service_t* service_register(int dir, const char* name, bool is_log_service);
 void       service_check_state(service_t* s, bool signaled, int return_code);
 void       service_handle_socket(int client);
 void       service_load(service_t* s, const uint8_t* buffer);    // for fsvc

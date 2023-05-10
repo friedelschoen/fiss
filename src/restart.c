@@ -10,17 +10,9 @@
 #include <unistd.h>
 
 
-/*void stat_mode(const char* path_format, ...) __attribute__((format(printf, 1, 0)))  {
-    va_list va;
-    va_start(va, path_format);
-        vsnprintf(char *, unsigned long, const char *, struct __va_list_tag *)
-}*/
-
 static void do_finish(service_t* s) {
-	char path_buffer[PATH_MAX];
-	snprintf(path_buffer, PATH_MAX, "%s/%s/finish", service_dir, s->name);
-
-	if (stat_mode("%s/%s/finish", service_dir, s->name) & S_IEXEC) {
+	struct stat st;
+	if (fstatat(s->dir, "finish", &st, 0) != -1 && st.st_mode & S_IEXEC) {
 		s->state = STATE_FINISHING;
 		if ((s->pid = fork()) == -1) {
 			print_error("error: cannot fork process: %s\n");
@@ -29,7 +21,9 @@ static void do_finish(service_t* s) {
 			dup2(null_fd, STDOUT_FILENO);
 			dup2(null_fd, STDERR_FILENO);
 
-			execl(path_buffer, path_buffer, NULL);
+			fchdir(s->dir);
+
+			execl("./finish", "./finish", NULL);
 			print_error("error: cannot execute finish process: %s\n");
 			_exit(1);
 		}
@@ -49,6 +43,8 @@ void service_check_state(service_t* s, bool signaled, int return_code) {
 		s->restart_file = S_DOWN;
 	if (s->restart_manual == S_ONCE)
 		s->restart_manual = S_DOWN;
+
+	struct stat st;
 
 	switch (s->state) {
 		case STATE_SETUP:
@@ -92,9 +88,9 @@ void service_check_state(service_t* s, bool signaled, int return_code) {
 			break;
 		case STATE_STARTING:
 			if (!signaled && return_code == 0) {
-				if (stat_mode("%s/%s/stop", service_dir, s->name) & S_IXUSR) {
+				if (fstatat(s->dir, "stop", &st, 0) != -1 && st.st_mode & S_IXUSR) {
 					s->state = STATE_ACTIVE_BACKGROUND;
-				} else if (stat_mode("%s/%s/stop", service_dir, s->name) & S_IRUSR) {
+				} else if (fstatat(s->dir, "pid", &st, 0) != -1 && st.st_mode & S_IXUSR) {
 					s->pid   = parse_pid_file(s);
 					s->state = STATE_ACTIVE_PID;
 				} else {

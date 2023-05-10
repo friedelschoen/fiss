@@ -81,11 +81,12 @@ static void set_user() {
 }
 
 void service_run(service_t* s) {
-	if (stat_mode("%s/%s/run", service_dir, s->name) & S_IXUSR) {
+	struct stat st;
+	if (fstatat(s->dir, "run", &st, 0) != -1 && st.st_mode & S_IXUSR) {
 		s->state = STATE_ACTIVE_FOREGROUND;
-	} else if (stat_mode("%s/%s/start", service_dir, s->name) & S_IXUSR) {
+	} else if (fstatat(s->dir, "start", &st, 0) != -1 && st.st_mode & S_IXUSR) {
 		s->state = STATE_STARTING;
-	} else if (stat_mode("%s/%s/depends", service_dir, s->name) & S_IREAD) {
+	} else if (fstatat(s->dir, "depends", &st, 0) != -1 && st.st_mode & S_IREAD) {
 		s->state = STATE_ACTIVE_DUMMY;
 	} else {
 		fprintf(stderr, "warn: %s: `run`, `start` or `depends` not found\n", s->name);
@@ -100,9 +101,7 @@ void service_run(service_t* s) {
 			if (setsid() == -1)
 				print_error("error: cannot setsid: %s\n");
 
-			char dir_path[PATH_MAX];
-			snprintf(dir_path, PATH_MAX, "%s/%s", service_dir, s->name);
-			if (chdir(dir_path) == -1)
+			if (fchdir(s->dir) == -1)
 				print_error("error: chdir failed: %s\n");
 
 			set_pipes(s);
@@ -152,10 +151,8 @@ void service_start(service_t* s, bool* changed) {
 			service_start(depends[i].depends, NULL);
 	}
 
-	char path_buf[PATH_MAX];
-	snprintf(path_buf, PATH_MAX, "%s/%s/setup", service_dir, s->name);
-
-	if (stat_mode("%s/%s/setup", service_dir, s->name) & S_IXUSR) {
+	struct stat st;
+	if (fstatat(s->dir, "setup", &st, 0) != -1 && st.st_mode & S_IXUSR) {
 		s->state = STATE_SETUP;
 		if ((s->pid = fork()) == -1) {
 			print_error("error: cannot fork process: %s\n");
@@ -164,7 +161,9 @@ void service_start(service_t* s, bool* changed) {
 			dup2(null_fd, STDOUT_FILENO);
 			dup2(null_fd, STDERR_FILENO);
 
-			execl(path_buf, path_buf, NULL);
+			fchdir(s->dir);
+
+			execl("./setup", "./setup", NULL);
 			print_error("error: cannot execute setup process: %s\n");
 			_exit(1);
 		}

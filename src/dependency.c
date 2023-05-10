@@ -24,11 +24,8 @@ void service_update_dependency(service_t* s) {
 		service_add_dependency(s, s->log_service);
 	}
 
-	int  depends_file;
-	char depends_path[PATH_MAX];
-	snprintf(depends_path, PATH_MAX, "%s/%s/%s", service_dir, s->name, "depends");
-
-	if ((depends_file = open(depends_path, O_RDONLY)) == -1)
+	int depends_file;
+	if ((depends_file = openat(s->dir, "depends", O_RDONLY)) == -1)
 		return;
 
 	char line[512];

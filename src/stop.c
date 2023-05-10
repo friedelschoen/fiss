@@ -9,8 +9,6 @@
 
 
 void service_stop(service_t* s, bool* changed) {
-	char path_buffer[PATH_MAX];
-
 	switch (s->state) {
 		case STATE_ACTIVE_DUMMY:
 			service_check_state(s, false, 0);
@@ -25,8 +23,6 @@ void service_stop(service_t* s, bool* changed) {
 				*changed = true;
 			break;
 		case STATE_ACTIVE_BACKGROUND:
-			snprintf(path_buffer, PATH_MAX, "%s/%s/stop", service_dir, s->name);
-
 			s->state = STATE_STOPPING;
 			if ((s->pid = fork()) == -1) {
 				print_error("error: cannot fork process: %s\n");
@@ -35,7 +31,8 @@ void service_stop(service_t* s, bool* changed) {
 				dup2(null_fd, STDOUT_FILENO);
 				dup2(null_fd, STDERR_FILENO);
 
-				execl(path_buffer, path_buffer, NULL);
+				fchdir(s->dir);
+				execl("./stop", "./stop", NULL);
 				print_error("error: cannot execute stop process: %s\n");
 				_exit(1);
 			}

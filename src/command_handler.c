@@ -139,13 +139,12 @@ int service_handle_command(void* argv, sv_command_t command, unsigned char extra
 			if (argv == NULL)
 				return -ENOSV;
 
-			if (extra == 1)    // once
-				snprintf(path_buffer, PATH_MAX, "%s/%s/once-%s", service_dir, s->name, runlevel);
-			else
-				snprintf(path_buffer, PATH_MAX, "%s/%s/up-%s", service_dir, s->name, runlevel);
+
+			strcpy(path_buffer, extra == 1 ? "once-" : "up-");
+			strcat(path_buffer, runlevel);
 
 			if (command == S_ENABLE) {
-				if ((fd = open(path_buffer, O_WRONLY | O_CREAT | O_TRUNC, 0666)) == -1)
+				if ((fd = openat(s->dir, path_buffer, O_WRONLY | O_CREAT | O_TRUNC, 0666)) == -1)
 					return 0;
 				close(fd);
 			} else {

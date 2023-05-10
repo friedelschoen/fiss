@@ -1,4 +1,5 @@
 #include "service.h"
+#include "util.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -93,7 +94,10 @@ int service_supervise(const char* service_dir_, const char* runlevel_, bool forc
 	sigaction(SIGPIPE, &sigact, NULL);
 
 	strcpy(runlevel, runlevel_);
-	service_dir = service_dir_;
+	if ((service_dir = open(service_dir_, O_DIRECTORY)) == -1) {
+		print_error("error: cannot open directory %s: %s\n", service_dir_);
+		return 1;
+	}
 
 	setenv("SERVICE_RUNLEVEL", runlevel, true);
 
