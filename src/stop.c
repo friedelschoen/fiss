@@ -1,4 +1,5 @@
 #include "service.h"
+#include "util.h"
 
 #include <errno.h>
 #include <limits.h>
@@ -24,17 +25,9 @@ void service_stop(service_t* s, bool* changed) {
 			break;
 		case STATE_ACTIVE_BACKGROUND:
 			s->state = STATE_STOPPING;
-			if ((s->pid = fork()) == -1) {
-				print_error("error: cannot fork process: %s\n");
-			} else if (s->pid == 0) {
-				dup2(null_fd, STDIN_FILENO);
-				dup2(null_fd, STDOUT_FILENO);
-				dup2(null_fd, STDERR_FILENO);
-
-				fchdir(s->dir);
-				execl("./stop", "./stop", NULL);
-				print_error("error: cannot execute stop process: %s\n");
-				_exit(1);
+			if ((s->pid = fork_dup_cd_exec(s->dir, "./stop", null_fd, null_fd, null_fd)) == -1) {
+				print_error("error: cannot execute ./stop: %s\n");
+				s->state = STATE_INACTIVE;
 			}
 			if (changed)
 				*changed = true;

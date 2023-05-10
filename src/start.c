@@ -101,9 +101,7 @@ void service_run(service_t* s) {
 			if (setsid() == -1)
 				print_error("error: cannot setsid: %s\n");
 
-			if (fchdir(s->dir) == -1)
-				print_error("error: chdir failed: %s\n");
-
+			fchdir(s->dir);
 			set_pipes(s);
 
 			char  args[SV_ARGUMENTS_MAX][SV_PARAM_FILE_LINE_MAX];
@@ -154,18 +152,9 @@ void service_start(service_t* s, bool* changed) {
 	struct stat st;
 	if (fstatat(s->dir, "setup", &st, 0) != -1 && st.st_mode & S_IXUSR) {
 		s->state = STATE_SETUP;
-		if ((s->pid = fork()) == -1) {
-			print_error("error: cannot fork process: %s\n");
-		} else if (s->pid == 0) {
-			dup2(null_fd, STDIN_FILENO);
-			dup2(null_fd, STDOUT_FILENO);
-			dup2(null_fd, STDERR_FILENO);
-
-			fchdir(s->dir);
-
-			execl("./setup", "./setup", NULL);
-			print_error("error: cannot execute setup process: %s\n");
-			_exit(1);
+		if ((s->pid = fork_dup_cd_exec(s->dir, "./setup", null_fd, null_fd, null_fd)) == -1) {
+			print_error("error: cannot execute ./setup: %s\n");
+			s->state = STATE_INACTIVE;
 		}
 	} else {
 		service_run(s);

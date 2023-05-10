@@ -14,18 +14,9 @@ static void do_finish(service_t* s) {
 	struct stat st;
 	if (fstatat(s->dir, "finish", &st, 0) != -1 && st.st_mode & S_IEXEC) {
 		s->state = STATE_FINISHING;
-		if ((s->pid = fork()) == -1) {
-			print_error("error: cannot fork process: %s\n");
-		} else if (s->pid == 0) {
-			dup2(null_fd, STDIN_FILENO);
-			dup2(null_fd, STDOUT_FILENO);
-			dup2(null_fd, STDERR_FILENO);
-
-			fchdir(s->dir);
-
-			execl("./finish", "./finish", NULL);
-			print_error("error: cannot execute finish process: %s\n");
-			_exit(1);
+		if ((s->pid = fork_dup_cd_exec(s->dir, "./finish", null_fd, null_fd, null_fd)) == -1) {
+			print_error("error: cannot execute ./finish: %s\n");
+			s->state = STATE_INACTIVE;
 		}
 	} else if (s->fail_count == SV_FAIL_MAX) {
 		s->state = STATE_DEAD;
