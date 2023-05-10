@@ -148,7 +148,7 @@ static const struct option long_options[] = {
 };
 
 int main(int argc, char** argv) {
-	strcpy(runlevel, getenv(SV_RUNLEVEL_ENV) ?: SV_RUNLEVEL);
+	strcpy(runlevel, getenv(SV_RUNLEVEL_DEFAULT_ENV) ?: SV_RUNLEVEL_DEFAULT);
 
 	char* argexec = argv[0];
 
@@ -286,7 +286,7 @@ int main(int argc, char** argv) {
 		printf("warn: --reset specified but not used\n");
 
 
-	service_t response[50];
+	service_t response[SV_SOCKET_SERVICE_MAX];
 	int       rc;
 
 	if (check) {

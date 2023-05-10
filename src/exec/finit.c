@@ -77,7 +77,7 @@ int main(int argc, const char** argv) {
 		sigaction(SIGTERM, &sigact, NULL);
 		sigaction(SIGINT, &sigact, NULL);
 
-		service_supervise(SV_SERVICE_DIR, SV_RUNLEVEL, true);
+		service_supervise(SV_SERVICE_DIR, SV_RUNLEVEL_DEFAULT, true);
 		sigblock_all(false);
 	}
 

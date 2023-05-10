@@ -1,8 +1,8 @@
 #pragma once
 
 // environment variable where the current runlevel is stored
-#ifndef SV_RUNLEVEL_ENV
-#	define SV_RUNLEVEL_ENV "SERVICE_RUNLEVEL"
+#ifndef SV_RUNLEVEL_DEFAULT_ENV
+#	define SV_RUNLEVEL_DEFAULT_ENV "SERVICE_RUNLEVEL"
 #endif
 
 // seconds to wait for a service before it gets killed
@@ -31,8 +31,8 @@
 #endif
 
 // default runlevel
-#ifndef SV_RUNLEVEL
-#	define SV_RUNLEVEL "default"
+#ifndef SV_RUNLEVEL_DEFAULT
+#	define SV_RUNLEVEL_DEFAULT "default"
 #endif
 
 // path to service-dir
@@ -113,4 +113,24 @@
 // defines the directory where logs are stored
 #ifndef SV_LOG_DIR
 #	define SV_LOG_DIR "/var/log/fiss"
+#endif
+
+#ifndef SV_PID_BUFFER
+#	define SV_PID_BUFFER 16
+#endif
+
+#ifndef SV_SOCKET_SERVICE_MAX
+#	define SV_SOCKET_SERVICE_MAX 128
+#endif
+
+#ifndef SV_USER_BUFFER
+#	define SV_USER_BUFFER 256
+#endif
+
+#ifndef SV_USER_GROUP_MAX
+#	define SV_USER_GROUP_MAX 32
+#endif
+
+#ifndef SV_VLOGGER_BUFFER
+#	define SV_VLOGGER_BUFFER 1024
 #endif

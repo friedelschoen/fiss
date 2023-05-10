@@ -1,3 +1,4 @@
+#include "config.h"
 #include "service.h"
 #include "util.h"
 
@@ -28,7 +29,7 @@ void service_update_dependency(service_t* s) {
 	if ((depends_file = openat(s->dir, "depends", O_RDONLY)) == -1)
 		return;
 
-	char line[512];
+	char line[SV_NAME_MAX];
 	while (dgetline(depends_file, line, sizeof(line)) > 0) {
 		if (streq(s->name, line)) {
 			fprintf(stderr, "warning: %s depends on itself\n", s->name);

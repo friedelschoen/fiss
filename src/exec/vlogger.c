@@ -1,3 +1,4 @@
+#include "config.h"
 #include "message.h"
 #include "util.h"
 
@@ -78,7 +79,7 @@ static void strpriority(char* facil_str, int* facility, int* level) {
 }
 
 int main(int argc, char* argv[]) {
-	char  buf[1024];
+	char  buf[SV_VLOGGER_BUFFER];
 	char *p, *e, *argv0;
 	char* tag = NULL;
 	int   c;

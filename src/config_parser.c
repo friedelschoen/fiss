@@ -70,7 +70,7 @@ pid_t parse_pid_file(service_t* s) {
 	if ((pid_file = openat(s->dir, "pid", O_RDONLY)) == -1)
 		return 0;
 
-	char buffer[20];
+	char buffer[SV_PID_BUFFER];
 	int  n;
 	if ((n = read(pid_file, buffer, sizeof(buffer))) <= 0) {
 		close(pid_file);

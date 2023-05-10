@@ -1,3 +1,4 @@
+#include "config.h"
 #include "service.h"
 #include "util.h"
 
@@ -50,8 +51,8 @@ service_t* service_register(int dir, const char* name, bool is_log_service) {
 
 	bool autostart, autostart_once;
 
-	char up_path[512]   = "up-";
-	char once_path[512] = "once-";
+	char up_path[SV_NAME_MAX]   = "up-";
+	char once_path[SV_NAME_MAX] = "once-";
 
 	strcat(up_path, runlevel);
 	strcat(once_path, runlevel);

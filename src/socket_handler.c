@@ -19,8 +19,8 @@ void service_handle_socket(int client) {
 
 	int        res     = 0;
 	int        res_off = 0;
-	service_t* response[128];
-	service_t* request[128];
+	service_t* response[SV_SOCKET_SERVICE_MAX];
+	service_t* request[SV_SOCKET_SERVICE_MAX];
 
 	if (service_len > 0) {
 		if (command[0] == S_SWITCH) {

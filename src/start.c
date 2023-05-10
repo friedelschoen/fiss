@@ -53,7 +53,7 @@ static void set_pipes(service_t* s) {
 }
 
 static void set_user() {
-	char buffer[1024];
+	char buffer[SV_USER_BUFFER];
 	int  user_file;
 	if ((user_file = open("user", O_RDONLY)) != -1) {
 		ssize_t n;
@@ -65,7 +65,7 @@ static void set_user() {
 		buffer[n] = '\0';
 
 		uid_t uid;
-		gid_t gids[60];
+		gid_t gids[SV_USER_GROUP_MAX];
 		if ((n = parse_ugid(buffer, &uid, gids)) <= 0) {
 			fprintf(stderr, "warn: malformatted user file\n");
 			close(user_file);
