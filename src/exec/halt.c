@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
 		if (do_force)
 			reboot(RB_HALT_SYSTEM);
 		else
-			execl("/sbin/finit", "init", "6", NULL);
+			execl("/sbin/finit", "init", "0", NULL);
 		err(1, "reboot failed");
 	}
 
