@@ -124,7 +124,7 @@ int service_handle_command(void* argv, sv_command_t command, unsigned char extra
 			if (argv == NULL)
 				return -ENOSV;
 
-			strcpy(runlevel, argv);
+			strncpy(runlevel, argv, SV_NAME_MAX);
 
 			if (extra == 1) {
 				for (int i = 0; i < services_size; i++) {

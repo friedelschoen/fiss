@@ -8,9 +8,9 @@ MAN_DIR     := src/man
 ROFF_DIR    := man
 
 # Compiler Options
-CC       ?= gcc
-CFLAGS   ?= -g -std=gnu99 -pedantic
-LDFLAGS  ?= -fPIE
+CC       ?= clang
+CFLAGS   += -g -std=gnu99 -Wpedantic
+LDFLAGS  += -fPIE
 
 # Executable-specific flags
 finit_FLAGS := -static

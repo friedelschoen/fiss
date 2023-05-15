@@ -32,8 +32,8 @@ int handle_initctl(int argc, const char** argv) {
 }
 
 
-void handle_stage1();
-void handle_stage3();
+void handle_stage1(void);
+void handle_stage3(void);
 
 static bool do_reboot;
 

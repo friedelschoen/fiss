@@ -40,7 +40,7 @@ int parse_ugid(char* str, uid_t* uid, gid_t* gids) {
 	int            gid_size = 0;
 
 	if (str[0] == ':')
-		return (parse_ugid_num(str + 1, uid, gids));
+		return parse_ugid_num(str + 1, uid, gids);
 
 	if ((end = strchr(str, ':')) != NULL) {
 		end[0]   = '\0';

@@ -34,7 +34,7 @@ service_t* service_register(int dir, const char* name, bool is_log_service) {
 			return NULL;
 		}
 
-		strcpy(s->name, name);
+		strncpy(s->name, name, sizeof(s->name));
 	}
 
 	struct stat st;

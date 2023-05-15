@@ -24,34 +24,34 @@ static const char VERSION_MESSAGE[] =
 void print_status(service_t* s, char* state, size_t size) {
 	switch (s->state) {
 		case STATE_SETUP:
-			strcpy(state, "setup");
+			strncpy(state, "setup", size);
 			break;
 		case STATE_INACTIVE:
-			strcpy(state, "inactive");
+			strncpy(state, "inactive", size);
 			break;
 		case STATE_STARTING:
-			strcpy(state, "starting");
+			strncpy(state, "starting", size);
 			break;
 		case STATE_ACTIVE_PID:
 			snprintf(state, size, "active (pid) as %d", s->pid);
 			break;
 		case STATE_ACTIVE_BACKGROUND:
-			strcpy(state, "active (background)");
+			strncpy(state, "active (background)", size);
 			break;
 		case STATE_ACTIVE_DUMMY:
-			strcpy(state, "active (dummy)");
+			strncpy(state, "active (dummy)", size);
 			break;
 		case STATE_ACTIVE_FOREGROUND:
 			snprintf(state, size, "active as %d", s->pid);
 			break;
 		case STATE_FINISHING:
-			strcpy(state, "finishing");
+			strncpy(state, "finishing", size);
 			break;
 		case STATE_STOPPING:
-			strcpy(state, "stopping");
+			strncpy(state, "stopping", size);
 			break;
 		case STATE_DEAD:
-			strcpy(state, "dead");
+			strncpy(state, "dead", size);
 			break;
 	}
 	time_t      diff      = time(NULL) - s->status_change;
@@ -148,7 +148,7 @@ static const struct option long_options[] = {
 };
 
 int main(int argc, char** argv) {
-	strcpy(runlevel, getenv(SV_RUNLEVEL_DEFAULT_ENV) ?: SV_RUNLEVEL_DEFAULT);
+	strncpy(runlevel, getenv(SV_RUNLEVEL_DEFAULT_ENV) ? getenv(SV_RUNLEVEL_DEFAULT_ENV) : SV_RUNLEVEL_DEFAULT, SV_NAME_MAX);
 
 	char* argexec = argv[0];
 
@@ -163,7 +163,7 @@ int main(int argc, char** argv) {
 	while ((c = getopt_long(argc, argv, ":Vvqr:pocf", long_options, NULL)) > 0) {
 		switch (c) {
 			case 'r':
-				strcpy(runlevel, optarg);
+				strncpy(runlevel, optarg, SV_NAME_MAX);
 				break;
 			case 'q':
 				short_ = true;

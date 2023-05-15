@@ -1,3 +1,4 @@
+#include "config.h"
 #include "service.h"
 #include "util.h"
 
@@ -44,7 +45,7 @@ static void signal_child(int unused) {
 	service_check_state(s, WIFSIGNALED(status), WIFSIGNALED(status) ? WTERMSIG(status) : WEXITSTATUS(status));
 }
 
-static void check_deaths() {
+static void check_deaths(void) {
 	service_t* s;
 	for (int i = 0; i < services_size; i++) {
 		s = &services[i];
@@ -55,7 +56,7 @@ static void check_deaths() {
 	}
 }
 
-static void check_services() {
+static void check_services(void) {
 	service_t* s;
 	for (int i = 0; i < services_size; i++) {
 		s = &services[i];
@@ -73,7 +74,7 @@ static void check_services() {
 	}
 }
 
-static void accept_socket() {
+static void accept_socket(void) {
 	int client_fd;
 	if ((client_fd = accept(control_socket, NULL, NULL)) == -1) {
 		if (errno == EWOULDBLOCK) {
@@ -93,7 +94,7 @@ int service_supervise(const char* service_dir_, const char* runlevel_, bool forc
 	sigact.sa_handler = SIG_IGN;
 	sigaction(SIGPIPE, &sigact, NULL);
 
-	strcpy(runlevel, runlevel_);
+	strncpy(runlevel, runlevel_, SV_NAME_MAX);
 	if ((service_dir = open(service_dir_, O_DIRECTORY)) == -1) {
 		print_error("error: cannot open directory %s: %s\n", service_dir_);
 		return 1;
@@ -134,7 +135,7 @@ int service_supervise(const char* service_dir_, const char* runlevel_, bool forc
 	// bind socket to address
 	struct sockaddr_un addr = { 0 };
 	addr.sun_family         = AF_UNIX;
-	strcpy(addr.sun_path, socket_path);
+	strncpy(addr.sun_path, socket_path, sizeof(addr.sun_path));
 	if (bind(control_socket, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
 		print_error("error: cannot bind %s to socket: %s\n", socket_path);
 		return 1;
