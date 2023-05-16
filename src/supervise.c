@@ -88,6 +88,7 @@ static void accept_socket(void) {
 }
 
 static void control_sockets(void) {
+#if SV_RUNIT_COMPAT != 0
 	service_t* s;
 	char       cmd;
 	for (int i = 0; i < services_size; i++) {
@@ -97,6 +98,7 @@ static void control_sockets(void) {
 			service_handle_command_runit(s, cmd);
 		}
 	}
+#endif
 }
 
 int service_supervise(const char* service_dir_, const char* runlevel_, bool force_socket) {

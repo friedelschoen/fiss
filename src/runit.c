@@ -20,6 +20,7 @@ static int runit_signals[] = {
 };
 
 void service_init_status(service_t* s) {
+#if SV_RUNIT_COMPAT != 0
 	int         lockfd;
 	struct stat st;
 
@@ -47,9 +48,11 @@ void service_init_status(service_t* s) {
 		return;
 	}
 	close(lockfd);
+#endif
 }
 
 void service_update_status(service_t* s) {
+#if SV_RUNIT_COMPAT != 0
 	int fd;
 	if ((fd = openat(s->dir, "supervise/status", O_CREAT | O_WRONLY | O_TRUNC, 0644)) == -1) {
 		print_error("cannot open supervise/status: %s\n");
@@ -87,9 +90,11 @@ void service_update_status(service_t* s) {
 	dprintf(fd, "%d", s->pid);
 
 	close(fd);
+#endif
 }
 
 void service_handle_command_runit(service_t* s, sv_command_runit_t command) {
+#if SV_RUNIT_COMPAT != 0
 	switch (command) {
 		case R_DOWN:
 		case R_TERM:
@@ -135,4 +140,5 @@ void service_handle_command_runit(service_t* s, sv_command_runit_t command) {
 
 	s->status_change = time(NULL);
 	service_update_status(s);
+#endif
 }
