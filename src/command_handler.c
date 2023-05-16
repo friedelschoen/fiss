@@ -46,6 +46,10 @@ int service_handle_command(void* argv, sv_command_t command, unsigned char extra
 
 			if (!changed)
 				return 0;
+
+			s->status_change = time(NULL);
+			service_update_status(s);
+
 			response[0] = s;
 			return 1;
 
@@ -69,6 +73,10 @@ int service_handle_command(void* argv, sv_command_t command, unsigned char extra
 
 			if (!changed)
 				return 0;
+
+			s->status_change = time(NULL);
+			service_update_status(s);
+
 			response[0] = s;
 			return 1;
 
@@ -83,11 +91,15 @@ int service_handle_command(void* argv, sv_command_t command, unsigned char extra
 		case S_PAUSE:
 			if (s == NULL)
 				return -ENOSV;
+
 			if (s->state == STATE_INACTIVE || s->paused)
 				return 0;
 
 			s->paused = true;
 			service_send(s, SIGSTOP);
+
+			s->status_change = time(NULL);
+			service_update_status(s);
 
 			response[0] = s;
 			return 1;
@@ -95,11 +107,15 @@ int service_handle_command(void* argv, sv_command_t command, unsigned char extra
 		case S_RESUME:
 			if (s == NULL)
 				return -ENOSV;
+
 			if (s->state == STATE_INACTIVE || !s->paused)
 				return 0;
 
 			s->paused = false;
 			service_send(s, SIGCONT);
+
+			s->status_change = time(NULL);
+			service_update_status(s);
 
 			response[0] = s;
 			return 1;
@@ -112,6 +128,9 @@ int service_handle_command(void* argv, sv_command_t command, unsigned char extra
 				return 0;
 
 			s->state = STATE_INACTIVE;
+
+			s->status_change = time(NULL);
+			service_update_status(s);
 
 			response[0] = s;
 			return 1;
@@ -139,12 +158,11 @@ int service_handle_command(void* argv, sv_command_t command, unsigned char extra
 			if (argv == NULL)
 				return -ENOSV;
 
-
 			strcpy(path_buffer, extra == 1 ? "once-" : "up-");
 			strcat(path_buffer, runlevel);
 
 			if (command == S_ENABLE) {
-				if ((fd = openat(s->dir, path_buffer, O_WRONLY | O_CREAT | O_TRUNC, 0666)) == -1)
+				if ((fd = openat(s->dir, path_buffer, O_WRONLY | O_CREAT | O_TRUNC, 0644)) == -1)
 					return 0;
 				close(fd);
 			} else {

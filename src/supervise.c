@@ -87,6 +87,18 @@ static void accept_socket(void) {
 	}
 }
 
+static void control_sockets(void) {
+	service_t* s;
+	char       cmd;
+	for (int i = 0; i < services_size; i++) {
+		s = &services[i];
+
+		while (read(s->control, &cmd, 1) == 1) {
+			service_handle_command_runit(s, cmd);
+		}
+	}
+}
+
 int service_supervise(const char* service_dir_, const char* runlevel_, bool force_socket) {
 	struct sigaction sigact = { 0 };
 	sigact.sa_handler       = signal_child;
@@ -95,12 +107,15 @@ int service_supervise(const char* service_dir_, const char* runlevel_, bool forc
 	sigaction(SIGPIPE, &sigact, NULL);
 
 	strncpy(runlevel, runlevel_, SV_NAME_MAX);
+	service_dir_path = service_dir_;
 	if ((service_dir = open(service_dir_, O_DIRECTORY)) == -1) {
 		print_error("error: cannot open directory %s: %s\n", service_dir_);
 		return 1;
 	}
 
-	setenv("SERVICE_RUNLEVEL", runlevel, true);
+	//	setenv("SERVICE_RUNLEVEL", runlevel, true);
+
+	umask(0002);
 
 	char socket_path[PATH_MAX];
 	snprintf(socket_path, PATH_MAX, SV_CONTROL_SOCKET, runlevel);
@@ -109,13 +124,6 @@ int service_supervise(const char* service_dir_, const char* runlevel_, bool forc
 		print_error("error: cannot open /dev/null: %s\n");
 		null_fd = 1;
 	}
-
-	printf(":: starting services on '%s'\n", runlevel);
-
-	if (service_refresh() < 0)
-		return 1;
-
-	printf(":: started services\n");
 
 	struct stat socket_stat;
 	if (force_socket) {
@@ -154,11 +162,19 @@ int service_supervise(const char* service_dir_, const char* runlevel_, bool forc
 		print_error("warn: fcntl-setflags on control-socket failed: %s\n");
 	}
 
+	printf(":: starting services on '%s'\n", runlevel);
+
+	if (service_refresh() < 0)
+		return 1;
+
+	printf(":: started services\n");
+
 	// accept connections and handle requests
 	while (daemon_running) {
 		check_deaths();
 		service_refresh();
 		check_services();
+		control_sockets();
 		accept_socket();
 	}
 

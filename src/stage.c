@@ -22,7 +22,7 @@ void sigblock_all(bool unblock) {
 	sigprocmask(unblock, &ss, NULL);
 }
 
-void handle_stage1() {
+void handle_stage1(void) {
 	int      pid, ttyfd, exitstat;
 	sigset_t ss;
 	while ((pid = fork()) == -1) {
@@ -117,7 +117,7 @@ void handle_stage1() {
 }
 
 
-void handle_stage3() {
+void handle_stage3(void) {
 	int      pid, ttyfd, exitstat;
 	sigset_t ss;
 	while ((pid = fork()) == -1) {

@@ -9,7 +9,7 @@ ROFF_DIR    := man
 
 # Compiler Options
 CC       ?= clang
-CFLAGS   += -g -std=gnu99 -Wpedantic
+CFLAGS   += -g -std=gnu99 -Wpedantic -Wunused-result -Wno-gnu-zero-variadic-macro-arguments
 LDFLAGS  += -fPIE
 
 # Executable-specific flags

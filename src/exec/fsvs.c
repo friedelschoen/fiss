@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
 					fprintf(stderr, "error: invalid option -%c\n", optopt);
 				else
 					fprintf(stderr, "error: invalid option %s\n", argv[optind - 1]);
-				print_usage_exit(PROG_FSVC, 1);
+				print_usage_exit(PROG_FSVS, 1);
 		}
 	}
 
@@ -55,13 +55,13 @@ int main(int argc, char** argv) {
 	argc -= optind;
 	if (argc == 0) {
 		fprintf(stderr, "error: missing <service-dir>\n");
-		print_usage_exit(PROG_FSVC, 1);
+		print_usage_exit(PROG_FSVS, 1);
 	} else if (argc == 1) {
 		fprintf(stderr, "error: missing <runlevel>\n");
-		print_usage_exit(PROG_FSVC, 1);
+		print_usage_exit(PROG_FSVS, 1);
 	} else if (argc > 2) {
 		fprintf(stderr, "error: too many arguments\n");
-		print_usage_exit(PROG_FSVC, 1);
+		print_usage_exit(PROG_FSVS, 1);
 	}
 
 	signal(SIGINT, signal_interrupt);

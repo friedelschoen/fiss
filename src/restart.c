@@ -24,12 +24,14 @@ static void do_finish(service_t* s) {
 	} else {
 		s->state = STATE_INACTIVE;
 	}
+
+	s->status_change = time(NULL);
+	service_update_status(s);
 }
 
 
 void service_check_state(service_t* s, bool signaled, int return_code) {
-	s->status_change = time(NULL);
-	s->pid           = 0;
+	s->pid = 0;
 	if (s->restart_file == S_ONCE)
 		s->restart_file = S_DOWN;
 	if (s->restart_manual == S_ONCE)
@@ -104,4 +106,7 @@ void service_check_state(service_t* s, bool signaled, int return_code) {
 		case STATE_INACTIVE:
 			printf("warn: %s died but was set to inactive\n", s->name);
 	}
+
+	s->status_change = time(NULL);
+	service_update_status(s);
 }

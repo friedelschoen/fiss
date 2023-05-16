@@ -44,7 +44,7 @@ void print_usage_exit(prog_t prog, int status) {
 	exit(status);
 }
 
-void print_version_exit() {
+void print_version_exit(void) {
 	printf(FISS_VERSION_STRING);
 	exit(0);
 }

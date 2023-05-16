@@ -16,6 +16,7 @@ service_t    services[SV_SERVICE_MAX];
 int          services_size = 0;
 char         runlevel[SV_NAME_MAX];
 int          service_dir;
+const char*  service_dir_path;
 int          control_socket;
 int          null_fd;
 bool         verbose = false;
@@ -40,10 +41,11 @@ int service_pattern(const char* name, service_t** dest, int dest_max) {
 	return size;
 }
 
-int service_refresh() {
+int service_refresh(void) {
 	DIR*           dp;
 	struct dirent* ep;
-	if ((dp = fdopendir(service_dir)) == NULL) {
+
+	if ((dp = opendir(service_dir_path)) == NULL) {
 		print_error("error: cannot open service directory: %s\n");
 		return -1;
 	}
@@ -55,6 +57,7 @@ int service_refresh() {
 			if (s->pid)
 				kill(s->pid, SIGKILL);
 			close(s->dir);
+			close(s->control);
 			if (i < services_size - 1) {
 				memmove(services + i, services + i + 1, services_size - i - 1);
 				i--;

@@ -15,6 +15,9 @@ void service_stop(service_t* s, bool* changed) {
 			service_check_state(s, false, 0);
 			if (changed)
 				*changed = true;
+
+			s->status_change = time(NULL);
+			service_update_status(s);
 			break;
 		case STATE_ACTIVE_FOREGROUND:
 		case STATE_ACTIVE_PID:
@@ -22,6 +25,9 @@ void service_stop(service_t* s, bool* changed) {
 			kill(s->pid, SIGTERM);
 			if (changed)
 				*changed = true;
+
+			s->status_change = time(NULL);
+			service_update_status(s);
 			break;
 		case STATE_ACTIVE_BACKGROUND:
 			s->state = STATE_STOPPING;
@@ -31,6 +37,9 @@ void service_stop(service_t* s, bool* changed) {
 			}
 			if (changed)
 				*changed = true;
+
+			s->status_change = time(NULL);
+			service_update_status(s);
 			break;
 		case STATE_STARTING:
 		case STATE_STOPPING:
@@ -39,6 +48,9 @@ void service_stop(service_t* s, bool* changed) {
 			if (changed)
 				*changed = true;
 
+			s->status_change = time(NULL);
+			service_update_status(s);
+			break;
 		case STATE_INACTIVE:
 		case STATE_DEAD:
 			break;

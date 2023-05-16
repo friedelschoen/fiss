@@ -52,7 +52,7 @@ static void set_pipes(service_t* s) {
 	}
 }
 
-static void set_user() {
+static void set_user(void) {
 	char buffer[SV_USER_BUFFER];
 	int  user_file;
 	if ((user_file = open("user", O_RDONLY)) != -1) {
@@ -129,6 +129,7 @@ void service_run(service_t* s) {
 		}
 	}
 	s->status_change = time(NULL);
+	service_update_status(s);
 }
 
 void service_start(service_t* s, bool* changed) {
@@ -156,6 +157,8 @@ void service_start(service_t* s, bool* changed) {
 			print_error("error: cannot execute ./setup: %s\n");
 			s->state = STATE_INACTIVE;
 		}
+		s->status_change = time(NULL);
+		service_update_status(s);
 	} else {
 		service_run(s);
 	}

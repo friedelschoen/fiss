@@ -420,7 +420,7 @@ int main(int argc __attribute__((unused)), char* argv[] __attribute__((unused)))
 		return 1;
 	}
 
-	dfd = open(SEED_DIR, O_DIRECTORY | O_RDONLY);
+	dfd = open(SEED_DIR, O_DIRECTORY);
 	if (dfd < 0 || flock(dfd, LOCK_EX) < 0) {
 		perror("Unable to lock seed directory");
 		program_ret = 1;

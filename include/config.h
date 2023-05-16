@@ -70,6 +70,8 @@
 #	define SV_ACCEPT_INTERVAL 1    // seconds
 #endif
 
+#define SV_CONTROL_SOCKET "/home/friedel/fiss-%s.sock"
+
 // control socket (%s is the runlevel)
 #ifndef SV_CONTROL_SOCKET
 #	define SV_CONTROL_SOCKET "/run/fiss/control-%s.socket"

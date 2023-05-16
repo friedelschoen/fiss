@@ -18,4 +18,4 @@ typedef enum prog {
 } prog_t;
 
 void print_usage_exit(prog_t prog, int status) __attribute__((noreturn));
-void print_version_exit() __attribute__((noreturn));
+void print_version_exit(void) __attribute__((noreturn));

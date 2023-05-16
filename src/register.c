@@ -17,7 +17,6 @@ service_t* service_register(int dir, const char* name, bool is_log_service) {
 	if ((s = service_get(name)) == NULL) {
 		s                 = &services[services_size++];
 		s->state          = STATE_INACTIVE;
-		s->status_change  = time(NULL);
 		s->restart_manual = S_DOWN;
 		s->restart_file   = S_DOWN;
 		s->last_exit      = EXIT_NONE;
@@ -35,6 +34,8 @@ service_t* service_register(int dir, const char* name, bool is_log_service) {
 		}
 
 		strncpy(s->name, name, sizeof(s->name));
+
+		service_init_status(s);
 	}
 
 	struct stat st;
@@ -72,6 +73,7 @@ service_t* service_register(int dir, const char* name, bool is_log_service) {
 	}
 
 	s->status_change = time(NULL);
+	service_update_status(s);
 
 	return s;
 }

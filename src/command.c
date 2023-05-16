@@ -32,8 +32,8 @@ int service_command(char command, char extra, const char* service, service_t* re
 	addr.sun_family = AF_UNIX;
 	snprintf(addr.sun_path, sizeof(addr.sun_path), SV_CONTROL_SOCKET, runlevel);
 
-	int ret = connect(sockfd, (struct sockaddr*) &addr, sizeof(addr));
-	if (ret == -1) {
+	int ret;
+	if ((ret = connect(sockfd, (struct sockaddr*) &addr, sizeof(addr))) == -1) {
 		print_error("error: cannot connect to %s: %s\n", addr.sun_path);
 		exit(EXIT_FAILURE);
 	}
