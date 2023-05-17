@@ -1,3 +1,6 @@
+FISS COMMANDS
+=============
+
 start   (u) [0] <service>: start if not running
 start   (u) [1] <service>: start if not running and pin as up
 start   (u) [2] <service>: only pin as restart
@@ -5,11 +8,30 @@ stop    (d) [0] <service>: stop if running
 stop    (d) [1] <service>: stop if running and pin as down
 stop    (d) [2] <service>: only pin as down
 send    (k) [s] <service>: send signal $s to service
-pause   (p) [*] <service>: pause service (send SIGSTOP)
-resume  (c) [*] <service>: unpause service (send SIGCONT)
-revive  (v) [*] <service>: revive died service
-update  (g) [*] <service>: force update info // todo
-exit    (x) [*]:           stop all services and kill the fsvs instance
-refresh (y) [*]:           refresh the service directory
-status  (a) [*] <service>: get status of the service
-status  (a) [*]:           get status of all services
+pause   (p) [-] <service>: pause service (send SIGSTOP)
+resume  (c) [-] <service>: unpause service (send SIGCONT)
+revive  (v) [-] <service>: revive died service
+update  (g) [-] <service>: force update info // todo
+exit    (x) [-]:           stop all services and kill the fsvs instance
+refresh (y) [-]:           refresh the service directory
+status  (a) [-] <service>: get status of the service
+status  (a) [-]:           get status of all services
+
+
+RUNIT COMMANDS
+==============
+
+down  (d): stopts the service and pin as stopped
+up    (u): starts the services and pin as started
+exit  (x): does nothing (actually exits the runsv instance)
+once  (o): starts the service but don't pin as started
+term  (t): same as down
+kill  (k): sends kill
+pause (p): pauses the service
+cont  (c): resumes the service
+alarm (a): sends alarm
+hup   (h): sends hup
+int   (i): sends interrupt
+quit  (q): sends quit
+usr1  (1): sends usr1
+usr2  (2): sends usr2

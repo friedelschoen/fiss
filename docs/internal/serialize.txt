@@ -1,9 +1,10 @@
 FISS CONTROL RESPONSE
 =====================
 
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-|    PID    |     STATUS CHANGE     |FC|RC|FLAGS|
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
++--+-/ /-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|   NAME0   |    PID    |     STATUS CHANGE     |FC|RC|FLAGS|
++--+-/ /-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+NAME0 = name of services | null-terminated
 PID = pid of the current instance (dependening on state) | big endian
 STATUS CHANGE = unix timestamp of last update (why tai tho?) | big endian
 FC = fail count
@@ -38,3 +39,5 @@ PS = is paused (int boolean)
 WU = wants up ('u' if want up, 'd' if want down)
 TR = was terminated (int boolean)
 ST = state (0 is down, 1 is running, 2 is finishing)
+
+yuup, there are no flags, boolean-flags still use the whole byte (and WU even uses 'u'/'d')
