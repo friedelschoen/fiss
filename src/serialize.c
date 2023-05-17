@@ -2,25 +2,6 @@
 
 
 void service_store(service_t* s, uint8_t* buffer) {
-	// +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-	// |    PID    |     STATUS CHANGE     |FC|RC|FLAGS|
-	// +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-	// PID = pid of the current instance (dependening on state)
-	// STATUS CHANGE = unix timestamp of last update (why tai tho?)
-	// FC = fail count
-	// RC = last return code (0 if not exitted yet)
-
-	// +--+--+--+--+--+--+--+--*--+--+--+--+--+--+--+--+
-	// |   STATE   |RSFIL|RSMAN|LSTEX|RD|PS|LS|HL| --- |
-	// +--+--+--+--+--+--+--+--*--+--+--+--+--+--+--+--+
-	// RSFIL = restart file (up-<runlevel>; 0 = down, 2 = once, 3 = restart)
-	// RSMAN = restart manual override (0 = down, 1 = force down, 2 = once, 3 = restart)
-	// RD = absolute restart needed, combining above + dependencies
-	// LSTEX = last exit (0 = never exitted, 1 = normally, 2 = signaled)
-	// PS = paused
-	// LS = is log service
-	// HS = has log service (in struct is pointer but stored as (void*) 1 or (void*) 0)
-
 	buffer[0]  = (s->pid >> 0) & 0xff;
 	buffer[1]  = (s->pid >> 8) & 0xff;
 	buffer[2]  = (s->pid >> 16) & 0xff;
@@ -68,17 +49,6 @@ const char* service_store_human(service_t* s) {
 }
 
 void service_store_runit(service_t* s, uint8_t* buffer) {
-	// +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-	// |      TAI SECONDS      | TAIA NANO |    PID    |PS|WU|TR|ST|
-	// +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-	// TAI SECONDS = unix seconds + 4611686018427387914ULL (lower endian!)
-	// TAIA NANO = unix nanoseconds (nulled-out as fiss don't store them)
-	// PID = current pid
-	// PS = is paused (int boolean)
-	// WU = wants up ('u' if want up, 'd' if want down)
-	// TR = was terminated (int boolean)
-	// ST = state (0 is down, 1 is running, 2 is finishing)
-
 	uint64_t tai = (uint64_t) s->status_change + 4611686018427387914ULL;
 	int      runit_state;
 	switch (s->state) {
