@@ -2,11 +2,9 @@
 
 
 void service_store(service_t* s, uint8_t* buffer) {
-	// +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-	// |    DIR    |    PID    |     STATUS CHANGE     |FC|RC|FLAGS|
-	// +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-	// ST = status
-	// DIR = file descriptor to the running directory
+	// +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+	// |    PID    |     STATUS CHANGE     |FC|RC|FLAGS|
+	// +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 	// PID = pid of the current instance (dependening on state)
 	// STATUS CHANGE = unix timestamp of last update (why tai tho?)
 	// FC = fail count
@@ -23,28 +21,24 @@ void service_store(service_t* s, uint8_t* buffer) {
 	// LS = is log service
 	// HS = has log service (in struct is pointer but stored as (void*) 1 or (void*) 0)
 
-	buffer[0]  = (s->dir >> 0) & 0xff;
-	buffer[1]  = (s->dir >> 8) & 0xff;
-	buffer[2]  = (s->dir >> 16) & 0xff;
-	buffer[3]  = (s->dir >> 24) & 0xff;
-	buffer[4]  = (s->pid >> 0) & 0xff;
-	buffer[5]  = (s->pid >> 8) & 0xff;
-	buffer[6]  = (s->pid >> 16) & 0xff;
-	buffer[7]  = (s->pid >> 24) & 0xff;
-	buffer[8]  = (s->status_change >> 0) & 0xff;
-	buffer[9]  = (s->status_change >> 8) & 0xff;
-	buffer[10] = (s->status_change >> 16) & 0xff;
-	buffer[11] = (s->status_change >> 24) & 0xff;
-	buffer[12] = (s->status_change >> 32) & 0xff;
-	buffer[13] = (s->status_change >> 40) & 0xff;
-	buffer[14] = (s->status_change >> 48) & 0xff;
-	buffer[15] = (s->status_change >> 56) & 0xff;
-	buffer[16] = (s->fail_count);
-	buffer[17] = (s->return_code);
-	buffer[18] = (s->state << 0) |
+	buffer[0]  = (s->pid >> 0) & 0xff;
+	buffer[1]  = (s->pid >> 8) & 0xff;
+	buffer[2]  = (s->pid >> 16) & 0xff;
+	buffer[3]  = (s->pid >> 24) & 0xff;
+	buffer[4]  = (s->status_change >> 0) & 0xff;
+	buffer[5]  = (s->status_change >> 8) & 0xff;
+	buffer[6]  = (s->status_change >> 16) & 0xff;
+	buffer[7]  = (s->status_change >> 24) & 0xff;
+	buffer[8]  = (s->status_change >> 32) & 0xff;
+	buffer[9]  = (s->status_change >> 40) & 0xff;
+	buffer[10] = (s->status_change >> 48) & 0xff;
+	buffer[11] = (s->status_change >> 56) & 0xff;
+	buffer[12] = (s->fail_count);
+	buffer[13] = (s->return_code);
+	buffer[14] = (s->state << 0) |
 	             (s->restart_file << 4) |
 	             (s->restart_manual << 6);
-	buffer[19] = (s->last_exit << 0) |
+	buffer[15] = (s->last_exit << 0) |
 	             (service_need_restart(s) << 2) |
 	             (s->paused << 3) |
 	             (s->is_log_service << 4) |
@@ -129,30 +123,26 @@ void service_store_runit(service_t* s, uint8_t* buffer) {
 }
 
 void service_load(service_t* s, const uint8_t* buffer) {
-	s->dir = ((uint32_t) buffer[0] << 0) |
+	s->pid = ((uint32_t) buffer[0] << 0) |
 	         ((uint32_t) buffer[1] << 8) |
 	         ((uint32_t) buffer[2] << 16) |
 	         ((uint32_t) buffer[3] << 24);
-	s->pid = ((uint32_t) buffer[4] << 0) |
-	         ((uint32_t) buffer[5] << 8) |
-	         ((uint32_t) buffer[6] << 16) |
-	         ((uint32_t) buffer[7] << 24);
-	s->status_change = ((uint64_t) buffer[8] << 0) |
-	                   ((uint64_t) buffer[9] << 8) |
-	                   ((uint64_t) buffer[10] << 16) |
-	                   ((uint64_t) buffer[11] << 24) |
-	                   ((uint64_t) buffer[12] << 32) |
-	                   ((uint64_t) buffer[13] << 40) |
-	                   ((uint64_t) buffer[14] << 48) |
-	                   ((uint64_t) buffer[15] << 56);
-	s->fail_count     = buffer[16];
-	s->return_code    = buffer[17];
-	s->state          = (buffer[18] >> 0) & 0x0F;
-	s->restart_file   = (buffer[18] >> 4) & 0x03;
-	s->restart_manual = (buffer[18] >> 6) & 0x03;
-	s->last_exit      = (buffer[19] >> 0) & 0x03;
-	s->restart_final  = (buffer[19] >> 2) & 0x01;
-	s->paused         = (buffer[19] >> 3) & 0x01;
-	s->is_log_service = (buffer[19] >> 4) & 0x01;
-	s->log_service    = (buffer[19] >> 5) ? (void*) 1 : (void*) 0;
+	s->status_change = ((uint64_t) buffer[4] << 0) |
+	                   ((uint64_t) buffer[5] << 8) |
+	                   ((uint64_t) buffer[6] << 16) |
+	                   ((uint64_t) buffer[7] << 24) |
+	                   ((uint64_t) buffer[8] << 32) |
+	                   ((uint64_t) buffer[9] << 40) |
+	                   ((uint64_t) buffer[10] << 48) |
+	                   ((uint64_t) buffer[11] << 56);
+	s->fail_count     = buffer[12];
+	s->return_code    = buffer[13];
+	s->state          = (buffer[14] >> 0) & 0x0F;
+	s->restart_file   = (buffer[14] >> 4) & 0x03;
+	s->restart_manual = (buffer[14] >> 6) & 0x03;
+	s->last_exit      = (buffer[15] >> 0) & 0x03;
+	s->restart_final  = (buffer[15] >> 2) & 0x01;
+	s->paused         = (buffer[15] >> 3) & 0x01;
+	s->is_log_service = (buffer[15] >> 4) & 0x01;
+	s->log_service    = (buffer[15] >> 5) ? (void*) 1 : (void*) 0;
 }

@@ -52,7 +52,6 @@ void service_init_status(service_t* s) {
 }
 
 void service_update_status(service_t* s) {
-	printf("update: %s\n", s->name);
 #if SV_RUNIT_COMPAT != 0
 	int fd;
 	if ((fd = openat(s->dir, "supervise/status", O_CREAT | O_WRONLY | O_TRUNC, 0644)) == -1) {

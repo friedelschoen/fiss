@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <time.h>
 
-#define SV_SERIAL_LEN       20
+#define SV_SERIAL_LEN       16
 #define SV_SERIAL_RUNIT_LEN 20
 #define SV_HAS_LOGSERVICE   ((void*) 1)
 
