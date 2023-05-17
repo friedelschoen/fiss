@@ -65,10 +65,14 @@ static void check_services(void) {
 		if (service_need_restart(s)) {
 			if (s->state == STATE_INACTIVE) {
 				service_start(s, NULL);
+				s->status_change = time(NULL);
+				service_update_status(s);
 			}
 		} else {
 			if (s->state != STATE_INACTIVE) {
 				service_stop(s, NULL);
+				s->status_change = time(NULL);
+				service_update_status(s);
 			}
 		}
 	}

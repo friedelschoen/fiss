@@ -77,7 +77,7 @@ void service_store_runit(service_t* s, uint8_t* buffer) {
 	// +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 	// |      TAI SECONDS      | TAIA NANO |    PID    |PS|WU|TR|ST|
 	// +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-	// TAI SECONDS = unix seconds + 4611686018427387914ULL
+	// TAI SECONDS = unix seconds + 4611686018427387914ULL (lower endian!)
 	// TAIA NANO = unix nanoseconds (nulled-out as fiss don't store them)
 	// PID = current pid
 	// PS = is paused (int boolean)
@@ -85,7 +85,7 @@ void service_store_runit(service_t* s, uint8_t* buffer) {
 	// TR = was terminated (int boolean)
 	// ST = state (0 is down, 1 is running, 2 is finishing)
 
-	uint64_t tai = s->status_change + 4611686018427387914ULL;
+	uint64_t tai = (uint64_t) s->status_change + 4611686018427387914ULL;
 	int      runit_state;
 	switch (s->state) {
 		case STATE_INACTIVE:
@@ -106,14 +106,14 @@ void service_store_runit(service_t* s, uint8_t* buffer) {
 			break;
 	}
 
-	buffer[0]  = (tai >> 0) & 0xff;
-	buffer[1]  = (tai >> 8) & 0xff;
-	buffer[2]  = (tai >> 16) & 0xff;
-	buffer[3]  = (tai >> 24) & 0xff;
-	buffer[4]  = (tai >> 32) & 0xff;
-	buffer[5]  = (tai >> 40) & 0xff;
-	buffer[6]  = (tai >> 48) & 0xff;
-	buffer[7]  = (tai >> 56) & 0xff;
+	buffer[0]  = (tai >> 56) & 0xff;
+	buffer[1]  = (tai >> 48) & 0xff;
+	buffer[2]  = (tai >> 40) & 0xff;
+	buffer[3]  = (tai >> 32) & 0xff;
+	buffer[4]  = (tai >> 24) & 0xff;
+	buffer[5]  = (tai >> 16) & 0xff;
+	buffer[6]  = (tai >> 8) & 0xff;
+	buffer[7]  = (tai >> 0) & 0xff;
 	buffer[8]  = 0;    // not implemented
 	buffer[9]  = 0;    // not implemented
 	buffer[10] = 0;    // not implemented
