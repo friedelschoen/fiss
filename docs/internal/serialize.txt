@@ -16,6 +16,7 @@ FLAGS
 +--+--+--+--+--+--+--+--*--+--+--+--+--+--+--+--+
 |   STATE   |RSFIL|RSMAN|LSTEX|RD|PS|LS|HL| --- |
 +--+--+--+--+--+--+--+--*--+--+--+--+--+--+--+--+
+STATE = state of the service
 RSFIL = restart file (up-<runlevel>; 0 = down, 2 = once, 3 = restart)
 RSMAN = restart manual override (0 = down, 1 = force down, 2 = once, 3 = restart)
 RD = absolute restart needed, combining above + dependencies
@@ -24,6 +25,21 @@ PS = paused
 LS = is log service
 HS = has log service (in struct is pointer but stored as (void*) 1 or (void*) 0)
 -- = nothing yet
+
+STATE
+-----
+
+0 = inactive
+1 = setup
+2 = starting
+3 = active_dummy
+4 = active_foreground
+5 = active_background
+6 = active_pid
+7 = finishing
+8 = stopping
+9 = dead
+
 
 
 RUNIT CONTROL RESPONSE
