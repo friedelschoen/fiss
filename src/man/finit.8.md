@@ -1,4 +1,4 @@
-# finit 1 "MAY 2023" "01.0" "fiss man page"
+# finit 8 "MAY 2023" "01.0" "fiss man page"
 
 ## NAME
 

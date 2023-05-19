@@ -1,8 +1,8 @@
-# fsvc 1 "MAY 2023" "01.0" "fiss man page"
+# fsvc 8 "MAY 2023" "0.2.2" "fiss man page"
 
 ## NAME
 
-fsvc - fiss' service controller
+`fsvc` - fiss' service controller
 
 ## SYNOPSIS
 
