@@ -1,5 +1,7 @@
 #include "message.h"
 
+#include "config.h"
+
 #include <libgen.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,6 +47,6 @@ void print_usage_exit(prog_t prog, int status) {
 }
 
 void print_version_exit(void) {
-	printf(FISS_VERSION_STRING);
+	printf(SV_VERSION);
 	exit(0);
 }
