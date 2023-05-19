@@ -96,20 +96,15 @@ static char* to_upper(char* str) {
 	return str;
 }
 
-void print_service_short(service_t* s, service_t* log) {
+void print_service_short(service_t* s) {
 	bool active = s->state == STATE_ACTIVE_BACKGROUND ||
 	              s->state == STATE_ACTIVE_DUMMY ||
 	              s->state == STATE_ACTIVE_FOREGROUND ||
 	              s->state == STATE_ACTIVE_PID;
 
-	bool restart = s->restart_file == S_ONCE ||
-	               s->restart_file == S_RESTART ||
-	               s->restart_manual == S_ONCE ||
-	               s->restart_manual == S_RESTART;
+	bool wants_other = active != s->restart_final;
 
-	bool wants_other = active != restart;
-
-	if (s->state == STATE_STARTING)
+	if (s->state == STATE_SETUP || s->state == STATE_STARTING)
 		printf("[    {+}]");
 	else if (s->state == STATE_FINISHING || s->state == STATE_STOPPING)
 		printf("[{-}     ]");
@@ -128,11 +123,6 @@ void print_service_short(service_t* s, service_t* log) {
 			printf(" (last exit: %d)", s->return_code);
 	}
 	printf("\n");
-
-	if (log) {
-		printf("log: ");
-		print_service_short(log, NULL);
-	}
 }
 
 static const struct option long_options[] = {
@@ -315,7 +305,7 @@ int main(int argc, char** argv) {
 				}
 			}
 			if (short_)
-				print_service_short(&response[i], log);
+				print_service_short(&response[i]);
 			else
 				print_service(&response[i], log);
 		}
