@@ -29,16 +29,16 @@ HS = has log service (in struct is pointer but stored as (void*) 1 or (void*) 0)
 STATE
 -----
 
-0 = inactive
-1 = setup
-2 = starting
-3 = active_dummy
-4 = active_foreground
-5 = active_background
-6 = active_pid
-7 = finishing
-8 = stopping
-9 = dead
+0 = inactive - is not enabled and does nothing
+1 = setup - ./setup is running atm
+2 = starting - ./start is running atm
+3 = active_dummy - service is considered as started but does nothing
+4 = active_foreground - ./run is running
+5 = active_background - ./start is done and ./stop is not called yet
+6 = active_pid - ./start is done and ./pid is not killed yet
+7 = finishing - ./finish is running
+8 = stopping - ./stop is running
+9 = dead - was enabled but failed too much or another error appeared
 
 
 
