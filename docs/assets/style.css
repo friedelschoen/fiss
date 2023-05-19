@@ -1,0 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;700&display=swap');
+
+body {
+	background: #eee;
+	color: #3c3836;
+}
+
+body.dark {
+	background: #3c3836;
+	color: #eee;
+}
+
+@media(max-width:999px) {
+	body {
+		font-size: 1.94vw
+	}
+}
+
+#toggle_dark {
+	background: #3c3836;
+	color: #eee;
+	cursor: pointer;
+}
+
+.dark #toggle_dark {
+	background: #eee;
+	color: #3c3836;
+}
+
+a {
+	color: inherit;
+	text-decoration: underline;
+}
+
+a:hover {
+	font-weight: bold;
+}
+
+.title {
+	color: #216477;
+	font-weight: bold;
+	text-decoration: none;
+	font-size: 14pt;
+}
+
+.title:hover {
+	text-decoration: underline;
+}
+
+.subtitle {
+	color: #216477;
+	text-decoration: underline;
+}
+
+.header {
+	font-size: 18pt;
+}
+
+.dark a.title,
+.dark a.header {
+	color: #339cba;
+}
+
+#wrapper {
+	overflow-x: hidden;
+	width: 80ch;
+	font: 12pt 'Source Code Pro', monospace;
+	margin: 20px auto;
+	white-space: pre;
+}
+
+#github {
+	height: 1em;
+}
+
+#me {
+	max-width: 100%;
+}
+
+#contact-div {
+	display: flex;
+	align-items: flex-start;
+}
+
+
+#contact-img {
+	flex-basis: 20%;
+}
+
+#contact-text {
+	flex-basis: 80%;
+	padding-right: 20px;
+}
