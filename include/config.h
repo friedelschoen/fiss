@@ -62,7 +62,7 @@
 
 // the current version
 #ifndef SV_VERSION
-#	define SV_VERSION "0.1.0"
+#	define SV_VERSION "0.2.2"
 #endif
 
 // time to wait to accept new connection

@@ -1,8 +1,6 @@
 #pragma once
 
-#define FISS_VERSION "0.1.1"
-
-#define FISS_VERSION_STRING "fiss version v" FISS_VERSION ""
+#define FISS_VERSION_STRING "fiss version v" SV_VERSION ""
 
 typedef enum prog {
 	PROG_FINIT,
