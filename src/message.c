@@ -36,8 +36,8 @@ static const char* prog_manual[] = {
 	[PROG_POWEROFF] = "poweroff 8",
 	[PROG_REBOOT]   = "reboot 8",
 	[PROG_SEEDRNG]  = "seedrng 8",
-	[PROG_SIGREMAP] = "sigremap 1",
-	[PROG_VLOGGER]  = "vlogger 8",
+	[PROG_SIGREMAP] = "sigremap 8",
+	[PROG_VLOGGER]  = "vlogger 1",
 	[PROG_ZZZ]      = "zzz 8"
 };
 

@@ -26,7 +26,7 @@
 
 ## DESCRIPTION
 
-`fsvc` is a command line tool for controlling services on a FISS system. It provides various commands for starting, stopping, enabling, disabling, sending signals to, checking the status of, pausing, resuming, and switching the runlevel of services.
+`fsvc` is a command line tool for controlling services on a fiss system. It provides various commands for starting, stopping, enabling, disabling, sending signals to, checking the status of, pausing, resuming, and switching the runlevel of services.
 
 ## OPTIONS
 

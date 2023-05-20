@@ -10,7 +10,7 @@ zzz - suspend or hibernate your system
 
 ## DESCRIPTION
 
-`zzz` is a simple utility to hibernate or suspend your computer and part of the FISS-system. It supports suspend/resume-hooks.
+`zzz` is a simple utility to hibernate or suspend your computer and part of the fiss-system. It supports suspend/resume-hooks.
 
 `-n, --noop`
 dry-run, sleep for 5sec instead of actually running ACPI actions.
