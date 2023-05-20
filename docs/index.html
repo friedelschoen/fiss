@@ -2,7 +2,7 @@
 <html lang=en>
 
 <head>
-  <title>Friedel Schön - Curriculum Vitae</title>
+  <title>Friedel's Initialization and Service Supervision</title>
   <meta charset=utf-8 />
   <meta name=viewport content='width=device-width,initial-scale=1' />
   <link rel=stylesheet href=assets/style.css />
@@ -11,169 +11,387 @@
 
 <body>
 <div id=wrapper>
-<a class='header title' href=/>Friedel Sch&ouml;n - Curriculum Vitae</a>             <span id=toggle_dark onclick=toggle_dark()> licht uitdoen </span>  <a href=https://github.com/friedelschoen/><img id=github alt=GitHub src=assets/github-mark.svg /></a>
+<a class='header title' href='/fiss'>fiss</a>                                                 <span id=toggle_dark onclick=toggle_dark()> turn the lights on </span>  <a href=https://github.com/friedelschoen/fiss><img id=github alt=GitHub src=assets/github-mark.svg /></a>
 ================================================================================
 
-<span id=about-me></span>
-Hoi, ik ben Friedel (Friedmund) Sch&ouml;n, ik ben nu 21 jaar en geboren te Aurich
-in Duitsland. Ik woon nu anderhalf jaar met plezier in Groningen. In mijn vrije
-tijd zit ik veel te programmeren, voornamelijk low-level in C. Ik heb C en vele
-andere talen zelf geleerd, begonnen was ik met BASH toen ik 15 jaar was. Aan
-programmeren vind ik leuk, dat ik creatief kan mensen helpen met software oplos-
-singen. Als ik niet zit de programmeren zit ik trompet te spelen in een orchest
-of ga met vrienden en een biertje doen. Ik vind dingen leren leuk op de manier
-learn-by-doing. Ik probeer mijn kennis te vergroten en kijk hoe dit gaat, C gaat
-heel goed met betrekking tot Linux utilities en dus zit ik heel veel daarmee te
-doen. Dit gaat niet alleen om programmeertalen maar ook protocollen en andere
-onderdelen. Ik wil graag deze dingen leren aan studenten en dus doe ik HBO-ICT
-om vervolgens in Nederland te blijven en te beginnen als docent op een hoge-
-school. Misschien begin ik ook bij een bedrijf met embedded programming. Aan
-mijn studie vind ik dingen zoals Assembly of Design leuk. Buiten school vind ik
-ook de gezelschap leuk, mijn meeste vrienden ken ik door deze opleiding.
+Aloha! You somehow landed on the website of <b>fiss</b> (<u>Friedel's Initialization and
+Service Supervision</u>). <b>fiss</b> is a supervision suite for Unix and Unix-like systems
+with the power off system initialization. This project is based on runit and
+other daemontools-based utilities.
 
-
-<a class=title id=contact href=#contact>Personalia</a>
+<a class=title id=contact href=#contact>What does an init-system do?</a>
 --------------------------------------------------------------------------------
 
-<div id=contact-div><div id=contact-text>Naam:          Friedel Sch&ouml;n
-E-Mail:        <a href=mailto:derfriedmundschoen@gmail.com>derfriedmundschoen@gmail.com</a>
-Telefoon:      <a href=tel:+31-6-2726-9331>+31 6 2726 9331</a>
-GitHub:        <a href=https://github.com/friedelschoen>friedelschoen</a>
+After the kernel has loaded all the hardware stuff and setting up a working
+environment, it executes /sbin/init by default which mounts pseude-drives, the 
+root-drive read-writable and more. This depends on your system, the package does
+include start and stop scripts and basic agetty services.
 
-Geboren:       18 juli 2001 te Aurich/Duitsland
-Nationaliteit: Duits
-</div><div id=contact-img><img id=me src=assets/friedel.png /></div></div>
+After the initialization is done, services must be started. A service is a long-
+running process, which needs to be restarted if it suddenly terminates. FreeBSD
+and other BSD's as far as I know, are handling services pretty rudimentally with
+plain shell scripts and without supervision. The most Linux distributions are
+shipped with SystemD which is the opposite of FreeBSD's rc.d idea. SystemD is
+one massive and bulky project with a lot of (useless) features. I've used Void
+Linux which is shipped with runit, a daemontools-derivate with initialization.
+Unlike SystemD, runit is a fine in-between: minimal but feature-rich. Bit too
+minimal so I thought of making fiss!
 
-<a class=title id=diplom href=#diplom>Diploma's</a>
+
+<a class=title id=diplom href=#diplom>Why fiss tho?</a>
 --------------------------------------------------------------------------------
 
-* Abitur (cf. VWO-diploma)
+fiss is a lightweight and easy-to-use tool for initializing and supervising
+long-running services on Unix-like systems. It provides a simple and reliable
+way to start, stop, and monitor services. It supports automatic restarts,
+logging, and customizable startup options. It's no fork and uses the standard
+POSIX libc without other runtime dependencies. fiss support all the features to 
+make services efficient running. It can be compatible with runit and daemontools
+utilities and is highly customizable at runtime to make fiss fit your needs.
 
-* Nederlands als tweede taal (NT2)
 
-* Rijbewijs B & BE
-
-
-<a class=title id=language href=#language>Taalvaardigheden</a>
+<a class=title id=diplom href=#diplom>fiss vs runit</a>
 --------------------------------------------------------------------------------
 
-* Duits (moedertaal)
+runit is a good init-system and is lovely to use but there are some features
+which are just missing.
 
-* Nederlands (B2-niveau)
+* fiss has service-ordering (aka. dependencies), thus if service-b depends on
+  service-a, you can configure it as a dependency and fiss will keep service-a
+  running as long as service-b is running.
 
-* Engels
+* fiss has background-services, some services just won't let you run them in
+  foreground. runit solves this problem with <u>pause</u>, a little program which just
+  waits on an incoming signal. But this solution requires extra resources and
+  a process-slot. It's bearly possible to hit the process-roof but for every
+  process, the kernel needs to reserve memory and manage cpu-time.
 
+* runit has no built-in environment settings, it always runs services with a
+  clear environment and you can modify it with chpst. That extends the process
+  chain and cost more start-up time. fiss has build-in environment options for
+  changing the user and group, the arguments, argv[0] or environment-variables.
+  This project also includes a simplified and rewritten version of chpst, for
+  compatibility use.
 
-<a class=title id=programming href=#programming>Programmeervaardigheden</a>
---------------------------------------------------------------------------------
+* runit's controller sv is really basic. It does not need to be very beautiful
+  or feature-rich, but enabling services and enabling services once (one time
+  after boot) is not possible. runit's <u>down</u>-file method seems more like a hack.
+  fiss supports enabling and once-enabling by default. If you like sv's
+  simplicity or its helpers like vsv or rsv, there is a compatibility-layer for
+  runit or daemontools.
 
-* C                                            (hele syntax en standard library)
+* finit and fsvc directly call the service executable. That means there is no
+  process-chaining as runit does. If you are running runit as init (runit-init):
+  - kernel executes runit-init
+  - this executes runit
+  - runit forks and executes /etc/runit/{1,2,3}
+  - /etc/runit/2 executes runsvdir
+  - runsvdir forks and executes runsv
+  - and finally runsv executes the underlying service executable
 
-* Python                                       (hele syntax en standard library)
-
-* D                                (hele syntax en grotendeels standard library)
-
-* C++                            (meeste syntax en grotendeels standard library)
-
-* BASH/ShellScript                              (meeste syntax en alle commands)
-
-* HTML/CSS                                       (hele syntax, geen goed design)
-
-<span class=subtitle>Frameworks en Libraries:</span>
-
-* Arduino (C++)
-
-* Flask (Python)
-
-
-<a class=title id=system href=#system>Systeemvaardigheden</a>
---------------------------------------------------------------------------------
-
-* Linux
-
-* macOS
-
-* BSD's (grotendeels)
-
-* Windows (grotendeels)
-
-
-<a class=title id=study href=#study>Opleiding</a>
---------------------------------------------------------------------------------
-
-* HBO-ICT: <a href=https://hanze.nl/>Hanzehogeschool Groningen</a>                                (sinds 2021)
-
-* Gymnasium: <a href=https://igsaurich.de/>IGS Aurich-West</a>                                       (2018 - 2021)
-
-* Middelbare: <a href=http://igsegels.de/>IGS Egels</a>                                            (2012 - 2018)
-
-* Basisschool: <a href=https://grundschule-mittegrossefehn.de/>Grundschule Mittegro&szlig;efehn</a>                          (2008 - 2012)
-
-
-<a class=title id=work href=#work>Werkervaring</a>
---------------------------------------------------------------------------------
-
-* <a href=https://www.fiksi.nl/>Fiksi Computerhulp</a>: Expert                                        (sinds 2021)
-  - Kennis over vele onderwerpen qua computers
-  - Helpen en uitleggen van oplossing (voornamelijk aan ouderen zonder kennis)
-
-* <a href=https://www.thuisbezorgd.nl/>Thuisbezorgd Groningen</a>: Bezorger                                  (sinds 2021)
-
-* <a href=https://www.gamma.nl/bouwmarkten/groningen-peizerweg>GAMMA Groningen-West</a>: Vulploeg                                          (2021)
-
-* <a href=https://citipost-nordwest.de/>Citipost Nordwest</a>: Brievenbezorger in Ihlow                      (2020 - 2021)
-  - Zelfstandigheid
-  - Tijdplanning
-
-* <a href=https://www.edeka.de/eh/minden-hannover/edeka-center-bruns-dreekamp-18/index.jsp>E-Center Bruns Aurich</a>: Vulploeg en pakhuis                       (2019 - 2020)
+  Every fork and execute causes an overhead. Also runsvdir is decentralized,
+  thus no central control unit can be used and every runsv has its own control
+  unit. 
   
-* <a href=https://www.nordwest-sonntagsblatt.de/epaper/aurich/>Heimat- & Sonntagsblatt</a>: Krantenbezorger in Ulbargen             (2016 - 2018)
-  - Zelfstandigheid
+  On the other hand this results in more security, if a executable failes due to
+  a bug, the underlying executable will catch this (if implemented). Which 
+  implementation is better is up to yourself.
+
+* fiss and runit are entirely written in C, init has to be minimal and a garbage
+  collector would only slow down the whole system. With C you have direct
+  control of the operating system.
+
+* fiss is written from scratch using the libc implementaions, this results in a
+  readable code thus easier for contributers to dive into the codebase.
+  runit and daemontools are written using the djb-library which is an 
+  alternative general library. It's completely fine to use the library and maybe
+  it is even faster than your libc-implementation (glibc, musl, freebsd-libc).
 
 
-<a class=title id=internship href=#internship>Relevante Stages</a>
+<a class=title id=contact href=#contact>Installation</a>
 --------------------------------------------------------------------------------
 
-* <a href=https://www.stadt-wiesmoor.de/>Stad Wiesmoor</a>: Systeembeheerder                                         (2019)
+Now that you are really hyped to install fiss, you first have to compile it.
 
-* <a href=https://www.buenting.de/en>B&uuml;nting Leer-Nortmoor</a>: Systeembeheerder                                 (2018)
+To compile make sure you have installed the dependencies.
 
-* <a href=https://www.orgadata.com/nl>ORGADATA Leer</a>: Software Engineer                                        (2017)
+- C compiler like gcc or clang which supports the gnu99-standard
+- POSIX-compliant shell like dash or bash
+- GNU make
+- <a href='https://github.com/sunaku/md2man'>md2man</a> to make the manuals
 
-* <a href=https://www.hr4you.de/en/company>HR4YOU Timmel</a>: Software Engineer                                        (2016)
+If running fiss, you require to have following dependencies installed:
+
+- POSIX-compliant shell like dash or bash
+- GNU awk
+
+Download the last release from GitHub or clone this project with git to build
+from HEAD.
+
++------------------------------------------------------------------------------+
+| git clone https://github.com/friedelschoen/fiss.git                          |
++------------------------------------------------------------------------------+
+
+Then you have to compile the project with make.
+
++------------------------------------------------------------------------------+
+| make binary   # to compile the executables                                   |
+| make manual   # to compile the manuals                                       |
++------------------------------------------------------------------------------+
+
+Executables are now stored in ./bin, standard configuration-files are stored in
+./etc, runtime-required files are in ./share and manuals in ./man.
 
 
-<a class=title id=projects href=#projects>Mijn Projecten</a>
+<a class=title id=diplom href=#diplom>Getting Started</a>
 --------------------------------------------------------------------------------
 
-* <a href=https://github.com/friedelschoen/importsort-d>importsort-d</a>: een utility voor de programmeertaal D om imports alfanumeriek 
-  te sorteren
+fiss does not parse any configuration file, everything is configured through
+different files inside for example /etc/service.d.
 
-* <a href=https://github.com/friedelschoen/dualinit>DualINIT</a>: een meta-init systeem voor Linux
+Following files are executed by finit:
 
-* <a href=#>paccat</a>: een Linux package-manager, die probeert verschil-   <b>(nog geen release)</b>
-  lende package-managers samen te voegen       
-  
-* <a href=https://github.com/MoiBaguette/Webtechnologie-Project/>Programmeerles voor Ouderen</a> (school-project van jaar 1): een website front- en
-  backend voor het beheren van programmeerlessen voor ouderen
+- /usr/share/fiss/start
+  This is the entry point of your system (similar to /etc/runit/1). By default
+  this script sources files in unix-order inside /etc/start.d/*.sh.
 
-* <a href=https://github.com/friedelschoen/muizenval.tk/>Muizenval.tk</a> (school-project van jaar 1): website en embedded software voor 
-  een <i>slimme</i> muizenval voor <a href=https://www.5groningen.nl/>5Groningen</a>
+- /etc/service.d/*
+  In this directory the services are stored, underneath is descripted how a
+  service is constructed. The utility fsvs is written to supervise a service-dir
+  without issuing start and stop mechanisms
 
-* <a href=https://github.com/friedelschoen/java-game-client/>Java Game Client</a> (school-project van jaar 2): een cli&euml;nt    <b>(nog geen release)</b>
-  voor TicTacToe en Othello
+- /usr/share/fiss/stop
+  This is the ending point of your system-lifetime (similar to /etc/runit/3). By
+  default this script sources file in unix-order inside /etc/stop.d/*.sh.
+
+zzz is a utility shipped with fiss to suspend your system, following files are
+executed by zzz.
+
+- /usr/share/fiss/suspend
+  This file is executed before suspending, by default this script sources
+  files in unix-order inside /etc/zzz.d/suspend/*.sh
+
+- /usr/share/fiss/resume
+  This file is executed after suspending (thus before resuming), by default this script sources
+  files in unix-order inside /etc/zzz.d/resume/*.sh
+
+
+<a class=title id=diplom href=#diplom>Getting Started</a>
+--------------------------------------------------------------------------------
+
+Services are usually placed into /etc/service.d, a services is a long-running
+executable like for example sshd, which should be running the whole lifetime of
+your system. Sadly do some services terminate before your system halts because
+of an error or signaling, this is where fiss plays its role.
+
+- ./run
+  Usually your service runs in the foreground, in this case you can create a run
+  executable, either linked to the actual binary or as a script that executes
+  the service. run is meant to be running the whole time in the foreground and
+  must not daemonize itself into the background as fiss would restart it.
+
+  +----------------------------------------------------------------------------+
+  | #!/bin/sh                                                                  |
+  |                                                                            |
+  | [ -r ./conf ] && . ./conf                                                  |
+  |                                                                            |
+  | exec myservice $ARGS                                                       |
+  +----------------------------------------------------------------------------+
+
+  This example sources conf in the service-directory if present and executes
+  myservice with $ARGS.  
+
+- ./params
+  run often needs parameters, these can be defined inside params. Your 
+  arguments must be newline-demilitered. Usually the 0th argument is not
+  included and defaults to './run', but if you want to define the 0th argument
+  you can prefix the first line with '%' and the argument counting starts at 0.
+  No shell-substitution will be done.
+
+  +----------------------------------------------------------------------------+
+  | %fiss-service                                                              |
+  | -L                                                                         |
+  | -p 8000                                                                    |
+  +----------------------------------------------------------------------------+
+
+  In this example, run would be executed with 'fiss-service' as 0th argument and
+  '-L' '-p 8000'
+
+- ./env
+  This file describes environment-variables for run. This is as params a
+  newline-demilitered file with key=value pairs. As for params, there is no
+  shell-substitution done.
+
+  +----------------------------------------------------------------------------+
+  | HOME=/home/foo                                                             |
+  | XDG_CONFIG_DIRS=/etc/                                                      |
+  | PATH=/bin:/sbin:/usr/bin:/usr/sbin                                         |
+  +----------------------------------------------------------------------------+
+
+- ./user
+  If this file is present, run will be executes as defined user and group(s).
+  You can define your user as 'user' and the group will be the user group or you
+  explicitly define 'user:group'. You can add multiple groups with
+  'user:group:group2:group3', if user is prefixed with a colon (':'), users and
+  groups will be parsed as numeric thus ':1000:1000:1001'.
+
+  +----------------------------------------------------------------------------+
+  | foo:foo:mysql                                                              |
+  +----------------------------------------------------------------------------+
+
+  In this example, run would be executed as 'foo' and als 'foo' as group with
+  'mysql' as additional group.
+
+- ./start
+  If your services cannot be run in the foreground, you should execute link it
+  to start, start is a short-running executable, if start exits it is considered
+  as running. To supervise your services, it's handy to provide a pid-file
+  inside your service as some services provide print its process-id to the
+  console. If no pid-file is found you must implement a stop file.
+
+  +----------------------------------------------------------------------------+
+  | #!/bin/sh                                                                  |
+  |                                                                            |
+  | myserver --print-pid > ./pid                                               |
+  +----------------------------------------------------------------------------+
+
+- ./pid
+  This is a plain-text file containing just the PID of the service in decimal.
+
+- ./stop
+  This script is meant to stop the service, if this file exits the service is
+  considered inactive. This file must not coexist with pid.
+
+  +----------------------------------------------------------------------------+
+  | #!/bin/sh                                                                  |
+  |                                                                            |
+  | myserver2 --stop                                                           |
+  +----------------------------------------------------------------------------+
+
+- ./depends
+  This file contains newline-demilitered service-names which are dependencies of
+  the service. dependencies are started before the service will be started and
+  stopped if no enabled and no other service depend on it. Dependencies are just
+  started, no consideration will be done that the dependency is actually active.
+
+  +----------------------------------------------------------------------------+
+  | dbus                                                                       |
+  | networking                                                                 |
+  +----------------------------------------------------------------------------+
+
+- ./setup
+  If this file is present and executable, it will be executed before run or
+  start, it is meant for example to create files or directories.
+
+  +----------------------------------------------------------------------------+
+  | #!/bin/sh                                                                  |
+  |                                                                            |
+  | mkdir /var/myserver                                                        |
+  +----------------------------------------------------------------------------+
+
+- ./finish
+  If this file is present and executable, it will be executed after run has
+  exited or after stop was executed. This is meant to remove unnessasary files
+  or directories.
+
+  +----------------------------------------------------------------------------+
+  | #!/bin/sh                                                                  |
+  |                                                                            |
+  | rm -rf /var/myserver                                                       |
+  +----------------------------------------------------------------------------+
+
+- ./log
+  If this file is present, fiss will write the stdout and stderr of run to it.
+  This will be done without any modifications.
+
+- ./log/ service
+  If this directory is present and a valid service-directory, stdout and stderr
+  of your service will be redirected to the run of the log-service. This is done
+  with a internal pipe, thus no data will be lost of either services failes.
+
+- ./no-log
+  If this file is present, no logging will be done at all. This is meant for
+  very verbose services, which would overflout the system.
+
+  If log, log/ or no-log is not present, the output of will be redirected to
+  /run/fiss/log/&lt;service&gt;.
+
+- ./up-&lt;runlevel&gt;
+  If this file is present, the services will be started automatically and
+  restarted if this services dies. On other systems, this is called 'enabling'
+  a service.
+
+- ./once-&lt;runlevel&gt;
+  If this file is present, the services will be started automatically but not
+  restarted if this services dies.
+
+To be a valid service, run, stop or depends must be present. If only depends is
+present, this service is a dummy service thus no actual action will be taken but
+starting and stopping dependencies.
+
+start, stop, setup and finish are executed as the same user as fsvs or finit is
+started, thus root in the most cased. user, env, params are not read when
+handling a background-service. Every file will be executed in the services
+directory, reading a file like './conf' will be read out of the service
+directory.
+
+
+<a class=title id=diplom href=#diplom>Controlling Services</a>
+--------------------------------------------------------------------------------
+
+To control a service, you can use fsvc. fsvc connects to the control-socket and
+controls the services. How a command and a serialized service is defined is
+stated in docs/internal/.
+
+fiss supports runit or daemontools' sv, if you are used to your fancy sv-
+implementation, you still can but keep in mind that even runit's sv only has
+limited functionality compared to fsvc.
+
+Following commands are present:
+
+- status [--short] [--check] [service]
+  Use this command to query a service. If service is omitted, every services
+  is printed. If issued with check, nothing will be printed and the return-code
+  is 0 if the service is active, otherwise 1. If issued with short, a table will
+  be printed rather than a list. Wildcards can be used with '*' for variable-
+  length and '%' for any character.
+
+- start [--pin] &lt;service&gt;
+  With start, you obviously start a service but if your service is not enabled
+  it will stop if it failes. You can pin this services as enabled manually,
+  the services will be restarted for this session only.
+
+- stop [--pin] &lt;service&gt;
+  You stop a services, but if you services is already enabled (either manually
+  or through a up-* file) or is a dependency of something, it will be restarted
+  instantly. To force this services as down, you must pin it.
+
+- enable [--once] &lt;service&gt; and disable [--once] &lt;service&gt;
+  This is a helper for creating up-&lt;runlevel&gt; or once-&lt;runlevel&gt;. If issued
+  without once, a up-* file will be created. If issued with once, a once-* file
+  will be created. The service directory should be refreshed a moment after.
+
+- kill &lt;service&gt; &lt;signal&gt;
+  With this command, you can send a signal to the service executable. No
+  consideration will be done, thus sending SIGSTOP will not set the pause-flag.
+  As a signal, you can use the number (9 as SIGKILL), the unix identifier like
+  KILL or prefixed with 'SIG' thus SIGKILL.
+
+- pause &lt;service&gt; and resume &lt;service&gt;
+  This pauses or resumes a services, SIGSTOP or SIGCONT will be sent to the
+  executable and the pause-flag is set.
+
+- switch [--reset] &lt;service&gt;
+  This switches the runlevel, all services that are enabled by file will be
+  stopped. If issued with reset also all services will be stopped that were
+  enabled manually with start --pin.
 
 
 ================================================================================
 
-  -*-  <i>Deze website is gebaseerd op <a href=https://kisslinux.org/>Kiss Linux</a>' website (MIT gelicenseerd)</i>  -*-  
+  -*-  <i>This website is based on <a href=https://kisslinux.org/>Kiss Linux</a>' website (MIT gelicenseerd)</i>  -*-  
 
 </div>
-<script type=text/javascript>
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    toggle_dark();
-  }
-</script>
 </body>
 
 </html>

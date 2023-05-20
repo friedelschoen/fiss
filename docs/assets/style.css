@@ -2,11 +2,11 @@
 
 body {
 	background: #eee;
-	color: #3c3836;
+	color: #222;
 }
 
 body.dark {
-	background: #3c3836;
+	background: #222;
 	color: #eee;
 }
 
@@ -37,7 +37,7 @@ a:hover {
 }
 
 .title {
-	color: #216477;
+	color: #772121;
 	font-weight: bold;
 	text-decoration: none;
 	font-size: 14pt;
@@ -48,7 +48,7 @@ a:hover {
 }
 
 .subtitle {
-	color: #216477;
+	color: #772121;
 	text-decoration: underline;
 }
 
@@ -58,7 +58,7 @@ a:hover {
 
 .dark a.title,
 .dark a.header {
-	color: #339cba;
+	color: #ba3333;
 }
 
 #wrapper {
