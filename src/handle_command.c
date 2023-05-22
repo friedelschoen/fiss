@@ -84,7 +84,7 @@ int service_handle_command(void* argv, sv_command_t command, unsigned char extra
 			if (s == NULL)
 				return -ENOSV;
 
-			service_send(s, extra);
+			service_kill(s, extra);
 			response[0] = s;
 			return 1;
 
@@ -96,7 +96,7 @@ int service_handle_command(void* argv, sv_command_t command, unsigned char extra
 				return 0;
 
 			s->paused = true;
-			service_send(s, SIGSTOP);
+			service_kill(s, SIGSTOP);
 
 			s->status_change = time(NULL);
 			service_update_status(s);
@@ -112,7 +112,7 @@ int service_handle_command(void* argv, sv_command_t command, unsigned char extra
 				return 0;
 
 			s->paused = false;
-			service_send(s, SIGCONT);
+			service_kill(s, SIGCONT);
 
 			s->status_change = time(NULL);
 			service_update_status(s);

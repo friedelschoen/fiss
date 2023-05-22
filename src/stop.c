@@ -57,7 +57,7 @@ void service_stop(service_t* s, bool* changed) {
 	}
 }
 
-void service_send(service_t* s, int signal) {
+void service_kill(service_t* s, int signal) {
 	if (!s->pid)
 		return;
 

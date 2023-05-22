@@ -1,4 +1,4 @@
-#include "config_parser.h"
+#include "parse.h"
 
 #include <fcntl.h>
 #include <grp.h>

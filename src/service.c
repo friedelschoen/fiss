@@ -40,7 +40,7 @@ int service_pattern(const char* name, service_t** dest, int dest_max) {
 	return size;
 }
 
-int service_refresh(void) {
+int service_refresh_directory(void) {
 	DIR*           dp;
 	struct dirent* ep;
 

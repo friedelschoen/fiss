@@ -57,7 +57,7 @@ int main(int argc, const char** argv) {
 	printf("booting...\n");
 
 	// stage 1
-	service_handle_stage(0);
+	service_stage(0);
 
 
 	// stage 2
@@ -74,7 +74,7 @@ int main(int argc, const char** argv) {
 	}
 
 	// stage 3
-	service_handle_stage(2);
+	service_stage(2);
 
 #ifdef RB_AUTOBOOT
 	/* fallthrough stage 3 */
