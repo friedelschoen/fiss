@@ -94,7 +94,7 @@ void service_handle_stage(int stage) {
 			printf("leave stage 1\n");
 			break;
 		}
-		if (child != 0) {
+		if (child <= 0) {
 			/* collect terminated children */
 
 			dont_wait = true;
