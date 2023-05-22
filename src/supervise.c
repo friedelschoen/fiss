@@ -41,7 +41,7 @@ static void signal_child(int unused) {
 	if (s == NULL)
 		return;
 
-	service_check_state(s, WIFSIGNALED(status), WIFSIGNALED(status) ? WTERMSIG(status) : WEXITSTATUS(status));
+	service_handle_exit(s, WIFSIGNALED(status), WIFSIGNALED(status) ? WTERMSIG(status) : WEXITSTATUS(status));
 }
 
 static void check_deaths(void) {
@@ -50,7 +50,7 @@ static void check_deaths(void) {
 		s = &services[i];
 		if (s->state == STATE_ACTIVE_PID) {
 			if (kill(s->pid, 0) == -1 && errno == ESRCH)
-				service_check_state(s, false, 0);
+				service_handle_exit(s, false, 0);
 		}
 	}
 }
@@ -86,7 +86,7 @@ static void accept_socket(void) {
 			print_error("error: cannot accept client from control-socket: %s\n");
 		}
 	} else {
-		service_handle_socket(client_fd);
+		service_handle_client(client_fd);
 	}
 }
 
@@ -169,7 +169,7 @@ int service_supervise(const char* service_dir_, const char* runlevel_, bool forc
 
 	printf(":: starting services on '%s'\n", runlevel);
 
-	if (service_refresh() < 0)
+	if (service_refresh_directory() < 0)
 		return 1;
 
 	printf(":: started services\n");
@@ -177,7 +177,7 @@ int service_supervise(const char* service_dir_, const char* runlevel_, bool forc
 	// accept connections and handle requests
 	while (daemon_running) {
 		check_deaths();
-		service_refresh();
+		service_refresh_directory();
 		check_services();
 		control_sockets();
 		accept_socket();
@@ -214,7 +214,7 @@ int service_supervise(const char* service_dir_, const char* runlevel_, bool forc
 	for (int i = 0; i < services_size; i++) {
 		if (services[i].pid) {
 			printf(":: killing %s\n", services[i].name);
-			service_send(&services[i], SIGKILL);
+			service_kill(&services[i], SIGKILL);
 		}
 	}
 

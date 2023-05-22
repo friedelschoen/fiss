@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 
-void service_handle_socket(int client) {
+void service_handle_client(int client) {
 	char command[2] = { 0, 0 };
 	char service_name[SV_NAME_MAX];
 
@@ -57,7 +57,7 @@ cleanup:
 		service_serial_t service_buffer;
 
 		for (int i = 0; i < res_off; i++) {
-			service_store(response[i], &service_buffer);
+			service_encode(response[i], &service_buffer);
 			writestr(client, response[i]->name);
 			write(client, &service_buffer, sizeof(service_buffer));
 		}

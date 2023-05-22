@@ -277,13 +277,13 @@ int main(int argc, char** argv) {
 
 	if (check) {
 		service_t s;
-		if ((rc = service_command(command, extra, service, &s, 1)) != 1) {
+		if ((rc = service_send_command(command, extra, service, &s, 1)) != 1) {
 			printf("error: %s (errno: %d)\n", command_error[-rc], -rc);
 			return 1;
 		}
 		return s.state == STATE_ACTIVE_PID || s.state == STATE_ACTIVE_DUMMY || s.state == STATE_ACTIVE_FOREGROUND || s.state == STATE_ACTIVE_BACKGROUND;
 	} else {
-		rc = service_command(command, extra, service, response, SV_SOCKET_SERVICE_MAX);
+		rc = service_send_command(command, extra, service, response, SV_SOCKET_SERVICE_MAX);
 
 		if (rc < 0) {
 			printf("error: %s (errno: %d)\n", command_error[-rc], -rc);

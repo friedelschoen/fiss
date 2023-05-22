@@ -1,7 +1,29 @@
 #include "service.h"
 
 
-void service_store(service_t* s, service_serial_t* buffer) {
+const char* service_status_name(service_t* s) {
+	switch (s->state) {
+		case STATE_SETUP:
+			return "setup";
+		case STATE_STARTING:
+			return "starting";
+		case STATE_ACTIVE_DUMMY:
+		case STATE_ACTIVE_FOREGROUND:
+		case STATE_ACTIVE_BACKGROUND:
+		case STATE_ACTIVE_PID:
+			return "run";
+		case STATE_STOPPING:
+			return "stopping";
+		case STATE_FINISHING:
+			return "finishing";
+		case STATE_INACTIVE:
+			return "down";
+		case STATE_DEAD:
+			return "dead";
+	}
+}
+
+void service_encode(service_t* s, service_serial_t* buffer) {
 	buffer->pid[0] = (s->pid >> 0) & 0xff;
 	buffer->pid[1] = (s->pid >> 8) & 0xff;
 	buffer->pid[2] = (s->pid >> 16) & 0xff;
@@ -29,29 +51,7 @@ void service_store(service_t* s, service_serial_t* buffer) {
 	                   ((s->log_service != NULL) << 2);
 }
 
-const char* service_store_human(service_t* s) {
-	switch (s->state) {
-		case STATE_SETUP:
-			return "setup";
-		case STATE_STARTING:
-			return "starting";
-		case STATE_ACTIVE_DUMMY:
-		case STATE_ACTIVE_FOREGROUND:
-		case STATE_ACTIVE_BACKGROUND:
-		case STATE_ACTIVE_PID:
-			return "run";
-		case STATE_STOPPING:
-			return "stopping";
-		case STATE_FINISHING:
-			return "finishing";
-		case STATE_INACTIVE:
-			return "down";
-		case STATE_DEAD:
-			return "dead";
-	}
-}
-
-void service_store_runit(service_t* s, service_serial_runit_t* buffer) {
+void service_encode_runit(service_t* s, service_serial_runit_t* buffer) {
 	uint64_t tai = (uint64_t) s->status_change + 4611686018427387914ULL;
 	int      runit_state;
 	switch (s->state) {
@@ -95,7 +95,7 @@ void service_store_runit(service_t* s, service_serial_runit_t* buffer) {
 	buffer->state[0]              = runit_state;
 }
 
-void service_load(service_t* s, const service_serial_t* buffer) {
+void service_decode(service_t* s, const service_serial_t* buffer) {
 	s->pid = (buffer->pid[3] << 24) |
 	         (buffer->pid[2] << 16) |
 	         (buffer->pid[1] << 8) |

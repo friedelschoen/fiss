@@ -129,27 +129,26 @@ extern int          depends_size;
 extern const char*  service_dir_path;
 
 
-char        service_get_command(const char* command);
-int         service_command(char command, char extra, const char* service, service_t* response, int response_max);
-int         service_handle_command(void* s, sv_command_t command, uint8_t extra, service_t** response);
-int         service_pattern(const char* name, service_t** dest, int dest_max);
-int         service_refresh(void);
-int         service_supervise(const char* service_dir, const char* runlevel, bool force_socket);
+const char* service_status_name(service_t* s);
+void        service_decode(service_t* s, const service_serial_t* buffer);    // for fsvc
+void        service_encode(service_t* s, service_serial_t* buffer);          // for fsvs
+void        service_encode_runit(service_t* s, service_serial_runit_t* buffer);
 service_t*  service_get(const char* name);
+void        service_handle_client(int client);
+int         service_handle_command(void* argv, sv_command_t command, uint8_t extra, service_t** response);
+void        service_handle_command_runit(service_t* s, sv_command_runit_t command);
+void        service_handle_exit(service_t* s, bool signaled, int return_code);
+void        service_init_runit(service_t* s);
+void        service_kill(service_t* s, int signal);
+bool        service_need_restart(service_t* s);
+int         service_pattern(const char* name, service_t** dest, int dest_max);
+int         service_refresh_directory(void);
 service_t*  service_register(int dir, const char* name, bool is_log_service);
-void        service_check_state(service_t* s, bool signaled, int return_code);
-void        service_handle_socket(int client);
-void        service_load(service_t* s, const service_serial_t* buffer);    // for fsvc
-void        service_send(service_t* s, int signal);
+void        service_run(service_t* s);
+int         service_send_command(char command, char extra, const char* service, service_t* response, int response_max);
+void        service_stage(int stage);
 void        service_start(service_t* s, bool* changed);
 void        service_stop(service_t* s, bool* changed);
-void        service_store(service_t* s, service_serial_t* buffer);    // for fsvs
-void        service_store_runit(service_t* s, service_serial_runit_t* buffer);
-const char* service_store_human(service_t* s);
+int         service_supervise(const char* service_dir, const char* runlevel, bool force_socket);
 void        service_update_dependency(service_t* s);
-bool        service_need_restart(service_t* s);
-void        service_run(service_t* s);
-void        service_init_status(service_t* s);
 void        service_update_status(service_t* s);
-void        service_handle_command_runit(service_t* s, sv_command_runit_t command);
-void        service_handle_stage(int stage);

@@ -35,7 +35,7 @@ service_t* service_register(int dir, const char* name, bool is_log_service) {
 
 		strncpy(s->name, name, sizeof(s->name));
 
-		service_init_status(s);
+		service_init_runit(s);
 
 		s->status_change = time(NULL);
 		service_update_status(s);

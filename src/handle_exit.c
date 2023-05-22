@@ -30,7 +30,7 @@ static void do_finish(service_t* s) {
 }
 
 
-void service_check_state(service_t* s, bool signaled, int return_code) {
+void service_handle_exit(service_t* s, bool signaled, int return_code) {
 	s->pid = 0;
 	if (s->restart_file == S_ONCE)
 		s->restart_file = S_DOWN;

@@ -1,5 +1,6 @@
 #include "pattern.h"
 
+
 static const char* strend(const char* s) {
 	while (*s)
 		s++;

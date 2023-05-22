@@ -23,7 +23,6 @@ bool         verbose = false;
 dependency_t depends[SV_DEPENDENCY_MAX];
 int          depends_size;
 
-
 service_t* service_get(const char* name) {
 	for (int i = 0; i < services_size; i++) {
 		if (streq(services[i].name, name))

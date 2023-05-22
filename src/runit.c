@@ -19,7 +19,7 @@ static int runit_signals[] = {
 	[R_USR2]  = SIGUSR2,
 };
 
-void service_init_status(service_t* s) {
+void service_init_runit(service_t* s) {
 #if SV_RUNIT_COMPAT != 0
 	int         lockfd;
 	struct stat st;
@@ -60,7 +60,7 @@ void service_update_status(service_t* s) {
 	}
 
 	service_serial_runit_t stat_runit;
-	service_store_runit(s, &stat_runit);
+	service_encode_runit(s, &stat_runit);
 
 	if (write(fd, &stat_runit, sizeof(stat_runit)) == -1) {
 		print_error("cannot write to supervise/status: %s\n");
@@ -74,7 +74,7 @@ void service_update_status(service_t* s) {
 		return;
 	}
 
-	const char* stat_human = service_store_human(s);
+	const char* stat_human = service_status_name(s);
 	if (write(fd, stat_human, strlen(stat_human)) == -1) {
 		print_error("cannot write to supervise/stat: %s\n");
 		return;
@@ -111,18 +111,18 @@ void service_handle_command_runit(service_t* s, sv_command_runit_t command) {
 			break;
 		case R_KILL:
 			s->restart_manual = S_FORCE_DOWN;
-			service_send(s, SIGKILL);
+			service_kill(s, SIGKILL);
 			break;
 		case R_PAUSE:
 			if (!s->paused) {
 				s->paused = true;
-				service_send(s, SIGSTOP);
+				service_kill(s, SIGSTOP);
 			}
 			break;
 		case R_CONT:
 			if (s->paused) {
 				s->paused = false;
-				service_send(s, SIGCONT);
+				service_kill(s, SIGCONT);
 			}
 			break;
 		case R_ALARM:
@@ -131,7 +131,7 @@ void service_handle_command_runit(service_t* s, sv_command_runit_t command) {
 		case R_QUIT:
 		case R_USR1:
 		case R_USR2:
-			service_send(s, runit_signals[command]);
+			service_kill(s, runit_signals[command]);
 			break;
 		case R_EXIT:
 			// ignored

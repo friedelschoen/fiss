@@ -18,7 +18,7 @@ const char* command_error[] = {
 	[EBEXT]   = "invalid extra"
 };
 
-int service_command(char command, char extra, const char* service, service_t* response, int response_max) {
+int service_send_command(char command, char extra, const char* service, service_t* response, int response_max) {
 	char request[2] = { command, extra };
 
 	int sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -50,7 +50,7 @@ int service_command(char command, char extra, const char* service, service_t* re
 		if (response) {
 			while (res < response_max && readstr(sockfd, response[res].name) > 1) {
 				read(sockfd, &service_buffer, sizeof(service_buffer));
-				service_load(&response[res], &service_buffer);
+				service_decode(&response[res], &service_buffer);
 				res++;
 			}
 		}

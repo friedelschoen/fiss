@@ -15,7 +15,7 @@ static const char* stage_exec[] = {
 };
 
 
-void service_handle_stage(int stage) {
+void service_stage(int stage) {
 	if (stage != 0 && stage != 2)
 		return;
 

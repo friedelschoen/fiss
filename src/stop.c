@@ -12,7 +12,7 @@
 void service_stop(service_t* s, bool* changed) {
 	switch (s->state) {
 		case STATE_ACTIVE_DUMMY:
-			service_check_state(s, false, 0);
+			service_handle_exit(s, false, 0);
 			if (changed)
 				*changed = true;
 
