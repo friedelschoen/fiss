@@ -192,3 +192,12 @@ int signame(char const* name) {
 
 	return -1;
 }
+
+const char* sigabbr(int signal) {
+	// search for name
+	for (signal_name_t* sigpair = signal_names; sigpair->num != 0; sigpair++)
+		if (sigpair->num == signal)
+			return sigpair->name;
+
+	return "UNKNOWN";
+}

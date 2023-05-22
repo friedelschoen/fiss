@@ -72,19 +72,13 @@ void print_status(service_t* s, char* state, size_t size) {
 	snprintf(state + len, size - len, " since %lu%s", diff, diff_unit);
 }
 
-void print_service(service_t* s, service_t* log) {
-	if (s->is_log_service)
-		return;
+void print_service(service_t* s) {
 	char state[100];
 	print_status(s, state, sizeof(state));
 
 	printf("- %s (%s)\n", s->name, state);
 	printf("  [ %c ] restart on exit\n", s->restart_file || s->restart_manual ? 'x' : ' ');
 	printf("  [%3d] last return code (%s)\n", s->return_code, s->last_exit == EXIT_SIGNALED ? "signaled" : "exited");
-	if (s->log_service) {
-		print_status(log, state, sizeof(state));
-		printf("        logging: %s\n", state);
-	}
 	printf("\n");
 }
 
@@ -114,13 +108,15 @@ void print_service_short(service_t* s) {
 		printf("[ - %s  ]", wants_other ? "->" : "  ");
 
 	printf(" %s", s->name);
+
 	if (s->pid) {
-		if (s->state == STATE_ACTIVE_PID || s->state == STATE_ACTIVE_FOREGROUND)
+		if (s->state == STATE_ACTIVE_PID || s->state == STATE_ACTIVE_FOREGROUND) {
 			printf(" (pid: %d)", s->pid);
-		else if (s->last_exit != EXIT_SIGNALED)
-			printf(" (last exit: SIG%s)", to_upper(strsignal(s->return_code)));
-		else if (s->last_exit != EXIT_NORMAL)
+		} else if (s->last_exit == EXIT_SIGNALED) {
+			printf(" (last exit: SIG%s)", sigabbr(s->return_code));
+		} else if (s->last_exit == EXIT_NORMAL) {
 			printf(" (last exit: %d)", s->return_code);
+		}
 	}
 	printf("\n");
 }
@@ -287,7 +283,7 @@ int main(int argc, char** argv) {
 		}
 		return s.state == STATE_ACTIVE_PID || s.state == STATE_ACTIVE_DUMMY || s.state == STATE_ACTIVE_FOREGROUND || s.state == STATE_ACTIVE_BACKGROUND;
 	} else {
-		rc = service_command(command, extra, service, response, 50);
+		rc = service_command(command, extra, service, response, SV_SOCKET_SERVICE_MAX);
 
 		if (rc < 0) {
 			printf("error: %s (errno: %d)\n", command_error[-rc], -rc);
@@ -295,19 +291,10 @@ int main(int argc, char** argv) {
 		}
 
 		for (int i = 0; i < rc; i++) {
-			service_t* log = NULL;
-			if (response[i].log_service) {
-				for (int j = 0; j < rc; j++) {
-					if (strncmp(response[i].name, response[j].name, strlen(response[i].name)) == 0) {
-						log = &response[j];
-						break;
-					}
-				}
-			}
 			if (short_)
 				print_service_short(&response[i]);
 			else
-				print_service(&response[i], log);
+				print_service(&response[i]);
 		}
 	}
 }

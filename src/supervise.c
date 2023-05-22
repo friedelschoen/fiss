@@ -17,7 +17,6 @@
 
 bool daemon_running = true;
 
-
 static void signal_child(int unused) {
 	(void) unused;
 
@@ -98,7 +97,7 @@ static void control_sockets(void) {
 	for (int i = 0; i < services_size; i++) {
 		s = &services[i];
 
-		while (read(s->control, &cmd, 1) == 1) {
+		while (recv(s->control, &cmd, 1, MSG_DONTWAIT) == 1) {
 			service_handle_command_runit(s, cmd);
 		}
 	}
