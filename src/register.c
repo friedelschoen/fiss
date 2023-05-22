@@ -61,8 +61,8 @@ service_t* service_register(int dir, const char* name, bool is_log_service) {
 	strcat(up_path, runlevel);
 	strcat(once_path, runlevel);
 
-	autostart      = fstatat(s->dir, up_path, &st, 0) == -1 && S_ISREG(st.st_mode);
-	autostart_once = fstatat(s->dir, once_path, &st, 0) == -1 && S_ISREG(st.st_mode);
+	autostart      = fstatat(s->dir, up_path, &st, 0) != -1 && S_ISREG(st.st_mode);
+	autostart_once = fstatat(s->dir, once_path, &st, 0) != -1 && S_ISREG(st.st_mode);
 
 	s->restart_file = S_DOWN;
 
