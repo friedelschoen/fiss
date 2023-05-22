@@ -137,3 +137,4 @@ void        service_run(service_t* s);
 void        service_init_status(service_t* s);
 void        service_update_status(service_t* s);
 void        service_handle_command_runit(service_t* s, sv_command_runit_t command);
+void        service_handle_stage(int stage);

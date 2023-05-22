@@ -1,3 +1,4 @@
+#include "config.h"
 #include "service.h"
 
 #include <errno.h>
@@ -8,8 +9,13 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+static const char* stage_exec[] = {
+	[0] = SV_START_EXEC,
+	[2] = SV_STOP_EXEC
+};
 
-void sigblock_all(bool unblock) {
+
+static void sigblock_all(bool unblock) {
 	sigset_t ss;
 	sigemptyset(&ss);
 	sigaddset(&ss, SIGALRM);
@@ -22,7 +28,11 @@ void sigblock_all(bool unblock) {
 	sigprocmask(unblock, &ss, NULL);
 }
 
-void handle_stage1(void) {
+void service_handle_stage(int stage) {
+	if (stage != 0 && stage != 2)
+		return;
+
+	// stage = 0 | 2
 	int      pid, ttyfd, exitstat;
 	sigset_t ss;
 	while ((pid = fork()) == -1) {
@@ -32,13 +42,15 @@ void handle_stage1(void) {
 	if (pid == 0) {
 		/* child */
 
-		/* stage 1 gets full control of console */
-		if ((ttyfd = open("/dev/console", O_RDWR)) == -1) {
-			print_error("error: unable to open /dev/console: %s\n");
-		} else {
-			ioctl(ttyfd, TIOCSCTTY, NULL);    // make the controlling process
-			dup2(ttyfd, 0);
-			if (ttyfd > 2) close(ttyfd);
+		if (stage == 0) {
+			/* stage 1 gets full control of console */
+			if ((ttyfd = open("/dev/console", O_RDWR)) == -1) {
+				print_error("error: unable to open /dev/console: %s\n");
+			} else {
+				ioctl(ttyfd, TIOCSCTTY, NULL);    // make the controlling process
+				dup2(ttyfd, 0);
+				if (ttyfd > 2) close(ttyfd);
+			}
 		}
 
 		sigblock_all(true);
@@ -52,8 +64,9 @@ void handle_stage1(void) {
 		sigact.sa_handler = SIG_IGN;
 		sigaction(SIGCONT, &sigact, NULL);
 
-		execl(SV_START_EXEC, SV_START_EXEC, NULL);
-		print_error("error: unable to exec stage1: %s\n");
+		printf("enter stage %d\n", stage);
+		execl(stage_exec[stage], stage_exec[stage], NULL);
+		print_error("error: unable to exec stage %d: %s\n", stage);
 		_exit(1);
 	}
 	bool dont_wait = false;
@@ -80,15 +93,9 @@ void handle_stage1(void) {
 			sleep(5);
 		}
 
-		/* reget stderr */
-		if ((ttyfd = open("/dev/console", O_WRONLY)) != -1) {
-			dup2(ttyfd, 1);
-			dup2(ttyfd, 2);
-			if (ttyfd > 2)
-				close(ttyfd);
-		}
+		reclaim_console();
 
-		if (child == pid) {
+		if (child == pid && stage == 0) {
 			if (!WIFEXITED(exitstat) || WEXITSTATUS(exitstat) != 0) {
 				if (WIFSIGNALED(exitstat)) {
 					/* this is stage 1 */
@@ -113,87 +120,5 @@ void handle_stage1(void) {
 		}
 
 		fprintf(stderr, "warn: signals only work in stage 2, ignoring...\n");
-	}
-}
-
-
-void handle_stage3(void) {
-	int      pid, ttyfd, exitstat;
-	sigset_t ss;
-	while ((pid = fork()) == -1) {
-		print_error("warn: unable to fork for state3: %s");
-		sleep(5);
-	}
-	if (pid == 0) {
-		/* child */
-
-		setsid();
-
-		sigblock_all(true);
-
-
-		struct sigaction sigact = { 0 };
-		sigact.sa_handler       = SIG_DFL;
-		sigaction(SIGCHLD, &sigact, NULL);
-		sigaction(SIGINT, &sigact, NULL);
-
-		sigact.sa_handler = SIG_IGN;
-		sigaction(SIGCONT, &sigact, NULL);
-
-		printf("enter stage3\n");
-		execl(SV_STOP_EXEC, SV_STOP_EXEC, NULL);
-		print_error("error: unable to exec stage3: %s\n");
-		_exit(1);
-	}
-	bool dont_wait = false;
-	for (;;) {
-		int child;
-		int sig;
-
-		if (!dont_wait) {
-			sigemptyset(&ss);
-			sigaddset(&ss, SIGCHLD);
-			sigaddset(&ss, SIGCONT);
-			sigaddset(&ss, SIGINT);
-
-			sigwait(&ss, &sig);
-		}
-		dont_wait = false;
-
-		do {
-			child = waitpid(-1, &exitstat, WNOHANG);
-		} while (child > 0 && child != pid);
-
-		if (child == -1) {
-			print_error("error: waitpid failed, pausing: %s\n");
-			sleep(5);
-		}
-
-		/* reget stderr */
-		if ((ttyfd = open("/dev/console", O_WRONLY)) != -1) {
-			dup2(ttyfd, 1);
-			dup2(ttyfd, 2);
-			if (ttyfd > 2)
-				close(ttyfd);
-		}
-
-		if (child == pid) {
-			//			if (!WIFEXITED(exitstat) || WEXITSTATUS(exitstat) != 0) {
-			//				printf("child failed\n");
-			//			}
-			printf("leave stage: stage3\n");
-			break;
-		}
-		if (child != 0) {
-			/* collect terminated children */
-			dont_wait = true;
-			continue;
-		}
-
-		/* sig? */
-		if (sig != SIGCONT && sig != SIGINT) {
-			continue;
-		}
-		fprintf(stderr, "warn: signals only work in stage 2\n");
 	}
 }

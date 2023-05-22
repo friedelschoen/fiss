@@ -1,6 +1,7 @@
 #include "util.h"
 
 #include <errno.h>
+#include <fcntl.h>
 #include <limits.h>
 #include <stdarg.h>
 #include <string.h>
@@ -74,4 +75,18 @@ int fork_dup_cd_exec(int dir, const char* path, int fd0, int fd1, int fd2) {
 		_exit(1);
 	}
 	return pid;
+}
+
+int reclaim_console(void) {
+	int ttyfd;
+	if ((ttyfd = open("/dev/console", O_RDWR)) == -1)
+		return -1;
+
+	dup2(ttyfd, 0);
+	dup2(ttyfd, 1);
+	dup2(ttyfd, 2);
+	if (ttyfd > 2)
+		close(ttyfd);
+
+	return 0;
 }

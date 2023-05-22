@@ -32,9 +32,6 @@ int handle_initctl(int argc, const char** argv) {
 }
 
 
-void handle_stage1(void);
-void handle_stage3(void);
-
 static bool do_reboot;
 
 static void signal_interrupt(int signum) {
@@ -54,21 +51,18 @@ int main(int argc, const char** argv) {
 
 	sigblock_all(false);
 
-	/* console */
-	if ((ttyfd = open("/dev/console", O_WRONLY)) != -1) {
-		dup2(ttyfd, 0);
-		dup2(ttyfd, 1);
-		dup2(ttyfd, 2);
-		if (ttyfd > 2) close(ttyfd);
-	}
+	reclaim_console();
 
 	// disable ctrl-alt-delete
 	reboot(0);
 
 	printf("booting...\n");
 
-	handle_stage1();
+	// stage 1
+	service_handle_stage(0);
 
+
+	// stage 2
 	if (daemon_running) {    // stage1 succeed
 		sigblock_all(true);
 
@@ -81,14 +75,8 @@ int main(int argc, const char** argv) {
 		sigblock_all(false);
 	}
 
-	handle_stage3();
-
-	/* reget stderr */
-	if ((ttyfd = open("/dev/console", O_WRONLY)) != -1) {
-		dup2(ttyfd, 1);
-		dup2(ttyfd, 2);
-		if (ttyfd > 2) close(ttyfd);
-	}
+	// stage 3
+	service_handle_stage(2);
 
 #ifdef RB_AUTOBOOT
 	/* fallthrough stage 3 */
