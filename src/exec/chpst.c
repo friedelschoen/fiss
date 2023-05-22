@@ -113,6 +113,7 @@ int main(int argc, char** argv) {
 		if (chroot(root) == -1)
 			print_error("unable to change root directory: %s\n");
 
+		// chdir to '/', otherwise the next command will complain 'directory not found'
 		chdir("/");
 	}
 	if (cd) {
