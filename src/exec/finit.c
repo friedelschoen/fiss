@@ -13,8 +13,6 @@
 #include <unistd.h>
 
 
-void sigblock_all(bool unblock);
-
 int handle_initctl(int argc, const char** argv) {
 	if (argc != 2 || argv[1][1] != '\0' || (argv[1][0] != '0' && argv[1][0] != '6')) {
 		print_usage_exit(PROG_FINIT, 1);

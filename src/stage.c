@@ -15,19 +15,6 @@ static const char* stage_exec[] = {
 };
 
 
-static void sigblock_all(bool unblock) {
-	sigset_t ss;
-	sigemptyset(&ss);
-	sigaddset(&ss, SIGALRM);
-	sigaddset(&ss, SIGCHLD);
-	sigaddset(&ss, SIGCONT);
-	sigaddset(&ss, SIGHUP);
-	sigaddset(&ss, SIGINT);
-	sigaddset(&ss, SIGPIPE);
-	sigaddset(&ss, SIGTERM);
-	sigprocmask(unblock, &ss, NULL);
-}
-
 void service_handle_stage(int stage) {
 	if (stage != 0 && stage != 2)
 		return;

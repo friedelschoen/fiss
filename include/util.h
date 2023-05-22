@@ -22,3 +22,4 @@ unsigned int stat_mode(const char* format, ...);
 int fork_dup_cd_exec(int dir, const char* path, int fd0, int fd1, int fd2);
 
 int reclaim_console(void);
+void sigblock_all(int unblock);

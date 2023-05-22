@@ -5,6 +5,7 @@
 #include <limits.h>
 #include <stdarg.h>
 #include <string.h>
+#include <signal.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -89,4 +90,18 @@ int reclaim_console(void) {
 		close(ttyfd);
 
 	return 0;
+}
+
+void sigblock_all(int unblock) {
+	sigset_t ss;
+	sigemptyset(&ss);
+	sigfillset(&ss);
+/*	sigaddset(&ss, SIGALRM);
+	sigaddset(&ss, SIGCHLD);
+	sigaddset(&ss, SIGCONT);
+	sigaddset(&ss, SIGHUP);
+	sigaddset(&ss, SIGINT);
+	sigaddset(&ss, SIGPIPE);
+	sigaddset(&ss, SIGTERM);*/
+	sigprocmask(unblock, &ss, NULL);
 }
