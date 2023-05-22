@@ -2,10 +2,11 @@
 
 
 void service_store(service_t* s, service_serial_t* buffer) {
-	buffer->pid[0]           = (s->pid >> 0) & 0xff;
-	buffer->pid[1]           = (s->pid >> 8) & 0xff;
-	buffer->pid[2]           = (s->pid >> 16) & 0xff;
-	buffer->pid[3]           = (s->pid >> 24) & 0xff;
+	buffer->pid[0] = (s->pid >> 0) & 0xff;
+	buffer->pid[1] = (s->pid >> 8) & 0xff;
+	buffer->pid[2] = (s->pid >> 16) & 0xff;
+	buffer->pid[3] = (s->pid >> 24) & 0xff;
+
 	buffer->status_change[0] = (s->status_change >> 0) & 0xff;
 	buffer->status_change[1] = (s->status_change >> 8) & 0xff;
 	buffer->status_change[2] = (s->status_change >> 16) & 0xff;
@@ -14,17 +15,18 @@ void service_store(service_t* s, service_serial_t* buffer) {
 	buffer->status_change[5] = (s->status_change >> 40) & 0xff;
 	buffer->status_change[6] = (s->status_change >> 48) & 0xff;
 	buffer->status_change[7] = (s->status_change >> 56) & 0xff;
-	buffer->failcount[0]     = (s->fail_count);
-	buffer->return_code[0]   = (s->return_code);
 
-	buffer->flags[0] = (s->state << 0) |
-	                   (s->restart_file << 4) |
-	                   (s->restart_manual << 6);
-	buffer->flags[1] = (s->last_exit << 0) |
-	                   (service_need_restart(s) << 2) |
-	                   (s->paused << 3) |
-	                   (s->is_log_service << 4) |
-	                   ((s->log_service != NULL) << 5);
+	buffer->failcount[0]   = (s->fail_count);
+	buffer->return_code[0] = (s->return_code);
+
+	buffer->flags[0] = (s->state << 4) |
+	                   (s->restart_file << 2) |
+	                   (s->restart_manual << 0);
+	buffer->flags[1] = (s->last_exit << 6) |
+	                   (service_need_restart(s) << 5) |
+	                   (s->paused << 4) |
+	                   (s->is_log_service << 3) |
+	                   ((s->log_service != NULL) << 2);
 }
 
 const char* service_store_human(service_t* s) {
@@ -111,12 +113,13 @@ void service_load(service_t* s, const service_serial_t* buffer) {
 	s->fail_count  = buffer->failcount[0];
 	s->return_code = buffer->return_code[0];
 
-	s->state          = (buffer->flags[0] >> 0) & 0x0F;
+	s->state          = (buffer->flags[0] >> 6) & 0x0F;
 	s->restart_file   = (buffer->flags[0] >> 4) & 0x03;
-	s->restart_manual = (buffer->flags[0] >> 6) & 0x01;
+	s->restart_manual = (buffer->flags[0] >> 2) & 0x03;
 
-	s->last_exit      = (buffer->flags[1] >> 0) & 0x03;
-	s->paused         = (buffer->flags[1] >> 3) & 0x01;
-	s->is_log_service = (buffer->flags[1] >> 4) & 0x01;
-	s->log_service    = (buffer->flags[1] >> 5) & 0x01 ? (void*) 1 : (void*) 0;
+	s->last_exit      = (buffer->flags[1] >> 6) & 0x03;
+	s->restart_file   = (buffer->flags[1] >> 5) & 0x01;
+	s->paused         = (buffer->flags[1] >> 4) & 0x01;
+	s->is_log_service = (buffer->flags[1] >> 3) & 0x01;
+	s->log_service    = (buffer->flags[1] >> 2) & 0x01 ? (void*) 1 : (void*) 0;
 }
