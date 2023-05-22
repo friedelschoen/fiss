@@ -130,6 +130,7 @@ from HEAD.
 
 +------------------------------------------------------------------------------+
 | git clone https://github.com/friedelschoen/fiss.git                          |
+| cd fiss/                                                                     |
 +------------------------------------------------------------------------------+
 
 Then you have to compile the project with make.
@@ -141,6 +142,29 @@ Then you have to compile the project with make.
 
 Executables are now stored in ./bin, standard configuration-files are stored in
 ./etc, runtime-required files are in ./share and manuals in ./man.
+
+
+<a class=title id=install href=#install>Installation on Void Linux</a>
+--------------------------------------------------------------------------------
+
+If you don't have the source-tree yet, clone and bootstrap it with git.
+
++------------------------------------------------------------------------------+
+| git clone https://github.com/void-linux/void-packages.git                    |
+| cd void-packages/                                                            |
+| ./xbps-src binary-bootstrap                                                  |
++------------------------------------------------------------------------------+
+
+<b>fiss</b> is not a official package yet, as it's too unstable to include, but you can
+add my void-packages as remote and compile.
+
++------------------------------------------------------------------------------+
+| git remote add fiss https://github.com/friedelschoen/void-packages.git       |
+| git pull fiss fiss                                                           |
+| ./xbps pkg fiss                                                              |
+| xi fiss                                     # if xtools is installed         |
+| sudo xbps-install -R hostdir/binpkgs fiss   # if xtools is not installed     |
++------------------------------------------------------------------------------+
 
 
 <a class=title id=getting-started href=#getting-started>Getting Started</a>
