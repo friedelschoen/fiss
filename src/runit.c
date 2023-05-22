@@ -59,10 +59,10 @@ void service_update_status(service_t* s) {
 		return;
 	}
 
-	uint8_t stat_runit[SV_SERIAL_RUNIT_LEN];
-	service_store_runit(s, stat_runit);
+	service_serial_runit_t stat_runit;
+	service_store_runit(s, &stat_runit);
 
-	if (write(fd, stat_runit, sizeof(stat_runit)) == -1) {
+	if (write(fd, &stat_runit, sizeof(stat_runit)) == -1) {
 		print_error("cannot write to supervise/status: %s\n");
 		return;
 	}

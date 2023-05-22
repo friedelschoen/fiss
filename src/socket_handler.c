@@ -54,12 +54,12 @@ cleanup:
 		goto cleanup;
 	} else {
 		write(client, "", 1);
-		uint8_t service_buffer[SV_SERIAL_LEN];
+		service_serial_t service_buffer;
 
 		for (int i = 0; i < res_off; i++) {
-			service_store(response[i], service_buffer);
+			service_store(response[i], &service_buffer);
 			writestr(client, response[i]->name);
-			write(client, service_buffer, sizeof(service_buffer));
+			write(client, &service_buffer, sizeof(service_buffer));
 		}
 		write(client, "", 1);
 	}

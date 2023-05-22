@@ -7,14 +7,11 @@
 #include <stdint.h>
 #include <time.h>
 
-#define SV_SERIAL_LEN       16
-#define SV_SERIAL_RUNIT_LEN 20
-#define SV_HAS_LOGSERVICE   ((void*) 1)
-
 #define EBADCMD 1    // command not found
 #define ENOSV   2    // service required
 #define EBADSV  3    // no matching services
 #define EBEXT   4    // invalid extra
+
 
 typedef enum {
 	S_START   = 'u',    // start if not running and restart if failed
@@ -73,6 +70,24 @@ typedef enum service_restart {
 	S_RESTART,
 } service_restart_t;
 
+typedef struct service_serial {
+	uint8_t pid[4];
+	uint8_t status_change[8];
+	uint8_t failcount[1];
+	uint8_t return_code[1];
+	uint8_t flags[2];
+} service_serial_t;
+
+typedef struct service_serial_runit {
+	uint8_t status_change[8];
+	uint8_t status_change_nsec[4];
+	uint8_t pid[4];
+	uint8_t paused[1];
+	uint8_t wants_up[1];
+	uint8_t terminated[1];
+	uint8_t state[1];
+} service_serial_runit_t;
+
 typedef struct service {
 	char              name[SV_NAME_MAX];    // name of service
 	int               dir;                  // dirfd
@@ -124,12 +139,12 @@ service_t*  service_get(const char* name);
 service_t*  service_register(int dir, const char* name, bool is_log_service);
 void        service_check_state(service_t* s, bool signaled, int return_code);
 void        service_handle_socket(int client);
-void        service_load(service_t* s, const uint8_t* buffer);    // for fsvc
+void        service_load(service_t* s, const service_serial_t* buffer);    // for fsvc
 void        service_send(service_t* s, int signal);
 void        service_start(service_t* s, bool* changed);
 void        service_stop(service_t* s, bool* changed);
-void        service_store(service_t* s, uint8_t* buffer);    // for fsvs
-void        service_store_runit(service_t* s, uint8_t* buffer);
+void        service_store(service_t* s, service_serial_t* buffer);    // for fsvs
+void        service_store_runit(service_t* s, service_serial_runit_t* buffer);
 const char* service_store_human(service_t* s);
 void        service_update_dependency(service_t* s);
 bool        service_need_restart(service_t* s);

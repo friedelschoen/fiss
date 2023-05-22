@@ -44,14 +44,13 @@ int service_command(char command, char extra, const char* service, service_t* re
 	int res;
 	read(sockfd, &res, 1);
 
-	uint8_t service_buffer[SV_SERIAL_LEN];
+	service_serial_t service_buffer;
 
 	if (res == 0) {
 		if (response) {
 			while (res < response_max && readstr(sockfd, response[res].name) > 1) {
-				read(sockfd, service_buffer, sizeof(service_buffer));
-				service_load(&response[res], service_buffer);
-				//			print_service(&s);
+				read(sockfd, &service_buffer, sizeof(service_buffer));
+				service_load(&response[res], &service_buffer);
 				res++;
 			}
 		}
