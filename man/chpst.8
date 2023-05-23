@@ -18,10 +18,6 @@ envuidgid. Set the environment variables $UID and $GID to the user's uid and gid
 \fB\fC\-b argv0\fR
 Run prog with argv0 as the 0th argument.
 .PP
-\fB\fC\-e dir\fR
-Set various environment variables as specified by files in the directory dir: If dir contains a file named k whose first line is v, chpst removes the environment variable k if it exists, and then adds the environment variable k with the value v. The name k must not contain =. Spaces and tabs at the end of v are removed, and nulls in v are changed to newlines. If
-the file k is empty (0 bytes long), chpst removes the environment variable k if it exists, without adding a new variable.
-.PP
 \fB\fC\-/ root\fR
 Change the root directory to root before starting prog.
 .PP
@@ -38,6 +34,25 @@ Open the file lock for writing, and obtain an exclusive lock on it. lock will be
 .PP
 \fB\fC\-L lock\fR
 The same as \-l, but fail immediately if lock is locked by another process.
+.PP
+\fB\fC\-P\fR
+Run prog in a new process group.
+.PP
+\fB\fC\-0\fR
+Close standard input before starting prog.
+.PP
+\fB\fC\-1\fR
+Close standard output before starting prog.
+.PP
+\fB\fC\-2\fR
+Close standard error before starting prog.
+.SH NOT IMPLEMENTED
+.PP
+Following options are defined in runit's chpst but are ignored by fiss' implementation.
+.PP
+\fB\fC\-e dir\fR
+Set various environment variables as specified by files in the directory dir: If dir contains a file named k whose first line is v, chpst removes the environment variable k if it exists, and then adds the environment variable k with the value v. The name k must not contain =. Spaces and tabs at the end of v are removed, and nulls in v are changed to newlines. If
+the file k is empty (0 bytes long), chpst removes the environment variable k if it exists, without adding a new variable.
 .PP
 \fB\fC\-m bytes\fR
 Limit the data segment, stack segment, locked physical pages, and total of all segment per process to bytes bytes each.
@@ -59,18 +74,6 @@ Limit the core file size to bytes bytes.
 .PP
 \fB\fC\-v\fR
 Print verbose messages to standard error. This includes warnings about limits unsupported by the system.
-.PP
-\fB\fC\-P\fR
-Run prog in a new process group.
-.PP
-\fB\fC\-0\fR
-Close standard input before starting prog.
-.PP
-\fB\fC\-1\fR
-Close standard output before starting prog.
-.PP
-\fB\fC\-2\fR
-Close standard error before starting prog.
 .SH EXIT CODES
 .PP
 chpst exits 100 when called with wrong options. It prints an error message and exits 111 if it has trouble changing the process state. Otherwise its exit code is the same as that of prog.

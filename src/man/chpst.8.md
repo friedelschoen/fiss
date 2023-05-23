@@ -21,10 +21,6 @@ envuidgid. Set the environment variables $UID and $GID to the user's uid and gid
 `-b argv0`
 Run prog with argv0 as the 0th argument.
 
-`-e dir`
-Set various environment variables as specified by files in the directory dir: If dir contains a file named k whose first line is v, chpst removes the environment variable k if it exists, and then adds the environment variable k with the value v. The name k must not contain =. Spaces and tabs at the end of v are removed, and nulls in v are changed to newlines. If
-the file k is empty (0 bytes long), chpst removes the environment variable k if it exists, without adding a new variable.
-
 `-/ root`
 Change the root directory to root before starting prog.
 
@@ -39,6 +35,27 @@ Open the file lock for writing, and obtain an exclusive lock on it. lock will be
 
 `-L lock`
 The same as -l, but fail immediately if lock is locked by another process.
+
+`-P`
+Run prog in a new process group.
+
+`-0`
+Close standard input before starting prog.
+
+`-1`
+Close standard output before starting prog.
+
+`-2`
+Close standard error before starting prog.
+
+
+## NOT IMPLEMENTED
+
+Following options are defined in runit's chpst but are ignored by fiss' implementation.
+
+`-e dir`
+Set various environment variables as specified by files in the directory dir: If dir contains a file named k whose first line is v, chpst removes the environment variable k if it exists, and then adds the environment variable k with the value v. The name k must not contain =. Spaces and tabs at the end of v are removed, and nulls in v are changed to newlines. If
+the file k is empty (0 bytes long), chpst removes the environment variable k if it exists, without adding a new variable.
 
 `-m bytes`
 Limit the data segment, stack segment, locked physical pages, and total of all segment per process to bytes bytes each.
@@ -61,17 +78,6 @@ Limit the core file size to bytes bytes.
 `-v`
 Print verbose messages to standard error. This includes warnings about limits unsupported by the system.
 
-`-P`
-Run prog in a new process group.
-
-`-0`
-Close standard input before starting prog.
-
-`-1`
-Close standard output before starting prog.
-
-`-2`
-Close standard error before starting prog.
 
 ## EXIT CODES
 
