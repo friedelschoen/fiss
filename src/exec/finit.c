@@ -39,7 +39,6 @@ static void signal_interrupt(int signum) {
 
 
 int main(int argc, const char** argv) {
-	int      ttyfd;
 	sigset_t ss;
 
 	if (getpid() != 1) {
@@ -88,26 +87,23 @@ int main(int argc, const char** argv) {
 			sync();
 			reboot(RB_AUTOBOOT);
 		} else {
-#	ifdef RB_POWER_OFF
+#	if defined(RB_POWER_OFF)
 			printf("system power off\n");
 			sync();
 			reboot(RB_POWER_OFF);
 			sleep(2);
-#	endif
-#	ifdef RB_HALT_SYSTEM
+#	elif defined(RB_HALT_SYSTEM)
 			printf("system halt\n");
 			sync();
 			reboot(RB_HALT_SYSTEM);
-#	else
-#		ifdef RB_HALT
+#	elif define(RB_HALT)
 			printf("system halt\n");
 			sync();
 			reboot(RB_HALT);
-#		else
+#	else
 			printf("system reboot\n");
 			sync();
 			reboot(RB_AUTOBOOT);
-#		endif
 #	endif
 		}
 		if (pid == 0)
@@ -117,8 +113,7 @@ int main(int argc, const char** argv) {
 		sigaddset(&ss, SIGCHLD);
 		sigprocmask(SIG_UNBLOCK, &ss, NULL);
 
-		while (waitpid(pid, NULL, 0) == -1)
-			;
+		while (waitpid(pid, NULL, 0) != -1) {}
 	}
 #endif
 
