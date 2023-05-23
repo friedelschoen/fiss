@@ -77,8 +77,14 @@ void print_service(service_t* s) {
 	print_status(s, state, sizeof(state));
 
 	printf("- %s (%s)\n", s->name, state);
-	printf("  [ %c ] restart on exit\n", s->restart_file || s->restart_manual ? 'x' : ' ');
-	printf("  [%3d] last return code (%s)\n", s->return_code, s->last_exit == EXIT_SIGNALED ? "signaled" : "exited");
+	printf("  [ %c ] restart on exit\n", s->restart_final ? 'x' : ' ');
+	if (s->return_code > 0)
+		printf("  [%3d] last return code (%s)\n", s->return_code, s->last_exit == EXIT_SIGNALED ? "signaled" : "exited");
+	printf("  [%3d] fail count\n", s->fail_count);
+	printf("  [ %c ] has log service\n", s->is_log_service ? '-'
+	                                     : s->log_service  ? 'x'
+	                                                       : ' ');
+	printf("  [ %c ] is paused\n", s->paused ? 'x' : ' ');
 	printf("\n");
 }
 
@@ -248,6 +254,14 @@ int main(int argc, char** argv) {
 		}
 
 		command = streq(command_str, "pause") ? S_PAUSE : S_RESUME;
+	} else if (streq(command_str, "reset")) {
+		if (!service) {
+			printf("service omitted\n");
+			return 1;
+		}
+
+		command = S_RESET;
+		extra   = 0;
 	} else if (streq(command_str, "switch")) {
 		if (!service) {
 			printf("runlevel omitted\n");

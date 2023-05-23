@@ -108,7 +108,7 @@ int service_handle_command(void* argv, sv_command_t command, unsigned char extra
 			if (s == NULL)
 				return -ENOSV;
 
-			if (s->state == STATE_INACTIVE || !s->paused)
+			if (s->state == STATE_INACTIVE || s->state == STATE_DEAD || s->pid == 0 || !s->paused)
 				return 0;
 
 			s->paused = false;
@@ -120,14 +120,18 @@ int service_handle_command(void* argv, sv_command_t command, unsigned char extra
 			response[0] = s;
 			return 1;
 
-		case S_REVIVE:
+		case S_RESET:
 			if (s == NULL)
 				return -ENOSV;
 
-			if (s->state != STATE_DEAD)
-				return 0;
+			if (s->paused) {
+				s->paused = false;
+				service_kill(s, SIGCONT);
+			}
 
-			s->state = STATE_INACTIVE;
+			s->fail_count = 0;
+			if (s->state == STATE_DEAD)
+				s->state = STATE_INACTIVE;
 
 			s->status_change = time(NULL);
 			service_update_status(s);

@@ -19,7 +19,7 @@ typedef enum {
 	S_SEND    = 'k',    // + signal | send signal to service
 	S_PAUSE   = 'p',    // pause service (send SIGSTOP)
 	S_RESUME  = 'c',    // unpause service (send SIGCONT)
-	S_REVIVE  = 'v',    // revive died service
+	S_RESET   = 'v',    // revive died service
 	S_EXIT    = 'x',    // kill the fsvs instance
 	S_STATUS  = 'a',    // get status of all services
 	S_SWITCH  = 'l',    // change runlevel
