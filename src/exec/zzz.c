@@ -32,12 +32,19 @@ int main(int argc, char** argv) {
 		switch (opt) {
 			case 'n':
 				new_state = NULL;
+				new_disk  = NULL;
+				break;
+			case 's':
+				new_state = "suspend";
+				new_disk  = NULL;
 				break;
 			case 'S':
 				new_state = "freeze";
+				new_disk  = NULL;
 				break;
 			case 'z':
 				new_state = "mem";
+				new_disk  = NULL;
 				break;
 			case 'Z':
 				new_state = "disk";
@@ -50,9 +57,6 @@ int main(int argc, char** argv) {
 			case 'H':
 				new_state = "disk";
 				new_disk  = "suspend";
-				break;
-			case 's':
-				new_state = "suspend";
 				break;
 			default:
 				printf("zzz [-n] [-S] [-z] [-Z] [-R] [-H]\n");
