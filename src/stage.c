@@ -1,5 +1,6 @@
 #include "config.h"
 #include "service.h"
+#include "util.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -56,56 +57,32 @@ void service_stage(int stage) {
 		print_error("error: unable to exec stage %d: %s\n", stage);
 		_exit(1);
 	}
-	bool dont_wait = false;
-	for (;;) {
-		int child;
-		int sig = 0;
 
-		if (!dont_wait) {
-			sigemptyset(&ss);
-			sigaddset(&ss, SIGCHLD);
-			sigaddset(&ss, SIGCONT);
-			sigaddset(&ss, SIGINT);
+	int child;
+	int sig = 0;
 
-			sigwait(&ss, &sig);
-		}
-		dont_wait = false;
+	sigemptyset(&ss);
+	sigaddset(&ss, SIGCHLD);
+	sigaddset(&ss, SIGCONT);
+	sigaddset(&ss, SIGINT);
 
-		do {
-			child = waitpid(-1, &exitstat, WNOHANG);
-		} while (child > 0 && child != pid);
+	sigwait(&ss, &sig);
 
-		if (child == -1) {
-			print_error("warn: waitpid failed: %s");
-			sleep(5);
-		}
+	if (waitpid(pid, &exitstat, 0) == -1) {
+		print_error("warn: waitpid failed: %s");
+		sleep(5);
+	}
 
-		reclaim_console();
+	reclaim_console();
 
-		if (child == pid && stage == 0) {
-			if (!WIFEXITED(exitstat) || WEXITSTATUS(exitstat) != 0) {
-				if (WIFSIGNALED(exitstat)) {
-					/* this is stage 1 */
-					fprintf(stderr, "stage 1 failed: skip stage 2\n");
-					daemon_running = false;
-					break;
-				}
+	if (child == pid && stage == 0) {
+		if (!WIFEXITED(exitstat) || WEXITSTATUS(exitstat) != 0) {
+			if (WIFSIGNALED(exitstat)) {
+				/* this is stage 1 */
+				fprintf(stderr, "stage 1 failed: skip stage 2\n");
+				daemon_running = false;
 			}
-			printf("leave stage 1\n");
-			break;
 		}
-		if (child <= 0) {
-			/* collect terminated children */
-
-			dont_wait = true;
-			continue;
-		}
-
-		/* sig? */
-		if (sig != SIGCONT && sig != SIGINT) {
-			continue;
-		}
-
-		fprintf(stderr, "warn: signals only work in stage 2, ignoring...\n");
+		printf("leave stage 1\n");
 	}
 }
