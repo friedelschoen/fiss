@@ -20,7 +20,8 @@ SOURCE_FILES  := $(wildcard $(SRC_DIR)/*.c)
 EXEC_FILES    := $(wildcard $(EXEC_DIR)/*)
 OBJ_FILES     := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SOURCE_FILES))
 BIN_FILES     := $(patsubst $(EXEC_DIR)/%.c,$(BIN_DIR)/%,$(EXEC_FILES)) \
-				 $(patsubst $(EXEC_DIR)/%.sh,$(BIN_DIR)/%,$(EXEC_FILES))
+				 $(patsubst $(EXEC_DIR)/%.sh,$(BIN_DIR)/%,$(EXEC_FILES)) \
+				 $(patsubst $(EXEC_DIR)/%.lnk,$(BIN_DIR)/%,$(EXEC_FILES))
 INCLUDE_FILES := $(wildcard $(INCLUDE_DIR)/*.h)
 
 MAN_FILES     := $(wildcard $(MAN_DIR)/*)
@@ -62,6 +63,10 @@ $(BIN_DIR)/%: $(EXEC_DIR)/%.c $(INCLUDE_FILES) $(OBJ_FILES) | $(BIN_DIR)
 $(BIN_DIR)/%: $(EXEC_DIR)/%.sh | $(BIN_DIR)
 	cp $< $@
 	chmod +x $@
+
+$(BIN_DIR)/%: $(EXEC_DIR)/%.lnk | $(BIN_DIR)
+	ln -sf $(shell cat $<) $@
+
 
 # Manual targets
 
