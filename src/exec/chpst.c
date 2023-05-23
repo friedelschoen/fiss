@@ -19,28 +19,13 @@ static long parse_long(const char* str) {
 	return l;
 }
 
-void slock(const char* path, bool d) {
-	int fd;
-
-	if ((fd = open(path, O_WRONLY | O_APPEND)) == -1)
-		print_error("unable to open lock: %s\n");
-
-	if (d) {
-		if (flock(fd, LOCK_EX) == -1)
-			print_error("unable to lock: %s\n");
-	} else if (flock(fd, LOCK_EX | LOCK_NB) == -1)
-		print_error("unable to lock: %s\n");
-}
-
-
 int main(int argc, char** argv) {
-	int   opt;
-	char *arg0 = NULL, *root = NULL, *cd = NULL, *lock = NULL;
+	int   opt, lockfd, lockflags, gid_len = 0;
+	char *arg0 = NULL, *root = NULL, *cd = NULL, *lock = NULL, *exec = NULL;
 	uid_t uid = 0;
 	gid_t gid[61];
-	int   gid_len   = 0;
-	long  nicelevel = 0;
-	bool  lockdelay, ssid = false;
+	long  nicelevel   = 0;
+	bool  ssid        = false;
 	bool  closestd[3] = { false, false, false };
 
 	while ((opt = getopt(argc, argv, "+u:U:b:e:m:d:o:p:f:c:r:t:/:C:n:l:L:vP012V")) != -1) {
@@ -75,9 +60,12 @@ int main(int argc, char** argv) {
 				nicelevel = parse_long(optarg);
 				break;
 			case 'l':
+				lock      = optarg;
+				lockflags = LOCK_EX | LOCK_NB;
+				break;
 			case 'L':
 				lock      = optarg;
-				lockdelay = opt == 'l';
+				lockflags = LOCK_EX;
 				break;
 			case 'v':    // ignored
 				break;
@@ -101,8 +89,9 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
-	if (ssid)
+	if (ssid) {
 		setsid();
+	}
 
 	if (uid) {
 		setgroups(gid_len, gid);
@@ -110,6 +99,7 @@ int main(int argc, char** argv) {
 		setuid(uid);
 		// $EUID
 	}
+
 	if (root) {
 		if (chroot(root) == -1)
 			print_error("unable to change root directory: %s\n");
@@ -117,16 +107,23 @@ int main(int argc, char** argv) {
 		// chdir to '/', otherwise the next command will complain 'directory not found'
 		chdir("/");
 	}
+
 	if (cd) {
 		chdir(cd);
 	}
+
 	if (nicelevel != 0) {
 		if (nice(nicelevel) == -1)
 			print_error("unable to set nice level: %s\n");
 	}
 
-	if (lock)
-		slock(lock, lockdelay);
+	if (lock) {
+		if ((lockfd = open(lock, O_WRONLY | O_APPEND)) == -1)
+			print_error("unable to open lock: %s\n");
+
+		if (flock(lockfd, lockflags) == -1)
+			print_error("unable to lock: %s\n");
+	}
 
 	if (closestd[0] && close(0) == -1)
 		print_error("unable to close stdin: %s\n");
@@ -135,7 +132,7 @@ int main(int argc, char** argv) {
 	if (closestd[2] && close(2) == -1)
 		print_error("unable to close stderr: %s\n");
 
-	const char* exec = argv[0];
+	exec = argv[0];
 	if (arg0)
 		argv[0] = arg0;
 
