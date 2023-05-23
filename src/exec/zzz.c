@@ -12,8 +12,23 @@
 #include <unistd.h>
 
 
+static int open_write(const char* path, const char* string) {
+	int fd;
+
+	if ((fd = open(path, O_WRONLY | O_TRUNC)) == -1) {
+		print_error("cannot open %s: %s\n", path);
+		return -1;
+	}
+	if (write(fd, string, strlen(string)) == -1) {
+		print_error("error writing to %s: %s\n", path);
+		return -1;
+	}
+	return close(fd);
+}
+
+
 int main(int argc, char** argv) {
-	int sys_state, sys_disk, opt;
+	int opt;
 
 	const char *new_state = "mem",
 	           *new_disk  = NULL;
@@ -83,25 +98,11 @@ int main(int argc, char** argv) {
 	}
 
 	if (new_disk) {
-		if ((sys_disk = open("/sys/power/disk", O_WRONLY | O_TRUNC)) == -1) {
-			print_error("cannot open /sys/power/disk: %s\n");
-			return 1;
-		}
-		if (write(sys_disk, new_disk, strlen(new_disk)) == -1)
-			print_error("error writing to /sys/power/disk: %s\n");
-
-		close(sys_disk);
+		open_write("/sys/power/disk", new_disk);
 	}
 
 	if (new_state) {
-		if ((sys_state = open("/sys/power/state", O_WRONLY | O_TRUNC)) == -1) {
-			print_error("cannot open /sys/power/state: %s\n");
-			return 1;
-		}
-		if (write(sys_state, new_state, strlen(new_state)) == -1)
-			print_error("error writing to /sys/power/state: %s\n");
-
-		close(sys_state);
+		open_write("/sys/power/state", new_state);
 	} else {
 		sleep(5);
 	}
