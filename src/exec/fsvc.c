@@ -222,23 +222,23 @@ int main(int argc, char** argv) {
 
 	for (int i = 0; i < argc; i++) {
 		if ((dir = open(argv[i], O_DIRECTORY)) == -1) {
-			fprintf(stderr, "warning: '%s' is not a valid directory\n", argv[0]);
+			fprintf(stderr, "warning: '%s' is not a valid directory\n", argv[i]);
 			continue;
 		}
 
 		if (check_service(dir) == -1) {
-			fprintf(stderr, "warning: '%s' is not a valid service\n", argv[0]);
+			fprintf(stderr, "warning: '%s' is not a valid service\n", argv[i]);
 			continue;
 		}
 
 		if ((mod = get_mtime(dir)) == -1) {
-			fprintf(stderr, "warning: cannot get modify-time of '%s'\n", argv[0]);
+			fprintf(stderr, "warning: cannot get modify-time of '%s'\n", argv[i]);
 			continue;
 		}
 
 		if (command[0] != '\0') {
 			if (send_command(dir, command) == -1) {
-				fprintf(stderr, "warning: unable to send command to '%s'\n", argv[0]);
+				fprintf(stderr, "warning: unable to send command to '%s'\n", argv[i]);
 				continue;
 			}
 		} else {
