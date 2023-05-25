@@ -113,6 +113,6 @@ void        service_stage(int stage);
 void        service_start(service_t* s);
 const char* service_status_name(service_t* s);
 void        service_stop(service_t* s);
-int         service_supervise(const char* service_dir, const char* runlevel, bool force_socket);
+int         service_supervise(const char* service_dir, const char* runlevel);
 void        service_update_dependency(service_t* s);
 void        service_update_status(service_t* s);

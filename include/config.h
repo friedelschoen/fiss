@@ -62,12 +62,12 @@
 
 // the current version
 #ifndef SV_VERSION
-#	define SV_VERSION "0.2.2"
+#	define SV_VERSION "0.3.0"
 #endif
 
 // time to wait to accept new connection
-#ifndef SV_ACCEPT_INTERVAL
-#	define SV_ACCEPT_INTERVAL 1    // seconds
+#ifndef SV_CHECK_INTERVAL
+#	define SV_CHECK_INTERVAL 3    // seconds
 #endif
 
 // control socket (%s is the runlevel)
@@ -115,10 +115,6 @@
 #	define SV_LOG_DIR "/var/log/fiss"
 #endif
 
-#ifndef SV_PID_BUFFER
-#	define SV_PID_BUFFER 16
-#endif
-
 #ifndef SV_SOCKET_SERVICE_MAX
 #	define SV_SOCKET_SERVICE_MAX 128
 #endif
@@ -133,10 +129,6 @@
 
 #ifndef SV_VLOGGER_BUFFER
 #	define SV_VLOGGER_BUFFER 1024
-#endif
-
-#ifndef SV_RUNIT_COMPAT
-#	define SV_RUNIT_COMPAT 1
 #endif
 
 #ifndef SV_STATUS_WAIT

@@ -13,7 +13,6 @@
 
 static const struct option long_options[] = {
 	{ "version", no_argument, 0, 'V' },
-	{ "force", no_argument, 0, 'f' },
 	{ 0 }
 };
 
@@ -24,16 +23,11 @@ static void signal_interrupt(int signum) {
 }
 
 int main(int argc, char** argv) {
-	bool force_socket = false;
-
 	int c;
-	while ((c = getopt_long(argc, argv, ":Vf", long_options, NULL)) > 0) {
+	while ((c = getopt_long(argc, argv, ":V", long_options, NULL)) > 0) {
 		switch (c) {
 			case 'V':
 				print_version_exit();
-			case 'f':
-				force_socket = true;
-				break;
 			default:
 			case '?':
 				if (optopt)
@@ -60,5 +54,5 @@ int main(int argc, char** argv) {
 	signal(SIGINT, signal_interrupt);
 	signal(SIGCONT, signal_interrupt);
 
-	return service_supervise(argv[0], argv[1], force_socket);
+	return service_supervise(argv[0], argv[1]);
 }

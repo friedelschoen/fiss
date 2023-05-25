@@ -88,7 +88,7 @@ static void control_sockets(void) {
 	}
 }
 
-int service_supervise(const char* service_dir_, const char* runlevel_, bool force_socket) {
+int service_supervise(const char* service_dir_, const char* runlevel_) {
 	struct sigaction sigact = { 0 };
 	sigact.sa_handler       = signal_child;
 	sigaction(SIGCHLD, &sigact, NULL);
@@ -116,7 +116,7 @@ int service_supervise(const char* service_dir_, const char* runlevel_, bool forc
 		service_refresh_directory();
 		check_services();
 		control_sockets();
-		sleep(1);
+		sleep(SV_CHECK_INTERVAL);
 	}
 
 
