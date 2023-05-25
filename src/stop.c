@@ -9,22 +9,17 @@
 #include <unistd.h>
 
 
-void service_stop(service_t* s, bool* changed) {
+void service_stop(service_t* s) {
 	switch (s->state) {
 		case STATE_ACTIVE_DUMMY:
 			service_handle_exit(s, false, 0);
-			if (changed)
-				*changed = true;
 
 			s->status_change = time(NULL);
 			service_update_status(s);
 			break;
 		case STATE_ACTIVE_FOREGROUND:
-		case STATE_ACTIVE_PID:
 		case STATE_SETUP:
 			kill(s->pid, SIGTERM);
-			if (changed)
-				*changed = true;
 
 			s->status_change = time(NULL);
 			service_update_status(s);
@@ -35,8 +30,6 @@ void service_stop(service_t* s, bool* changed) {
 				print_error("error: cannot execute ./stop: %s\n");
 				s->state = STATE_INACTIVE;
 			}
-			if (changed)
-				*changed = true;
 
 			s->status_change = time(NULL);
 			service_update_status(s);
@@ -45,8 +38,6 @@ void service_stop(service_t* s, bool* changed) {
 		case STATE_STOPPING:
 		case STATE_FINISHING:
 			kill(s->pid, SIGTERM);
-			if (changed)
-				*changed = true;
 
 			s->status_change = time(NULL);
 			service_update_status(s);
@@ -61,6 +52,6 @@ void service_kill(service_t* s, int signal) {
 	if (!s->pid)
 		return;
 
-	if (s->state == STATE_ACTIVE_FOREGROUND || s->state == STATE_ACTIVE_PID)
+	if (s->state == STATE_ACTIVE_FOREGROUND)
 		kill(s->pid, signal);
 }

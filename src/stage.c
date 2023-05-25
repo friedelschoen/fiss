@@ -58,7 +58,6 @@ void service_stage(int stage) {
 		_exit(1);
 	}
 
-	int child;
 	int sig = 0;
 
 	sigemptyset(&ss);
@@ -75,7 +74,7 @@ void service_stage(int stage) {
 
 	reclaim_console();
 
-	if (child == pid && stage == 0) {
+	if (stage == 0) {
 		if (!WIFEXITED(exitstat) || WEXITSTATUS(exitstat) != 0) {
 			if (WIFSIGNALED(exitstat)) {
 				/* this is stage 1 */

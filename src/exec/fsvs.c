@@ -10,13 +10,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#define SV_DEPENDS_MAX_STR  static_stringify(SV_DEPENDS_MAX)
-#define MAX_SERVICE_STR     static_stringify(SV_SERVICE_MAX)
-#define SV_STOP_TIMEOUT_STR static_stringify(SV_STOP_TIMEOUT)
-
 
 static const struct option long_options[] = {
-	{ "verbose", no_argument, 0, 'v' },
 	{ "version", no_argument, 0, 'V' },
 	{ "force", no_argument, 0, 'f' },
 	{ 0 }
@@ -32,16 +27,14 @@ int main(int argc, char** argv) {
 	bool force_socket = false;
 
 	int c;
-	while ((c = getopt_long(argc, argv, ":vVf", long_options, NULL)) > 0) {
+	while ((c = getopt_long(argc, argv, ":Vf", long_options, NULL)) > 0) {
 		switch (c) {
-			case 'v':
-				verbose = true;
-				break;
 			case 'V':
 				print_version_exit();
 			case 'f':
 				force_socket = true;
 				break;
+			default:
 			case '?':
 				if (optopt)
 					fprintf(stderr, "error: invalid option -%c\n", optopt);

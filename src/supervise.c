@@ -44,17 +44,6 @@ static void signal_child(int unused) {
 	service_handle_exit(s, WIFSIGNALED(status), WIFSIGNALED(status) ? WTERMSIG(status) : WEXITSTATUS(status));
 }
 
-static void check_deaths(void) {
-	service_t* s;
-	for (int i = 0; i < services_size; i++) {
-		s = &services[i];
-		if (s->state == STATE_ACTIVE_PID) {
-			if (kill(s->pid, 0) == -1 && errno == ESRCH)
-				service_handle_exit(s, false, 0);
-		}
-	}
-}
-
 static void check_services(void) {
 	service_t* s;
 	for (int i = 0; i < services_size; i++) {
@@ -63,13 +52,13 @@ static void check_services(void) {
 			continue;
 		if (service_need_restart(s)) {
 			if (s->state == STATE_INACTIVE) {
-				service_start(s, NULL);
+				service_start(s);
 				s->status_change = time(NULL);
 				service_update_status(s);
 			}
 		} else {
 			if (s->state != STATE_INACTIVE) {
-				service_stop(s, NULL);
+				service_stop(s);
 				s->status_change = time(NULL);
 				service_update_status(s);
 			}
@@ -77,31 +66,26 @@ static void check_services(void) {
 	}
 }
 
-static void accept_socket(void) {
-	int client_fd;
-	if ((client_fd = accept(control_socket, NULL, NULL)) == -1) {
-		if (errno == EWOULDBLOCK) {
-			sleep(SV_ACCEPT_INTERVAL);
-		} else {
-			print_error("error: cannot accept client from control-socket: %s\n");
-		}
-	} else {
-		service_handle_client(client_fd);
-	}
-}
 
 static void control_sockets(void) {
-#if SV_RUNIT_COMPAT != 0
 	service_t* s;
-	char       cmd;
+	char       cmd, chr;
+	bool       read_signo = false;
 	for (int i = 0; i < services_size; i++) {
 		s = &services[i];
-
-		while (recv(s->control, &cmd, 1, MSG_DONTWAIT) == 1) {
-			service_handle_command_runit(s, cmd);
+		while (read(s->control, &chr, 1) == 1) {
+			printf("handling '%c' from %s\n", chr, s->name);
+			if (read_signo) {
+				service_handle_command(s, cmd, chr);
+				read_signo = false;
+			} else if (chr == X_XUP || chr == X_XDOWN) {
+				cmd        = chr;
+				read_signo = true;
+			} else {
+				service_handle_command(s, cmd, 0);
+			}
 		}
 	}
-#endif
 }
 
 int service_supervise(const char* service_dir_, const char* runlevel_, bool force_socket) {
@@ -120,81 +104,28 @@ int service_supervise(const char* service_dir_, const char* runlevel_, bool forc
 
 	//	setenv("SERVICE_RUNLEVEL", runlevel, true);
 
-	umask(0002);
-
-	char socket_path[PATH_MAX];
-	snprintf(socket_path, PATH_MAX, SV_CONTROL_SOCKET, runlevel);
-
 	if ((null_fd = open("/dev/null", O_RDWR)) == -1) {
 		print_error("error: cannot open /dev/null: %s\n");
 		null_fd = 1;
 	}
 
-	struct stat socket_stat;
-	if (force_socket) {
-		if (unlink(socket_path) == -1 && errno != ENOENT) {
-			print_error("error: cannot unlink socket: %s\n");
-		}
-	} else if (stat(socket_path, &socket_stat) != -1 && S_ISREG(socket_stat.st_mode)) {
-		printf("error: %s exist and is locking supervision,\nrun this program with '-f' flag if you are sure no other superviser is running.", socket_path);
-		return 1;
-	}
-	// create socket
-	if ((control_socket = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
-		print_error("error: cannot create socket: %s\n");
-		return 1;
-	}
-
-	// bind socket to address
-	struct sockaddr_un addr = { 0 };
-	addr.sun_family         = AF_UNIX;
-	strncpy(addr.sun_path, socket_path, sizeof(addr.sun_path));
-	if (bind(control_socket, (struct sockaddr*) &addr, sizeof(addr)) == -1) {
-		print_error("error: cannot bind %s to socket: %s\n", socket_path);
-		return 1;
-	}
-
-	// listen for connections
-	if (listen(control_socket, 5) == -1) {
-		print_error("error: cannot listen to control socket: %s\n");
-		return 1;
-	}
-
-	int sockflags = fcntl(control_socket, F_GETFL, 0);
-	if (sockflags == -1) {
-		print_error("warn: fcntl-getflags on control-socket failed: %s\n");
-	} else if (fcntl(control_socket, F_SETFL, sockflags | O_NONBLOCK) == -1) {
-		print_error("warn: fcntl-setflags on control-socket failed: %s\n");
-	}
-
 	printf(":: starting services on '%s'\n", runlevel);
-
-	if (service_refresh_directory() < 0)
-		return 1;
-
-	printf(":: started services\n");
 
 	// accept connections and handle requests
 	while (daemon_running) {
-		check_deaths();
 		service_refresh_directory();
 		check_services();
 		control_sockets();
-		accept_socket();
+		sleep(1);
 	}
 
-	close(control_socket);
-
-	if (unlink(socket_path) == -1 && errno != ENOENT) {
-		print_error("error: cannot unlink socket: %s\n");
-	}
 
 	printf(":: terminating\n");
 
 	service_t* s;
 	for (int i = 0; i < services_size; i++) {
 		s = &services[i];
-		service_stop(s, NULL);
+		service_stop(s);
 	}
 
 	time_t start = time(NULL);

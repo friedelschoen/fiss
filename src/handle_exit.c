@@ -65,7 +65,6 @@ void service_handle_exit(service_t* s, bool signaled, int return_code) {
 
 			break;
 		case STATE_ACTIVE_DUMMY:
-		case STATE_ACTIVE_PID:
 		case STATE_ACTIVE_BACKGROUND:
 		case STATE_STOPPING:
 			do_finish(s);
@@ -83,9 +82,6 @@ void service_handle_exit(service_t* s, bool signaled, int return_code) {
 			if (!signaled && return_code == 0) {
 				if (fstatat(s->dir, "stop", &st, 0) != -1 && st.st_mode & S_IXUSR) {
 					s->state = STATE_ACTIVE_BACKGROUND;
-				} else if (fstatat(s->dir, "pid", &st, 0) != -1 && st.st_mode & S_IXUSR) {
-					s->pid   = parse_pid_file(s);
-					s->state = STATE_ACTIVE_PID;
 				} else {
 					do_finish(s);
 				}

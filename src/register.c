@@ -11,6 +11,49 @@
 #include <unistd.h>
 
 
+static int fd_set_flag(int fd, int flags) {
+	int rc;
+	if ((rc = fcntl(fd, F_GETFL)) == -1)
+		return -1;
+
+	if (fcntl(fd, F_SETFL, rc | flags) == -1)
+		return -1;
+
+	return 0;
+}
+
+static void init_supervise(service_t* s) {
+	int         lockfd;
+	struct stat st;
+
+	if (fstatat(s->dir, "supervise", &st, 0) == -1)
+		mkdirat(s->dir, "supervise", 0744);
+
+	if (fstatat(s->dir, "supervise/ok", &st, 0) == -1)
+		mkfifoat(s->dir, "supervise/ok", 0644);
+
+	if (fstatat(s->dir, "supervise/control", &st, 0) == -1)
+		mkfifoat(s->dir, "supervise/control", 0644);
+
+	if (openat(s->dir, "supervise/ok", O_RDONLY | O_NONBLOCK) == -1) {
+		print_error("cannot open supervise/ok: %s\n");
+		return;
+	}
+
+	if ((s->control = openat(s->dir, "supervise/control", O_RDONLY | O_NONBLOCK)) == -1) {
+		print_error("cannot open supervise/ok: %s\n");
+		return;
+	}
+
+	fd_set_flag(s->control, O_NONBLOCK);
+
+	if ((lockfd = openat(s->dir, "supervise/lock", O_CREAT | O_WRONLY, 0644)) == -1) {
+		print_error("cannot create supervise/lock: %s\n");
+		return;
+	}
+	close(lockfd);
+}
+
 service_t* service_register(int dir, const char* name, bool is_log_service) {
 	service_t* s;
 
@@ -35,7 +78,7 @@ service_t* service_register(int dir, const char* name, bool is_log_service) {
 
 		strncpy(s->name, name, sizeof(s->name));
 
-		service_init_runit(s);
+		init_supervise(s);
 
 		s->status_change = time(NULL);
 		service_update_status(s);

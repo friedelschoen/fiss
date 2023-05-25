@@ -3,9 +3,10 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
-#include <stdarg.h>
-#include <string.h>
 #include <signal.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -96,12 +97,23 @@ void sigblock_all(int unblock) {
 	sigset_t ss;
 	sigemptyset(&ss);
 	sigfillset(&ss);
-/*	sigaddset(&ss, SIGALRM);
-	sigaddset(&ss, SIGCHLD);
-	sigaddset(&ss, SIGCONT);
-	sigaddset(&ss, SIGHUP);
-	sigaddset(&ss, SIGINT);
-	sigaddset(&ss, SIGPIPE);
-	sigaddset(&ss, SIGTERM);*/
+	/*	sigaddset(&ss, SIGALRM);
+	    sigaddset(&ss, SIGCHLD);
+	    sigaddset(&ss, SIGCONT);
+	    sigaddset(&ss, SIGHUP);
+	    sigaddset(&ss, SIGINT);
+	    sigaddset(&ss, SIGPIPE);
+	    sigaddset(&ss, SIGTERM);*/
 	sigprocmask(unblock, &ss, NULL);
+}
+
+
+long parse_long(const char* str, const char* name) {
+	char* end;
+	long  l = strtol(str, &end, 10);
+	if (*end != '\0') {
+		fprintf(stderr, "error: invalid %s '%s'\n", name, optarg);
+		exit(1);
+	}
+	return l;
 }

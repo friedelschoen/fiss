@@ -9,16 +9,6 @@
 #include <sys/file.h>
 
 
-static long parse_long(const char* str) {
-	char* end;
-	long  l = strtol(str, &end, 10);
-	if (*end != '\0') {
-		fprintf(stderr, "error: invalid limit '%s'\n", optarg);
-		exit(1);
-	}
-	return l;
-}
-
 int main(int argc, char** argv) {
 	int   opt, lockfd, lockflags, gid_len = 0;
 	char *arg0 = NULL, *root = NULL, *cd = NULL, *lock = NULL, *exec = NULL;
@@ -57,7 +47,7 @@ int main(int argc, char** argv) {
 				cd = optarg;
 				break;
 			case 'n':
-				nicelevel = parse_long(optarg);
+				nicelevel = parse_long(optarg, "nice-level");
 				break;
 			case 'l':
 				lock      = optarg;

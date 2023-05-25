@@ -1,59 +1,47 @@
 FISS CONTROL RESPONSE
 =====================
 
-+--+-/ /-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-|   NAME0   |    PID    |     STATUS CHANGE     |FC|RC|FLAGS|
-+--+-/ /-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-NAME0 = name of services | null-terminated
-PID = pid of the current instance (dependening on state) | big endian
-STATUS CHANGE = unix timestamp of last update (why tai tho?) | big endian
-FC = fail count
+       +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+FISS:  |     STATUS CHANGE     |ST|RC|FC|FL|    PID    |PS|RS|FD|SR|
+       +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+RUNIT: |     STATUS CHANGE     | TAIA NANO |    PID    |PS|WU|TR|SR|
+       +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+
+STATUS CHANGE = unix seconds + 4611686018427387914ULL (tai, lower endian)
+ST = state (see below)
 RC = last return code (0 if not exitted yet)
+FC = fail count
+FL = flags (see below)
+PID = current pid (big endian)
+PS = is paused (int boolean)
+RS = restart ('u' if want up, 'd' if want down)
+FD = forced down (int boolean, unused by fiss)
+SR = state runit (0 is down, 1 is running, 2 is finishing, not available in daemontools, unused by fiss)
+
+TAIA NANO = unix nanoseconds (written, never read)
+WU = wants up ('u' if want up, 'd' if want down)
+TR = was terminated (int boolean)
 
 FLAGS
 -----
 
-+--+--+--+--+--+--+--+--*--+--+--+--+--+--+--+--+
-|   STATE   |RSFIL|RSMAN|LSTEX|RD|PS|LS|HL| --- |
-+--+--+--+--+--+--+--+--*--+--+--+--+--+--+--+--+
-STATE = state of the service
-RSFIL = restart file (up-<runlevel>; 0 = down, 2 = once, 3 = restart)
++--+--+--+--+--+--+--+--+
+| --- |RSFIL|RSMAN|LSTEX|
++--+--+--+--+--+--+--+--+
+RSFIL = restart file (0 = down, 2 = once, 3 = restart)
 RSMAN = restart manual override (0 = down, 1 = force down, 2 = once, 3 = restart)
-RD = absolute restart needed, combining above + dependencies
 LSTEX = last exit (0 = never exitted, 1 = normally, 2 = signaled)
-PS = paused
-LS = is log service
-HS = has log service (in struct is pointer but stored as (void*) 1 or (void*) 0)
 -- = nothing yet
 
 STATE
 -----
 
 0 = inactive - is not enabled and does nothing
-1 = setup - ./setup is running atm
-2 = starting - ./start is running atm
-3 = active_dummy - service is considered as started but does nothing
-4 = active_foreground - ./run is running
-5 = active_background - ./start is done and ./stop is not called yet
-6 = active_pid - ./start is done and ./pid is not killed yet
+1 = setup - ./setup is running
+2 = starting - ./start is running
+3 = active_foreground - ./run is running
+4 = active_background - ./start is done and ./stop is not called yet
+5 = active_dummy - service is considered as started but does nothing
+6 = stopping - ./stop is running
 7 = finishing - ./finish is running
-8 = stopping - ./stop is running
-9 = dead - was enabled but failed too much or another error appeared
-
-
-
-RUNIT CONTROL RESPONSE
-======================
-
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-|      TAI SECONDS      | TAIA NANO |    PID    |PS|WU|TR|ST|
-+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-TAI SECONDS = unix seconds + 4611686018427387914ULL | lower endian!
-TAIA NANO = unix nanoseconds (nulled-out as fiss don't store them)
-PID = current pid | big endian
-PS = is paused (int boolean)
-WU = wants up ('u' if want up, 'd' if want down)
-TR = was terminated (int boolean)
-ST = state (0 is down, 1 is running, 2 is finishing)
-
-yuup, there are no flags, boolean-flags still use the whole byte (and WU even uses 'u'/'d')
+8 = dead - was enabled but failed too much or another error

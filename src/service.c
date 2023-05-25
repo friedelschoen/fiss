@@ -12,16 +12,16 @@
 #include <unistd.h>
 
 
-service_t    services[SV_SERVICE_MAX];
-int          services_size = 0;
-char         runlevel[SV_NAME_MAX];
-int          service_dir;
-const char*  service_dir_path;
-int          control_socket;
-int          null_fd;
-bool         verbose = false;
-dependency_t depends[SV_DEPENDENCY_MAX];
-int          depends_size;
+service_t   services[SV_SERVICE_MAX];
+int         services_size = 0;
+char        runlevel[SV_NAME_MAX];
+int         service_dir;
+const char* service_dir_path;
+int         control_socket;
+int         null_fd;
+bool        verbose = false;
+service_t*  depends[SV_DEPENDENCY_MAX][2];
+int         depends_size;
 
 service_t* service_get(const char* name) {
 	for (int i = 0; i < services_size; i++) {
@@ -88,8 +88,8 @@ int service_refresh_directory(void) {
 static bool is_dependency(service_t* d) {
 	service_t* s;
 	for (int i = 0; i < depends_size; i++) {
-		s = depends[i].service;
-		if (depends[i].depends == d && (s->state != STATE_INACTIVE || service_need_restart(s)))
+		s = depends[i][0];
+		if (depends[i][1] == d && (s->state != STATE_INACTIVE || service_need_restart(s)))
 			return true;
 	}
 	return false;

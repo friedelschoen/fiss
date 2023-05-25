@@ -13,8 +13,8 @@ void service_add_dependency(service_t* s, service_t* d) {
 	if (s == d)
 		return;
 
-	depends[depends_size].service = s;
-	depends[depends_size].depends = d;
+	depends[depends_size][0] = s;
+	depends[depends_size][1] = d;
 	depends_size++;
 }
 

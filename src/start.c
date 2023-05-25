@@ -131,22 +131,14 @@ void service_run(service_t* s) {
 	service_update_status(s);
 }
 
-void service_start(service_t* s, bool* changed) {
+void service_start(service_t* s) {
 	if (s->state != STATE_INACTIVE)
 		return;
 
-	if (changed)
-		*changed = true;
-
 	printf("starting %s\n", s->name);
 	for (int i = 0; i < depends_size; i++) {
-		if (depends[i].service == s)
-			service_start(depends[i].depends, NULL);
-	}
-
-	for (int i = 0; i < depends_size; i++) {
-		if (depends[i].service == s)
-			service_start(depends[i].depends, NULL);
+		if (depends[i][0] == s)
+			service_start(depends[i][1]);
 	}
 
 	struct stat st;

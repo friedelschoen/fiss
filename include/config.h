@@ -138,3 +138,7 @@
 #ifndef SV_RUNIT_COMPAT
 #	define SV_RUNIT_COMPAT 1
 #endif
+
+#ifndef SV_STATUS_WAIT
+#	define SV_STATUS_WAIT 5
+#endif

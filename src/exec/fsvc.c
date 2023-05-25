@@ -1,314 +1,207 @@
 #include "config.h"
+#include "message.h"
 #include "service.h"
-#include "signame.h"
+#include "util.h"
 
-#include <ctype.h>
+#include <fcntl.h>
 #include <getopt.h>
-#include <libgen.h>
-#include <stdio.h>
-#include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
+struct ident {
+	const char* name;
+	const char* command;
+};
 
-static const char HELP_MESSAGE[] =
-    "Usage:\n"
-    "  %s <command> [-cfopqvV] [-r ..] [-s ..] [service]\n"
-    "  /etc/init.d/<service> [-cfopqvV] [-r ..] [-s ..] <command>\n"
-    "\n"
-    "Check the manual (fsvc 8) for more information.\n";
-
-static const char VERSION_MESSAGE[] =
-    "FISS v" SV_VERSION "\n";
-
-
-void print_status(service_t* s, char* state, size_t size) {
-	switch (s->state) {
-		case STATE_SETUP:
-			strncpy(state, "setup", size);
-			break;
-		case STATE_INACTIVE:
-			strncpy(state, "inactive", size);
-			break;
-		case STATE_STARTING:
-			strncpy(state, "starting", size);
-			break;
-		case STATE_ACTIVE_PID:
-			snprintf(state, size, "active (pid) as %d", s->pid);
-			break;
-		case STATE_ACTIVE_BACKGROUND:
-			strncpy(state, "active (background)", size);
-			break;
-		case STATE_ACTIVE_DUMMY:
-			strncpy(state, "active (dummy)", size);
-			break;
-		case STATE_ACTIVE_FOREGROUND:
-			snprintf(state, size, "active as %d", s->pid);
-			break;
-		case STATE_FINISHING:
-			strncpy(state, "finishing", size);
-			break;
-		case STATE_STOPPING:
-			strncpy(state, "stopping", size);
-			break;
-		case STATE_DEAD:
-			strncpy(state, "dead", size);
-			break;
-	}
-	time_t      diff      = time(NULL) - s->status_change;
-	const char* diff_unit = "sec";
-	if (diff >= 60) {
-		diff /= 60;
-		diff_unit = "min";
-	}
-	if (diff >= 60) {
-		diff /= 60;
-		diff_unit = "hours";
-	}
-	if (diff >= 24) {
-		diff /= 24;
-		diff_unit = "days";
-	}
-	int len = strlen(state);
-	snprintf(state + len, size - len, " since %lu%s", diff, diff_unit);
-}
-
-void print_service(service_t* s) {
-	char state[100];
-	print_status(s, state, sizeof(state));
-
-	printf("- %s (%s)\n", s->name, state);
-	printf("  [ %c ] restart on exit\n", s->restart_final ? 'x' : ' ');
-	if (s->return_code > 0)
-		printf("  [%3d] last return code (%s)\n", s->return_code, s->last_exit == EXIT_SIGNALED ? "signaled" : "exited");
-	printf("  [%3d] fail count\n", s->fail_count);
-	printf("  [ %c ] has log service\n", s->is_log_service ? '-'
-	                                     : s->log_service  ? 'x'
-	                                                       : ' ');
-	printf("  [ %c ] is paused\n", s->paused ? 'x' : ' ');
-	printf("\n");
-}
-
-static char* to_upper(char* str) {
-	for (char* c = str; *c; c++) {
-		if (islower(*c))
-			*c += 'A' - 'a';
-	}
-	return str;
-}
-
-void print_service_short(service_t* s) {
-	bool active = s->state == STATE_ACTIVE_BACKGROUND ||
-	              s->state == STATE_ACTIVE_DUMMY ||
-	              s->state == STATE_ACTIVE_FOREGROUND ||
-	              s->state == STATE_ACTIVE_PID;
-
-	bool wants_other = active != s->restart_final;
-
-	if (s->state == STATE_SETUP || s->state == STATE_STARTING)
-		printf("[    {+}]");
-	else if (s->state == STATE_FINISHING || s->state == STATE_STOPPING)
-		printf("[{-}     ]");
-	else if (active)
-		printf("[  %s + ]", wants_other ? "<-" : "  ");
-	else
-		printf("[ - %s  ]", wants_other ? "->" : "  ");
-
-	printf(" %s", s->name);
-
-	if (s->pid) {
-		if (s->state == STATE_ACTIVE_PID || s->state == STATE_ACTIVE_FOREGROUND) {
-			printf(" (pid: %d)", s->pid);
-		} else if (s->last_exit == EXIT_SIGNALED) {
-			printf(" (last exit: SIG%s)", sigabbr(s->return_code));
-		} else if (s->last_exit == EXIT_NORMAL) {
-			printf(" (last exit: %d)", s->return_code);
-		}
-	}
-	printf("\n");
-}
+static struct ident command_names[] = {
+	{ "up", "u" },             // starts the services, pin as started
+	{ "down", "d" },           // stops the service, pin as stopped
+	{ "xup", "U" },            // stops the service, don't pin as stopped
+	{ "xdown", "D" },          // stops the service, don't pin as stopped
+	{ "once", "o" },           // same as xup
+	{ "term", "t" },           // same as down
+	{ "kill", "k" },           // sends kill, pin as stopped
+	{ "pause", "p" },          // pauses the service
+	{ "cont", "c" },           // resumes the service
+	{ "reset", "r" },          // resets the service
+	{ "alarm", "a" },          // sends alarm
+	{ "hup", "h" },            // sends hup
+	{ "int", "i" },            // sends interrupt
+	{ "quit", "q" },           // sends quit
+	{ "1", "1" },              // sends usr1
+	{ "2", "2" },              // sends usr2
+	{ "exit", "x" },           // does nothing
+	{ "+up", "U0" },           // starts the service, don't modify pin
+	{ "+down", "D0" },         // stops the service, don't modify pin
+	{ "restart", "!D0U0" },    // restarts the service, don't modify pin
+	{ "start", "!u" },         // start the service, pin as started, print status
+	{ "stop", "!d" },          // stop the service, pin as stopped, print status
+	{ "status", "!" },         // print status
+	{ 0, 0 }
+};
 
 static const struct option long_options[] = {
-	{ "verbose", no_argument, 0, 'v' },
-	{ "version", no_argument, 0, 'V' },
-	{ "runlevel", no_argument, 0, 'r' },
-	{ "pin", no_argument, 0, 'p' },
-	{ "once", no_argument, 0, 'o' },
-	{ "check", no_argument, 0, 'c' },
-	{ "reset", no_argument, 0, 'f' },
-	{ "short", no_argument, 0, 'q' },
+	{ "version", no_argument, NULL, 'V' },
+	{ "wait", no_argument, NULL, 'w' },
 	{ 0 }
 };
 
+static char* progname(char* path) {
+	char* match;
+	for (;;) {
+		if ((match = strrchr(path, '/')) == NULL)
+			return path;
+
+		if (match[1] != '\0')
+			return match + 1;
+
+		*match = '\0';
+	}
+	return path;
+}
+
+static int check_service(int dir) {
+	int fd;
+	if ((fd = openat(dir, "supervise/ok", O_WRONLY | O_NONBLOCK)) == -1)
+		return -1;
+	close(fd);
+	return 0;
+}
+
+static time_t get_mtime(int dir) {
+	struct stat st;
+	if (fstatat(dir, "supervise/status", &st, 0) == -1)
+		return -1;
+	return st.st_mtim.tv_sec;
+}
+
+static int send_command(int dir, const char* command) {
+	int fd;
+	if ((fd = openat(dir, "supervise/control", O_WRONLY | O_NONBLOCK)) == -1)
+		return -1;
+
+	if (write(fd, command, strlen(command)) == -1)
+		return -1;
+
+	close(fd);
+
+	return 0;
+}
+
+int status(int dir) {
+	int fd;
+	if ((fd = openat(dir, "supervise/status", O_RDONLY | O_NONBLOCK)) == -1)
+		return -1;
+
+	service_serial_t buffer;
+	service_t        s;
+
+	if (read(fd, &buffer, sizeof(buffer)) == -1) {
+		close(fd);
+		return -1;
+	}
+
+	close(fd);
+
+	service_decode(&s, &buffer);
+
+	printf("%d\n", s.pid);
+
+	return 0;
+}
+
 int main(int argc, char** argv) {
-	strncpy(runlevel, getenv(SV_RUNLEVEL_DEFAULT_ENV) ? getenv(SV_RUNLEVEL_DEFAULT_ENV) : SV_RUNLEVEL_DEFAULT, SV_NAME_MAX);
+	int opt;
+	int timeout = SV_STATUS_WAIT;
 
-	char* argexec = argv[0];
+	const char* command = NULL;
 
-	bool check = false,
-	     pin   = false,
-	     once  = false,
-	     reset = false,
-
-	     short_ = false;
-
-	int c;
-	while ((c = getopt_long(argc, argv, ":Vvqr:pocf", long_options, NULL)) > 0) {
-		switch (c) {
-			case 'r':
-				strncpy(runlevel, optarg, SV_NAME_MAX);
-				break;
-			case 'q':
-				short_ = true;
-				break;
-			case 'v':
-				verbose = true;
-				break;
+	while ((opt = getopt_long(argc, argv, ":Vw:", long_options, NULL)) != -1) {
+		switch (opt) {
 			case 'V':
-				printf(VERSION_MESSAGE);
-				return 0;
-			case 'p':
-				pin = true;
+				// version
 				break;
-			case 'o':
-				once = true;
+			case 'w':
+				timeout = parse_long(optarg, "seconds");
 				break;
-			case 'c':
-				check = true;
-				break;
-			case 'f':
-				reset = true;
-				break;
+			default:
 			case '?':
 				if (optopt)
 					fprintf(stderr, "error: invalid option -%c\n", optopt);
 				else
 					fprintf(stderr, "error: invalid option %s\n", argv[optind - 1]);
-				fprintf(stderr, "%s", HELP_MESSAGE);
-				return 1;
+				print_usage_exit(PROG_FSVC, 1);
 		}
 	}
-	argc -= optind;
-	argv += optind;
 
-	if (argc < 1) {
-		printf("fsvc [options] <command> [service]\n");
-		return 1;
+	argc -= optind, argv += optind;
+
+	if (argc == 0) {
+		fprintf(stderr, "error: command omitted\n");
+		print_usage_exit(PROG_FSVC, 1);
+	}
+	for (struct ident* ident = command_names; ident->name != NULL; ident++) {
+		if (streq(ident->name, argv[0])) {
+			command = ident->command;
+			break;
+		}
+	}
+	if (command == NULL) {
+		fprintf(stderr, "error: unknown command '%s'\n", argv[0]);
+		print_usage_exit(PROG_FSVC, 1);
 	}
 
-	const char* command_str = argv[0];
-	argv++, argc--;
+	argc--, argv++;
 
-	const char* service;
-	char        command, extra = 0;
+	if (argc == 0) {
+		fprintf(stderr, "error: at least one service must be specified\n");
+		print_usage_exit(PROG_FSVC, 1);
+	}
 
-	if (streq(service = basename(argexec), "fsvc")) {
-		if (argc > 0) {
-			service = argv[0];
-			argv++, argc--;
+	chdir(SV_SERVICE_DIR);
+
+	bool print_status;
+	if ((print_status = command[0] == '!')) {
+		command++;
+	}
+
+	int    dir;
+	time_t mod, start;
+	for (int i = 0; i < argc; i++) {
+		if ((dir = open(argv[i], O_DIRECTORY)) == -1) {
+			fprintf(stderr, "warning: '%s' is not a valid directory\n", argv[0]);
+			continue;
+		}
+
+		if (check_service(dir) == -1) {
+			fprintf(stderr, "warning: '%s' is not a valid service\n", argv[0]);
+			continue;
+		}
+
+		if ((mod = get_mtime(dir)) == -1) {
+			fprintf(stderr, "warning: cannot get modify-time of '%s'\n", argv[0]);
+			continue;
+		}
+
+		if (command[0] != '\0') {
+			if (send_command(dir, command) == -1) {
+				fprintf(stderr, "warning: unable to send command to '%s'\n", argv[0]);
+				continue;
+			}
 		} else {
-			service = NULL;
-		}
-	}
-
-	if (streq(command_str, "up") || streq(command_str, "start") || streq(command_str, "down") || streq(command_str, "stop")) {
-		if (!service) {
-			printf("service omitted\n");
-			return 1;
+			mod++;    // avoid modtime timeout
 		}
 
-		command = streq(command_str, "down") || streq(command_str, "stop") ? S_STOP : S_START;
-		extra   = pin;
-		pin     = false;
-	} else if (streq(command_str, "send") || streq(command_str, "kill")) {
-		if (!service) {
-			printf("service omitted\n");
-			return 1;
-		}
-		if (argc == 1) {
-			printf("signal omitted\n");
-			return 1;
-		}
-		if ((extra = signame(argv[1])) == -1) {
-			printf("unknown signalname\n");
-			return 1;
-		}
+		start = time(NULL);
+		if (print_status) {
+			while (get_mtime(dir) == mod && time(NULL) - start < timeout)
+				usleep(500);    // sleep half a secound
 
-		command = S_SEND;
-	} else if (streq(command_str, "enable") || streq(command_str, "disable")) {
-		if (!service) {
-			printf("service omitted\n");
-			return 1;
-		}
-
-		command = streq(command_str, "enable") ? S_ENABLE : S_DISABLE;
-		extra   = once;
-		once    = false;
-	} else if (streq(command_str, "status")) {
-		command = S_STATUS;
-		extra   = check;
-		check   = false;
-	} else if (streq(command_str, "pause") || streq(command_str, "resume")) {
-		if (!service) {
-			printf("service omitted\n");
-			return 1;
-		}
-
-		command = streq(command_str, "pause") ? S_PAUSE : S_RESUME;
-	} else if (streq(command_str, "reset")) {
-		if (!service) {
-			printf("service omitted\n");
-			return 1;
-		}
-
-		command = S_RESET;
-		extra   = 0;
-	} else if (streq(command_str, "switch")) {
-		if (!service) {
-			printf("runlevel omitted\n");
-			return 1;
-		}
-
-		command = S_SWITCH;
-		extra   = reset;
-		reset   = false;
-	} else {
-		printf("unknown command '%s'\n", command_str);
-		return 1;
-	}
-
-	if (check)
-		printf("warn: --check specified but not used\n");
-	if (pin)
-		printf("warn: --pin specified but not used\n");
-	if (once)
-		printf("warn: --once specified but not used\n");
-	if (reset)
-		printf("warn: --reset specified but not used\n");
-
-
-	service_t response[SV_SOCKET_SERVICE_MAX];
-	int       rc;
-
-	if (check) {
-		service_t s;
-		if ((rc = service_send_command(command, extra, service, &s, 1)) != 1) {
-			printf("error: %s (errno: %d)\n", command_error[-rc], -rc);
-			return 1;
-		}
-		return s.state == STATE_ACTIVE_PID || s.state == STATE_ACTIVE_DUMMY || s.state == STATE_ACTIVE_FOREGROUND || s.state == STATE_ACTIVE_BACKGROUND;
-	} else {
-		rc = service_send_command(command, extra, service, response, SV_SOCKET_SERVICE_MAX);
-
-		if (rc < 0) {
-			printf("error: %s (errno: %d)\n", command_error[-rc], -rc);
-			return 1;
-		}
-
-		for (int i = 0; i < rc; i++) {
-			if (short_)
-				print_service_short(&response[i]);
-			else
-				print_service(&response[i]);
+			printf(get_mtime(dir) == mod ? "timeout: %s: " : "ok: %s: ", progname(argv[i]));
+			if (status(dir) == -1)
+				printf("unable to access supervise/status\n");
 		}
 	}
 }
