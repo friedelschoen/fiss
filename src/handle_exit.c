@@ -12,6 +12,7 @@
 
 static void do_finish(service_t* s) {
 	struct stat st;
+
 	if (fstatat(s->dir, "finish", &st, 0) != -1 && st.st_mode & S_IXUSR) {
 		s->state = STATE_FINISHING;
 		if ((s->pid = fork_dup_cd_exec(s->dir, "./finish", null_fd, null_fd, null_fd)) == -1) {
@@ -31,13 +32,13 @@ static void do_finish(service_t* s) {
 
 
 void service_handle_exit(service_t* s, bool signaled, int return_code) {
+	struct stat st;
+
 	s->pid = 0;
 	if (s->restart_file == S_ONCE)
 		s->restart_file = S_DOWN;
 	if (s->restart_manual == S_ONCE)
 		s->restart_manual = S_DOWN;
-
-	struct stat st;
 
 	switch (s->state) {
 		case STATE_SETUP:

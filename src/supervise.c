@@ -46,6 +46,7 @@ static void signal_child(int unused) {
 
 static void check_services(void) {
 	service_t* s;
+
 	for (int i = 0; i < services_size; i++) {
 		s = &services[i];
 		if (s->state == STATE_DEAD)
@@ -71,6 +72,7 @@ static void control_sockets(void) {
 	service_t* s;
 	char       cmd, chr;
 	bool       read_signo = false;
+
 	for (int i = 0; i < services_size; i++) {
 		s = &services[i];
 		while (read(s->control, &chr, 1) == 1) {
@@ -90,7 +92,11 @@ static void control_sockets(void) {
 
 int service_supervise(const char* service_dir_, const char* runlevel_) {
 	struct sigaction sigact = { 0 };
-	sigact.sa_handler       = signal_child;
+	service_t*       s;
+	time_t           start;
+	int              running;
+
+	sigact.sa_handler = signal_child;
 	sigaction(SIGCHLD, &sigact, NULL);
 	sigact.sa_handler = SIG_IGN;
 	sigaction(SIGPIPE, &sigact, NULL);
@@ -101,8 +107,6 @@ int service_supervise(const char* service_dir_, const char* runlevel_) {
 		print_error("error: cannot open directory %s: %s\n", service_dir_);
 		return 1;
 	}
-
-	//	setenv("SERVICE_RUNLEVEL", runlevel, true);
 
 	if ((null_fd = open("/dev/null", O_RDWR)) == -1) {
 		print_error("error: cannot open /dev/null: %s\n");
@@ -122,14 +126,12 @@ int service_supervise(const char* service_dir_, const char* runlevel_) {
 
 	printf(":: terminating\n");
 
-	service_t* s;
 	for (int i = 0; i < services_size; i++) {
 		s = &services[i];
 		service_stop(s);
 	}
 
-	time_t start = time(NULL);
-	int    running;
+	start = time(NULL);
 	do {
 		sleep(1);    // sleep for one second
 		running = 0;

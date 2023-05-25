@@ -27,19 +27,6 @@ int main(int argc, char** argv) {
 			case 'b':
 				arg0 = optarg;
 				break;
-			case 'e':    // ignored
-				fprintf(stderr, "`envdir` is ignored\n");
-				break;
-			case 'd':
-			case 'o':
-			case 'p':
-			case 'f':
-			case 'c':
-			case 'r':
-			case 't':
-			case 'm':    // ignored
-				fprintf(stderr, "limits are ignored\n");
-				break;
 			case '/':
 				root = optarg;
 				break;
@@ -66,6 +53,17 @@ int main(int argc, char** argv) {
 			case '1':
 			case '2':
 				closestd[opt - '0'] = true;
+				break;
+			case 'e':
+			case 'd':
+			case 'o':
+			case 'p':
+			case 'f':
+			case 'c':
+			case 'r':
+			case 't':
+			case 'm':    // ignored
+				fprintf(stderr, "warning: '-%c' are ignored\n", optopt);
 				break;
 			case '?':
 				fprintf(stderr, "usage\n");

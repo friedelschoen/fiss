@@ -4,8 +4,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <getopt.h>
-#include <stdbool.h>
-#include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -21,6 +19,7 @@ static int open_write(const char* path, const char* string) {
 	}
 	if (write(fd, string, strlen(string)) == -1) {
 		print_error("error writing to %s: %s\n", path);
+		close(fd);
 		return -1;
 	}
 	return close(fd);
@@ -28,8 +27,9 @@ static int open_write(const char* path, const char* string) {
 
 
 int main(int argc, char** argv) {
-	int opt;
-
+	int         opt;
+	pid_t       pid;
+	struct stat st;
 	const char *new_state = "mem",
 	           *new_disk  = NULL;
 
@@ -81,10 +81,8 @@ int main(int argc, char** argv) {
 
 	argc -= optind, argv += optind;
 
-	struct stat st;
 
 	if (stat(SV_SUSPEND_EXEC, &st) == 0 && st.st_mode & S_IXUSR) {
-		pid_t pid;
 		if ((pid = fork()) == -1) {
 			print_error("failed to fork for " SV_SUSPEND_EXEC ": %s\n");
 			return 1;
@@ -108,7 +106,6 @@ int main(int argc, char** argv) {
 	}
 
 	if (stat(SV_RESUME_EXEC, &st) == 0 && st.st_mode & S_IXUSR) {
-		pid_t pid;
 		if ((pid = fork()) == -1) {
 			print_error("failed to fork for " SV_RESUME_EXEC ": %s\n");
 			return 1;

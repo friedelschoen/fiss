@@ -1,10 +1,6 @@
 #!/bin/sh
 # shutdown - shutdown(8) lookalike for fiss
 
-single() {
-  fsvc chlevel single
-}
-
 abort() {
   printf '%s\n' "$1" >&2
   exit 1
@@ -14,7 +10,7 @@ usage() {
   abort "Usage: ${0##*/} [-fF] [-kchPr] time [warning message]"
 }
 
-action=single
+action=:
 
 while getopts akrhPHfFnct: opt; do
   case "$opt" in

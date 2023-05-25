@@ -10,12 +10,12 @@
 void write_wtmp(int boot) {
 	int fd;
 
-	if ((fd = open(OUR_WTMP, O_WRONLY | O_APPEND)) < 0)
-		return;
-
 	struct utmp    utmp = { 0 };
 	struct utsname uname_buf;
 	struct timeval tv;
+
+	if ((fd = open(OUR_WTMP, O_WRONLY | O_APPEND)) < 0)
+		return;
 
 	gettimeofday(&tv, 0);
 	utmp.ut_tv.tv_sec  = tv.tv_sec;

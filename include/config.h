@@ -1,10 +1,5 @@
 #pragma once
 
-// environment variable where the current runlevel is stored
-#ifndef SV_RUNLEVEL_DEFAULT_ENV
-#	define SV_RUNLEVEL_DEFAULT_ENV "SERVICE_RUNLEVEL"
-#endif
-
 // seconds to wait for a service before it gets killed
 #ifndef SV_STOP_TIMEOUT
 #	define SV_STOP_TIMEOUT 5
@@ -12,7 +7,7 @@
 
 // maximal characters a service-dir can have
 #ifndef SV_NAME_MAX
-#	define SV_NAME_MAX 512
+#	define SV_NAME_MAX 128
 #endif
 
 // maximal dependencies a service can have

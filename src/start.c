@@ -39,9 +39,10 @@ static void set_pipes(service_t* s) {
 		dup2(null_fd, STDERR_FILENO);
 	} else {
 		char service_log[PATH_MAX];
+		int  log_fd;
+
 		snprintf(service_log, PATH_MAX, "%s/%s-%s.log", SV_LOG_DIR, s->name, runlevel);
 
-		int log_fd;
 		if ((log_fd = open(service_log, O_CREAT | O_WRONLY | O_TRUNC, 0644)) == -1)
 			log_fd = null_fd;
 
@@ -52,35 +53,38 @@ static void set_pipes(service_t* s) {
 }
 
 static void set_user(void) {
-	char buffer[SV_USER_BUFFER];
-	int  user_file;
-	if ((user_file = open("user", O_RDONLY)) != -1) {
-		ssize_t n;
-		if ((n = read(user_file, buffer, sizeof(buffer))) == -1) {
-			print_error("error: failed reading ./user: %s\n");
-			close(user_file);
-			return;
-		}
-		buffer[n] = '\0';
+	char    buffer[SV_USER_BUFFER];
+	int     user_file;
+	ssize_t n;
+	uid_t   uid;
+	gid_t   gids[SV_USER_GROUP_MAX];
 
-		uid_t uid;
-		gid_t gids[SV_USER_GROUP_MAX];
-		if ((n = parse_ugid(buffer, &uid, gids)) <= 0) {
-			fprintf(stderr, "warn: malformatted user file\n");
-			close(user_file);
-			return;
-		}
+	if ((user_file = open("user", O_RDONLY)) == -1)
+		return;
 
-		setgroups(n, gids);
-		setgid(gids[0]);
-		setuid(uid);
-
+	if ((n = read(user_file, buffer, sizeof(buffer))) == -1) {
+		print_error("error: failed reading ./user: %s\n");
 		close(user_file);
+		return;
 	}
+	buffer[n] = '\0';
+
+	if ((n = parse_ugid(buffer, &uid, gids)) <= 0) {
+		fprintf(stderr, "warn: malformatted user file\n");
+		close(user_file);
+		return;
+	}
+
+	setgroups(n, gids);
+	setgid(gids[0]);
+	setuid(uid);
+
+	close(user_file);
 }
 
 void service_run(service_t* s) {
 	struct stat st;
+
 	if (fstatat(s->dir, "run", &st, 0) != -1 && st.st_mode & S_IXUSR) {
 		s->state = STATE_ACTIVE_FOREGROUND;
 	} else if (fstatat(s->dir, "start", &st, 0) != -1 && st.st_mode & S_IXUSR) {
@@ -132,6 +136,8 @@ void service_run(service_t* s) {
 }
 
 void service_start(service_t* s) {
+	struct stat st;
+
 	if (s->state != STATE_INACTIVE)
 		return;
 
@@ -141,7 +147,6 @@ void service_start(service_t* s) {
 			service_start(depends[i][1]);
 	}
 
-	struct stat st;
 	if (fstatat(s->dir, "setup", &st, 0) != -1 && st.st_mode & S_IXUSR) {
 		s->state = STATE_SETUP;
 		if ((s->pid = fork_dup_cd_exec(s->dir, "./setup", null_fd, null_fd, null_fd)) == -1) {

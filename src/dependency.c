@@ -20,16 +20,16 @@ void service_add_dependency(service_t* s, service_t* d) {
 
 void service_update_dependency(service_t* s) {
 	service_t* dep;
+	int        depends_file;
+	char       line[SV_NAME_MAX];
 
 	if (s->log_service) {    // aka keep first entry (the log service) if a log service is used
 		service_add_dependency(s, s->log_service);
 	}
 
-	int depends_file;
 	if ((depends_file = openat(s->dir, "depends", O_RDONLY)) == -1)
 		return;
 
-	char line[SV_NAME_MAX];
 	while (dgetline(depends_file, line, sizeof(line)) > 0) {
 		if (streq(s->name, line)) {
 			fprintf(stderr, "warning: %s depends on itself\n", s->name);

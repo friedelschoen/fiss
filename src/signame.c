@@ -176,9 +176,9 @@ static signal_name_t signal_names[] = {
 int signame(char const* name) {
 	char* endptr;
 	int   signum;
-	if ((signum = strtol(name, &endptr, 10)) && endptr == strchr(name, '\0')) {
+
+	if ((signum = strtol(name, &endptr, 10)) && endptr == strchr(name, '\0'))
 		return signum;
-	}
 
 	// startswith SIG, remove that so -SIGKILL == -KILL
 	if (strncmp(name, "SIG", 3) == 0) {

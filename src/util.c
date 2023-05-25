@@ -15,6 +15,7 @@ ssize_t dgetline(int fd, char* line, size_t line_buffer) {
 	ssize_t line_size = 0;
 	ssize_t rc;
 	char    c;
+
 	while (line_size < (ssize_t) line_buffer - 1 && (rc = read(fd, &c, 1)) == 1) {
 		if (c == '\r')
 			continue;
@@ -48,8 +49,8 @@ ssize_t writestr(int fd, const char* str) {
 unsigned int stat_mode(const char* format, ...) {
 	char        path[PATH_MAX];
 	struct stat st;
+	va_list     args;
 
-	va_list args;
 	va_start(args, format);
 	vsnprintf(path, PATH_MAX, format, args);
 	va_end(args);
@@ -62,6 +63,7 @@ unsigned int stat_mode(const char* format, ...) {
 
 int fork_dup_cd_exec(int dir, const char* path, int fd0, int fd1, int fd2) {
 	pid_t pid;
+
 	if ((pid = fork()) == -1) {
 		print_error("error: cannot fork process: %s\n");
 		return -1;
@@ -81,6 +83,7 @@ int fork_dup_cd_exec(int dir, const char* path, int fd0, int fd1, int fd2) {
 
 int reclaim_console(void) {
 	int ttyfd;
+
 	if ((ttyfd = open("/dev/console", O_RDWR)) == -1)
 		return -1;
 
@@ -95,6 +98,7 @@ int reclaim_console(void) {
 
 void sigblock_all(int unblock) {
 	sigset_t ss;
+
 	sigemptyset(&ss);
 	sigfillset(&ss);
 	/*	sigaddset(&ss, SIGALRM);
@@ -111,9 +115,25 @@ void sigblock_all(int unblock) {
 long parse_long(const char* str, const char* name) {
 	char* end;
 	long  l = strtol(str, &end, 10);
+
 	if (*end != '\0') {
 		fprintf(stderr, "error: invalid %s '%s'\n", name, optarg);
 		exit(1);
 	}
 	return l;
+}
+
+char* progname(char* path) {
+	char* match;
+
+	for (;;) {
+		if ((match = strrchr(path, '/')) == NULL)
+			return path;
+
+		if (match[1] != '\0')
+			return match + 1;
+
+		*match = '\0';
+	}
+	return path;
 }

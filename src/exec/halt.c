@@ -14,27 +14,22 @@ int main(int argc, char* argv[]) {
 	     do_wtmp  = true,
 	     noop     = false;
 	int         opt;
-	char*       progname;
 	int         rebootnum;
 	const char* initarg;
 
-	if ((progname = strrchr(argv[0], '/')) != NULL) {
-		progname++;    // to hide '/'
-	} else {
-		progname = argv[0];
-	}
+	char* prog = progname(argv[0]);
 
-	if (streq(progname, "halt")) {
+	if (streq(prog, "halt")) {
 		rebootnum = RB_HALT_SYSTEM;
 		initarg   = "0";
-	} else if (streq(progname, "poweroff")) {
+	} else if (streq(prog, "poweroff")) {
 		rebootnum = RB_POWER_OFF;
 		initarg   = "0";
-	} else if (streq(progname, "reboot")) {
+	} else if (streq(prog, "reboot")) {
 		rebootnum = RB_AUTOBOOT;
 		initarg   = "6";
 	} else {
-		fprintf(stderr, "invalid mode: %s\n", progname);
+		fprintf(stderr, "invalid mode: %s\n", prog);
 		return 1;
 	}
 

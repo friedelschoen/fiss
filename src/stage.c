@@ -17,12 +17,14 @@ static const char* stage_exec[] = {
 
 
 void service_stage(int stage) {
+	int              pid, ttyfd, exitstat, sig = 0;
+	sigset_t         ss;
+	struct sigaction sigact = { 0 };
+
+	// stage = 0 | 2
 	if (stage != 0 && stage != 2)
 		return;
 
-	// stage = 0 | 2
-	int      pid, ttyfd, exitstat;
-	sigset_t ss;
 	while ((pid = fork()) == -1) {
 		print_error("error: unable to fork for stage1: %s\n");
 		sleep(5);
@@ -44,8 +46,7 @@ void service_stage(int stage) {
 		sigblock_all(true);
 
 
-		struct sigaction sigact = { 0 };
-		sigact.sa_handler       = SIG_DFL;
+		sigact.sa_handler = SIG_DFL;
 		sigaction(SIGCHLD, &sigact, NULL);
 		sigaction(SIGINT, &sigact, NULL);
 
@@ -57,8 +58,6 @@ void service_stage(int stage) {
 		print_error("error: unable to exec stage %d: %s\n", stage);
 		_exit(1);
 	}
-
-	int sig = 0;
 
 	sigemptyset(&ss);
 	sigaddset(&ss, SIGCHLD);

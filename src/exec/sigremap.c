@@ -20,15 +20,6 @@
     THE SOFTWARE.
     */
 
-/*
- * sigremap is a simple wrapper program designed to run as PID 1 and pass
- * signals to its children.
- *
- * Usage:
- *   ./sigremap python -c 'while True: pass'
- *
- * To get debug output on stderr, run with '-v'.
- */
 
 #include "message.h"
 #include "signame.h"
@@ -63,28 +54,14 @@
 
 // Indices are one-indexed (signal 1 is at index 1). Index zero is unused.
 // User-specified signal rewriting.
-int signal_remap[MAXSIG + 1];
+static int signal_remap[MAXSIG + 1];
 // One-time ignores due to TTY quirks. 0 = no skip, 1 = skip the next-received signal.
-bool signal_temporary_ignores[MAXSIG + 1];
+static bool signal_temporary_ignores[MAXSIG + 1];
 
-int  child_pid  = -1;
-bool debug      = false;
-bool use_setsid = true;
+static int  child_pid  = -1;
+static bool debug      = false;
+static bool use_setsid = true;
 
-void forward_signal(int signum) {
-	if (signum >= 0 && signum <= MAXSIG && signal_remap[signum] != -1) {
-		DEBUG("Translating signal %d to %d.\n", signum, signal_remap[signum]);
-		signum = signal_remap[signum];
-	}
-
-	if (signum == 0) {
-		DEBUG("Not forwarding signal %d to children (ignored).\n", signum);
-		return;
-	}
-
-	kill(use_setsid ? -child_pid : child_pid, signum);
-	DEBUG("Forwarded signal %d to children.\n", signum);
-}
 
 /*
  * The sigremap signal handler.
@@ -106,7 +83,7 @@ void forward_signal(int signum) {
  * https://www.gnu.org/software/libc/manual/html_node/Job-Control-Signals.html
  *
  */
-void handle_signal(int signum) {
+static void handle_signal(int signum) {
 	DEBUG("Received signal %d.\n", signum);
 
 	if (signal_temporary_ignores[signum] == 1) {
@@ -147,7 +124,7 @@ void handle_signal(int signum) {
 	}
 }
 
-char** parse_command(int argc, char* argv[]) {
+static char** parse_command(int argc, char* argv[]) {
 	int           opt;
 	struct option long_options[] = {
 		{ "single", no_argument, NULL, 's' },
@@ -155,6 +132,9 @@ char** parse_command(int argc, char* argv[]) {
 		{ "version", no_argument, NULL, 'V' },
 		{ NULL, 0, NULL, 0 },
 	};
+	char *old, *new;
+	int   oldsig, newsig;
+
 	while ((opt = getopt_long(argc, argv, "+:hvVs", long_options, NULL)) != -1) {
 		switch (opt) {
 			case 'v':
@@ -173,15 +153,12 @@ char** parse_command(int argc, char* argv[]) {
 	argc -= optind, argv += optind;
 
 	while (argc > 0) {
-		char *old, *new;
 		if ((new = strchr(argv[0], '=')) == NULL)
 			break;
 
 		old  = argv[0];
 		*new = '\0';
 		new ++;
-
-		int oldsig, newsig;
 
 		if ((oldsig = signame(old)) == -1) {
 			fprintf(stderr, "error: invalid old signal '%s'\n", old);
@@ -213,13 +190,15 @@ char** parse_command(int argc, char* argv[]) {
 // On the FreeBSD kernel, ignored signals cannot be waited on by `sigwait` (but
 // they can be on Linux). We must provide a dummy handler.
 // https://lists.freebsd.org/pipermail/freebsd-ports/2009-October/057340.html
-void dummy(int signum) {
+static void dummy(int signum) {
 	(void) signum;
 }
 
 int main(int argc, char* argv[]) {
 	char**   cmd = parse_command(argc, argv);
 	sigset_t all_signals;
+	int      signum;
+
 	sigfillset(&all_signals);
 	sigprocmask(SIG_BLOCK, &all_signals, NULL);
 
@@ -292,7 +271,6 @@ int main(int argc, char* argv[]) {
 	/* parent */
 	DEBUG("Child spawned with PID %d.\n", child_pid);
 	for (;;) {
-		int signum;
 		sigwait(&all_signals, &signum);
 		handle_signal(signum);
 	}

@@ -13,6 +13,7 @@
 
 static int fd_set_flag(int fd, int flags) {
 	int rc;
+
 	if ((rc = fcntl(fd, F_GETFL)) == -1)
 		return -1;
 
@@ -55,7 +56,13 @@ static void init_supervise(service_t* s) {
 }
 
 service_t* service_register(int dir, const char* name, bool is_log_service) {
-	service_t* s;
+	service_t*  s;
+	struct stat st;
+	bool        autostart, autostart_once;
+
+	char up_path[SV_NAME_MAX]   = "up-",
+	     once_path[SV_NAME_MAX] = "once-";
+
 
 	if ((s = service_get(name)) == NULL) {
 		s                 = &services[services_size++];
@@ -84,8 +91,6 @@ service_t* service_register(int dir, const char* name, bool is_log_service) {
 		service_update_status(s);
 	}
 
-	struct stat st;
-
 	if (s->is_log_service) {
 		if (s->log_pipe.read == 0 || s->log_pipe.write == 0)
 			pipe((int*) &s->log_pipe);
@@ -95,11 +100,6 @@ service_t* service_register(int dir, const char* name, bool is_log_service) {
 		if (!s->log_service)
 			s->log_service = service_register(s->dir, "log", true);
 	}
-
-	bool autostart, autostart_once;
-
-	char up_path[SV_NAME_MAX]   = "up-";
-	char once_path[SV_NAME_MAX] = "once-";
 
 	strcat(up_path, runlevel);
 	strcat(once_path, runlevel);

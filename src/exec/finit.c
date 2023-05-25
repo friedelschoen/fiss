@@ -14,6 +14,8 @@
 
 
 int handle_initctl(int argc, const char** argv) {
+	int sig;
+
 	if (argc != 2 || argv[1][1] != '\0' || (argv[1][0] != '0' && argv[1][0] != '6')) {
 		print_usage_exit(PROG_FINIT, 1);
 	}
@@ -21,7 +23,7 @@ int handle_initctl(int argc, const char** argv) {
 		fprintf(stderr, "error: can only be run as root...\n");
 		return 1;
 	}
-	int sig = argv[1][0] == '0' ? SIGTERM : SIGINT;
+	sig = argv[1][0] == '0' ? SIGTERM : SIGINT;
 	if (kill(1, sig) == -1) {
 		print_error("error: unable to kill init: %s\n");
 		return 1;
@@ -40,6 +42,7 @@ static void signal_interrupt(int signum) {
 
 int main(int argc, const char** argv) {
 	sigset_t ss;
+	pid_t    pid;
 
 	if (getpid() != 1) {
 		return handle_initctl(argc, argv);
@@ -61,10 +64,11 @@ int main(int argc, const char** argv) {
 
 	// stage 2
 	if (daemon_running) {    // stage1 succeed
+		struct sigaction sigact = { 0 };
+
 		sigblock_all(true);
 
-		struct sigaction sigact = { 0 };
-		sigact.sa_handler       = signal_interrupt;
+		sigact.sa_handler = signal_interrupt;
 		sigaction(SIGTERM, &sigact, NULL);
 		sigaction(SIGINT, &sigact, NULL);
 
@@ -79,7 +83,6 @@ int main(int argc, const char** argv) {
 	/* fallthrough stage 3 */
 	printf("sending KILL signal to all processes...\n");
 	kill(-1, SIGKILL);
-	pid_t pid;
 
 	if ((pid = fork()) <= 0) {
 		if (do_reboot) {

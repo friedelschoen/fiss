@@ -49,22 +49,9 @@ static const struct option long_options[] = {
 	{ 0 }
 };
 
-static char* progname(char* path) {
-	char* match;
-	for (;;) {
-		if ((match = strrchr(path, '/')) == NULL)
-			return path;
-
-		if (match[1] != '\0')
-			return match + 1;
-
-		*match = '\0';
-	}
-	return path;
-}
-
 static int check_service(int dir) {
 	int fd;
+
 	if ((fd = openat(dir, "supervise/ok", O_WRONLY | O_NONBLOCK)) == -1)
 		return -1;
 	close(fd);
@@ -114,8 +101,9 @@ int status(int dir) {
 }
 
 int main(int argc, char** argv) {
-	int opt;
-	int timeout = SV_STATUS_WAIT;
+	int opt, dir,
+	    timeout = SV_STATUS_WAIT;
+	time_t mod, start;
 
 	const char* command = NULL;
 
@@ -168,8 +156,6 @@ int main(int argc, char** argv) {
 		command++;
 	}
 
-	int    dir;
-	time_t mod, start;
 	for (int i = 0; i < argc; i++) {
 		if ((dir = open(argv[i], O_DIRECTORY)) == -1) {
 			fprintf(stderr, "warning: '%s' is not a valid directory\n", argv[0]);

@@ -15,10 +15,10 @@ void parse_param_file(service_t* s, char* args[]) {
 	int  args_size = 0;
 	int  line_size = 0;
 	char c;
+	bool start = true;
 
 	strcpy(args[args_size++], "./run");
 
-	bool start = true;
 	if ((param_file = openat(s->dir, "params", O_RDONLY)) != -1) {
 		while (read(param_file, &c, 1) > 0) {
 			if (start && c == '%') {
@@ -68,9 +68,9 @@ void parse_env_file(char** env) {
 
 /* uid:gid[:gid[:gid]...] */
 static int parse_ugid_num(char* str, uid_t* uid, gid_t* gids) {
-	int i;
-
+	int   i;
 	char* end;
+
 	*uid = strtoul(str, &end, 10);
 
 	if (*end != ':')
@@ -98,6 +98,7 @@ int parse_ugid(char* str, uid_t* uid, gid_t* gids) {
 	char*          end;
 	char*          groupstr = NULL;
 	int            gid_size = 0;
+	char*          next;
 
 	if (str[0] == ':')
 		return parse_ugid_num(str + 1, uid, gids);
@@ -117,7 +118,7 @@ int parse_ugid(char* str, uid_t* uid, gid_t* gids) {
 		return 1;
 	}
 
-	char* next = groupstr;
+	next = groupstr;
 
 	while (next && gid_size < 60) {
 		groupstr = next;

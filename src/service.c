@@ -33,6 +33,7 @@ service_t* service_get(const char* name) {
 
 int service_pattern(const char* name, service_t** dest, int dest_max) {
 	int size = 0;
+
 	for (int i = 0; i < services_size && size < dest_max; i++) {
 		if (pattern_test(name, services[i].name))
 			dest[size++] = &services[i];
@@ -43,15 +44,16 @@ int service_pattern(const char* name, service_t** dest, int dest_max) {
 int service_refresh_directory(void) {
 	DIR*           dp;
 	struct dirent* ep;
+	struct stat    st;
+	service_t*     s;
 
 	if ((dp = opendir(service_dir_path)) == NULL) {
 		print_error("error: cannot open service directory: %s\n");
 		return -1;
 	}
 
-	struct stat st;
 	for (int i = 0; i < services_size; i++) {
-		service_t* s = &services[i];
+		s = &services[i];
 		if (fstat(s->dir, &st) == -1 || !S_ISDIR(st.st_mode)) {
 			if (s->pid)
 				kill(s->pid, SIGKILL);
@@ -87,6 +89,7 @@ int service_refresh_directory(void) {
 
 static bool is_dependency(service_t* d) {
 	service_t* s;
+
 	for (int i = 0; i < depends_size; i++) {
 		s = depends[i][0];
 		if (depends[i][1] == d && (s->state != STATE_INACTIVE || service_need_restart(s)))
@@ -98,6 +101,7 @@ static bool is_dependency(service_t* d) {
 bool service_need_restart(service_t* s) {
 	if (s->restart_manual == S_FORCE_DOWN)
 		return is_dependency(s);
+
 	return s->restart_file == S_ONCE ||
 	       s->restart_file == S_RESTART ||
 	       s->restart_manual == S_ONCE ||
