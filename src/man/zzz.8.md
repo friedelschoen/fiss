@@ -30,7 +30,7 @@ hibernate to disk and reboot (useful for switching operating systems)
 `-H, --hybrid`
 hibernate to disk and suspend
 
-# HOOKS
+## HOOKS
 
 Before suspending, `zzz` executes _/usr/share/fiss/suspend_ which intents to execute scripts inside _/etc/zzz.d/suspend_ in alphanumeric order. After resuming, `zzz` executes _/usr/share/fiss/resume_ which intents to execute scripts inside _/etc/zzz.d/resume_ in alphanumeric order.
 
