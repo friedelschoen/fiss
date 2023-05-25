@@ -13,7 +13,9 @@
 #include <unistd.h>
 
 
-int handle_initctl(int argc, const char** argv) {
+static bool do_reboot;
+
+static int handle_initctl(int argc, const char** argv) {
 	int sig;
 
 	if (argc != 2 || argv[1][1] != '\0' || (argv[1][0] != '0' && argv[1][0] != '6')) {
@@ -30,9 +32,6 @@ int handle_initctl(int argc, const char** argv) {
 	}
 	return 0;
 }
-
-
-static bool do_reboot;
 
 static void signal_interrupt(int signum) {
 	daemon_running = false;
