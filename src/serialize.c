@@ -10,9 +10,9 @@ const char* service_status_name(service_t* s) {
 		case STATE_ACTIVE_FOREGROUND:
 			return "run";
 		case STATE_ACTIVE_BACKGROUND:
-			return "run (background)";
+			return "run-background";
 		case STATE_ACTIVE_DUMMY:
-			return "run (dummy)";
+			return "run-dummy";
 		case STATE_FINISHING:
 			return "finishing";
 		case STATE_STOPPING:
@@ -99,6 +99,6 @@ void service_decode(service_t* s, const service_serial_t* buffer) {
 	         (buffer->pid[2] << 16) |
 	         (buffer->pid[3] << 24);
 
-	s->paused         = buffer->paused;
-	s->restart_manual = buffer->restart;
+	s->paused        = buffer->paused;
+	s->restart_final = buffer->restart;
 }

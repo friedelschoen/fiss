@@ -19,7 +19,6 @@ int         service_dir;
 const char* service_dir_path;
 int         control_socket;
 int         null_fd;
-bool        verbose = false;
 service_t*  depends[SV_DEPENDENCY_MAX][2];
 int         depends_size;
 

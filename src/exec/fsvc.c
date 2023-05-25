@@ -1,6 +1,7 @@
 #include "config.h"
 #include "message.h"
 #include "service.h"
+#include "signame.h"
 #include "util.h"
 
 #include <fcntl.h>
@@ -79,7 +80,10 @@ static int send_command(int dir, const char* command) {
 }
 
 int status(int dir) {
-	int fd;
+	int         fd;
+	time_t      timeval;
+	const char* timeunit = "sec";
+
 	if ((fd = openat(dir, "supervise/status", O_RDONLY | O_NONBLOCK)) == -1)
 		return -1;
 
@@ -95,7 +99,67 @@ int status(int dir) {
 
 	service_decode(&s, &buffer);
 
-	printf("%d\n", s.pid);
+	timeval = time(NULL) - s.status_change;
+
+	if (timeval >= 60) {
+		timeval /= 60;
+		timeunit = "min";
+		if (timeval >= 60) {
+			timeval /= 60;
+			timeunit = "h";
+			if (timeval >= 24) {
+				timeval /= 24;
+				timeunit = "d";
+			}
+		}
+	}
+
+	switch (s.state) {
+		case STATE_SETUP:
+			printf("setting up");
+			break;
+		case STATE_STARTING:
+			printf("starting as %d", s.pid);
+			break;
+		case STATE_ACTIVE_FOREGROUND:
+			printf("active as %d", s.pid);
+			break;
+		case STATE_ACTIVE_BACKGROUND:
+		case STATE_ACTIVE_DUMMY:
+			printf("active");
+			break;
+		case STATE_FINISHING:
+			printf("finishing as %d", s.pid);
+			break;
+		case STATE_STOPPING:
+			printf("stopping as %d", s.pid);
+			break;
+		case STATE_INACTIVE:
+			printf("inactive");
+			break;
+		case STATE_DEAD:
+			printf("dead");
+			break;
+	}
+
+	if (s.paused)
+		printf(" & paused");
+
+	printf(" since %lu%s", timeval, timeunit);
+
+	if (s.restart_final)
+		printf(", restarts on exit");
+
+	if (s.return_code > 0 && s.last_exit == EXIT_NORMAL)
+		printf(", exited with %d", s.return_code);
+
+	if (s.return_code > 0 && s.last_exit == EXIT_SIGNALED)
+		printf(", signaled with SIG%s", sigabbr(s.return_code));
+
+	if (s.fail_count > 0)
+		printf(", failed %d times", s.fail_count);
+
+	printf("\n");
 
 	return 0;
 }
@@ -186,7 +250,11 @@ int main(int argc, char** argv) {
 			while (get_mtime(dir) == mod && time(NULL) - start < timeout)
 				usleep(500);    // sleep half a secound
 
-			printf(get_mtime(dir) == mod ? "timeout: %s: " : "ok: %s: ", progname(argv[i]));
+			if (get_mtime(dir) == mod)
+				printf("timeout: ");
+
+			printf("%s: ", progname(argv[i]));
+
 			if (status(dir) == -1)
 				printf("unable to access supervise/status\n");
 		}
