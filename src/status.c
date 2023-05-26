@@ -4,6 +4,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/file.h>
 #include <sys/stat.h>
@@ -15,7 +16,7 @@ void service_update_status(service_t* s) {
 	const char*      stat_human;
 	service_serial_t stat_runit;
 
-	if ((fd = openat(s->dir, "supervise/status", O_CREAT | O_WRONLY | O_TRUNC, 0644)) == -1) {
+	if ((fd = openat(s->dir, "supervise/status.new", O_CREAT | O_WRONLY | O_TRUNC, 0644)) == -1) {
 		print_error("cannot open supervise/status: %s\n");
 		return;
 	}
@@ -29,7 +30,7 @@ void service_update_status(service_t* s) {
 
 	close(fd);
 
-	if ((fd = openat(s->dir, "supervise/stat", O_CREAT | O_WRONLY | O_TRUNC, 0644)) == -1) {
+	if ((fd = openat(s->dir, "supervise/stat.new", O_CREAT | O_WRONLY | O_TRUNC, 0644)) == -1) {
 		print_error("cannot create supervise/stat: %s\n");
 		return;
 	}
@@ -42,7 +43,7 @@ void service_update_status(service_t* s) {
 
 	close(fd);
 
-	if ((fd = openat(s->dir, "supervise/pid", O_CREAT | O_WRONLY | O_TRUNC, 0644)) == -1) {
+	if ((fd = openat(s->dir, "supervise/pid.new", O_CREAT | O_WRONLY | O_TRUNC, 0644)) == -1) {
 		print_error("cannot create supervise/stat: %s\n");
 		return;
 	}
@@ -50,4 +51,8 @@ void service_update_status(service_t* s) {
 	dprintf(fd, "%d", s->pid);
 
 	close(fd);
+
+	renameat(s->dir, "supervise/status.new", s->dir, "supervise/status");
+	renameat(s->dir, "supervise/stat.new", s->dir, "supervise/stat");
+	renameat(s->dir, "supervise/pid.new", s->dir, "supervise/pid");
 }
