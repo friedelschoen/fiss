@@ -24,7 +24,7 @@ static int fd_set_flag(int fd, int flags) {
 }
 
 static void init_supervise(service_t* s) {
-	int         lockfd;
+	int         fd;
 	struct stat st;
 
 	if (fstatat(s->dir, "supervise", &st, 0) == -1)
@@ -48,17 +48,29 @@ static void init_supervise(service_t* s) {
 
 	fd_set_flag(s->control, O_NONBLOCK);
 
-	if ((lockfd = openat(s->dir, "supervise/lock", O_CREAT | O_WRONLY, 0644)) == -1) {
+	if ((fd = openat(s->dir, "supervise/lock", O_CREAT | O_WRONLY, 0644)) == -1) {
 		print_error("cannot create supervise/lock: %s\n");
 		return;
 	}
-	close(lockfd);
+	close(fd);
+
+
+	if ((fd = openat(s->dir, "supervise/runlevel", O_CREAT | O_TRUNC | O_WRONLY, 0644)) == -1) {
+		print_error("cannot create supervise/runlevel: %s\n");
+		return;
+	}
+
+	if (write(fd, runlevel, strlen(runlevel)) == -1) {
+		print_error("cannot write to supervise/runlevel: %s\n");
+		close(fd);
+		return;
+	}
+	close(fd);
 }
 
 service_t* service_register(int dir, const char* name, bool is_log_service) {
 	service_t*  s;
 	struct stat st;
-	bool        autostart, autostart_once;
 
 	char up_path[SV_NAME_MAX]   = "up-",
 	     once_path[SV_NAME_MAX] = "once-";
@@ -104,19 +116,13 @@ service_t* service_register(int dir, const char* name, bool is_log_service) {
 	strcat(up_path, runlevel);
 	strcat(once_path, runlevel);
 
-	autostart      = fstatat(s->dir, up_path, &st, 0) != -1 && S_ISREG(st.st_mode);
-	autostart_once = fstatat(s->dir, once_path, &st, 0) != -1 && S_ISREG(st.st_mode);
-
 	s->restart_file = S_DOWN;
 
-	if (autostart && autostart_once) {
-		fprintf(stderr, "error: %s is marked for up AND once!\n", s->name);
-	} else if (autostart) {
+	if (fstatat(s->dir, up_path, &st, 0) != -1 && st.st_mode & S_IREAD)
 		s->restart_file = S_RESTART;
-	} else if (autostart_once) {
-		if (s->restart_file == S_DOWN)
-			s->restart_file = S_ONCE;
-	}
+	else if (fstatat(s->dir, once_path, &st, 0) != -1 && st.st_mode & S_IREAD)
+		s->restart_file = S_ONCE;
+
 
 	return s;
 }
