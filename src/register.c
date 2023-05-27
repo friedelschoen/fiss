@@ -23,49 +23,59 @@ static int fd_set_flag(int fd, int flags) {
 	return 0;
 }
 
-static void init_supervise(service_t* s) {
+static int init_supervise(service_t* s) {
 	int         fd;
 	struct stat st;
 
-	if (fstatat(s->dir, "supervise", &st, 0) == -1)
-		mkdirat(s->dir, "supervise", 0744);
-
-	if (fstatat(s->dir, "supervise/ok", &st, 0) == -1)
-		mkfifoat(s->dir, "supervise/ok", 0644);
-
-	if (fstatat(s->dir, "supervise/control", &st, 0) == -1)
-		mkfifoat(s->dir, "supervise/control", 0644);
-
+	if (fstatat(s->dir, "supervise", &st, 0) == -1 && mkdirat(s->dir, "supervise", 0744) == -1) {
+		print_error("warning: cannot create directory supervise: %s\ntrying to remove supervise...\n");
+		if (unlinkat(s->dir, "supervise", 0) == -1 || mkdirat(s->dir, "supervise", 0744) == -1) {
+			print_error("warning: cannot create directory supervise: %s\n");
+			return -1;
+		}
+	}
+	if (fstatat(s->dir, "supervise/ok", &st, 0) == -1 && mkfifoat(s->dir, "supervise/ok", 0644) == -1) {
+		print_error("cannot create fifo at supervise/ok: %s\n");
+		return -1;
+	}
+	if (fstatat(s->dir, "supervise/control", &st, 0) == -1 && mkfifoat(s->dir, "supervise/control", 0644) == -1) {
+		print_error("cannot create fifo at supervise/control: %s\n");
+		return -1;
+	}
 	if (openat(s->dir, "supervise/ok", O_RDONLY | O_NONBLOCK) == -1) {
 		print_error("cannot open supervise/ok: %s\n");
-		return;
+		return -1;
 	}
 
 	if ((s->control = openat(s->dir, "supervise/control", O_RDONLY | O_NONBLOCK)) == -1) {
 		print_error("cannot open supervise/ok: %s\n");
-		return;
+		return -1;
 	}
 
-	fd_set_flag(s->control, O_NONBLOCK);
+	if (fd_set_flag(s->control, O_NONBLOCK)) {
+		print_error("cannot set supervise/control non-blocking: %s\n");
+	}
 
 	if ((fd = openat(s->dir, "supervise/lock", O_CREAT | O_WRONLY, 0644)) == -1) {
 		print_error("cannot create supervise/lock: %s\n");
-		return;
+		return -1;
 	}
 	close(fd);
 
 
 	if ((fd = openat(s->dir, "supervise/runlevel", O_CREAT | O_TRUNC | O_WRONLY, 0644)) == -1) {
 		print_error("cannot create supervise/runlevel: %s\n");
-		return;
+		return -1;
 	}
 
 	if (write(fd, runlevel, strlen(runlevel)) == -1) {
 		print_error("cannot write to supervise/runlevel: %s\n");
 		close(fd);
-		return;
+		return -1;
 	}
 	close(fd);
+
+	return 0;
 }
 
 service_t* service_register(int dir, const char* name, bool is_log_service) {
@@ -92,12 +102,16 @@ service_t* service_register(int dir, const char* name, bool is_log_service) {
 
 		if ((s->dir = openat(dir, name, O_DIRECTORY)) == -1) {
 			print_error("error: cannot open '%s': %s\n", name);
+			services_size--;
+			return NULL;
+		}
+
+		if (init_supervise(s) == -1) {
+			services_size--;
 			return NULL;
 		}
 
 		strncpy(s->name, name, sizeof(s->name));
-
-		init_supervise(s);
 
 		s->status_change = time(NULL);
 		service_update_status(s);

@@ -75,6 +75,7 @@ static void control_sockets(void) {
 
 	for (int i = 0; i < services_size; i++) {
 		s = &services[i];
+		printf("%s reading from %d\n", s->name, s->control);
 		while (read(s->control, &chr, 1) == 1) {
 			printf("handling '%c' from %s\n", chr, s->name);
 			if (read_signo) {
