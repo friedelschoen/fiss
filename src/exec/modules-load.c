@@ -113,7 +113,7 @@ int main(int argc, char** argv) {
 		printf("%s\n", modules[i]);
 	}
 
-	char* args[modules_size + argc - 1 + 2];
+	char* args[modules_size + argc - 1 + 2 + 1];
 	int   argi = 0;
 
 	args[argi++] = "modprobe";
