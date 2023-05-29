@@ -1,4 +1,4 @@
-# fsvc 8 "MAY 2023" "0.2.2" "fiss man page"
+# fsvc 8 "MAY 2023" "%VERSION%" "fiss man page"
 
 ## NAME
 

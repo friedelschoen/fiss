@@ -1,5 +1,8 @@
 #pragma once
 
+// the current version, VERSION must be defined by compiler-flag -DVERSION=\"x.x.x\"
+#define SV_VERSION VERSION
+
 // seconds to wait for a service before it gets killed
 #ifndef SV_STOP_TIMEOUT
 #	define SV_STOP_TIMEOUT 5
@@ -53,11 +56,6 @@
 // path to resume-script
 #ifndef SV_RESUME_EXEC
 #	define SV_RESUME_EXEC "/usr/share/fiss/resume"
-#endif
-
-// the current version
-#ifndef SV_VERSION
-#	define SV_VERSION "0.3.0"
 #endif
 
 // time to wait to accept new connection

@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
 				write_wtmp(1);
 				return 0;
 			default:
-				fprintf(stderr, "Usage: %s [-n] [-f] [-d] [-w] [-B]", progname);
+				fprintf(stderr, "Usage: %s [-n] [-f] [-d] [-w] [-B]", prog);
 				return 1;
 		}
 

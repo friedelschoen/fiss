@@ -1,4 +1,4 @@
-# zzz 8 "MAY 2023" "0.1.2" "fiss man page"
+# zzz 8 "MAY 2023" "%VERSION%" "fiss man page"
 
 ## NAME
 

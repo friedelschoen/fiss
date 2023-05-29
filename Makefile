@@ -1,3 +1,5 @@
+VERSION = 0.3.2
+
 # Directories
 SRC_DIR     := src
 BUILD_DIR   := build
@@ -9,8 +11,10 @@ ROFF_DIR    := man
 
 # Compiler Options
 CC       ?= clang
-CFLAGS   += -g -std=gnu99 -Wpedantic -Wunused-result -Wno-gnu-zero-variadic-macro-arguments
+CFLAGS   += -I$(INCLUDE_DIR) -DVERSION=\"$(VERSION)\" -g -std=gnu99 -Werror -Wpedantic -Wpedantic -Wno-gnu-zero-variadic-macro-arguments
 LDFLAGS  += -fPIE
+
+SED      ?= sed
 
 # Executable-specific flags
 finit_FLAGS := -static
@@ -54,11 +58,11 @@ $(INTERMED_DIRS):
 
 # Object rules
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c $(INCLUDE_FILES) | $(BUILD_DIR)
-	$(CC) -o $@ -c -I$(INCLUDE_DIR) $(CFLAGS) $<
+	$(CC) -o $@ -c $(CFLAGS) $<
 
 # Executables
 $(BIN_DIR)/%: $(EXEC_DIR)/%.c $(INCLUDE_FILES) $(OBJ_FILES) | $(BIN_DIR)
-	$(CC) -o $@ -I$(INCLUDE_DIR) $(CFLAGS) $< $(OBJ_FILES) $($(notdir $@)_FLAGS) $(LDFLAGS)
+	$(CC) -o $@ $(CFLAGS) $< $(OBJ_FILES) $($(notdir $@)_FLAGS) $(LDFLAGS)
 
 $(BIN_DIR)/%: $(EXEC_DIR)/%.sh | $(BIN_DIR)
 	cp $< $@
@@ -71,10 +75,10 @@ $(BIN_DIR)/%: $(EXEC_DIR)/%.lnk | $(BIN_DIR)
 # Manual targets
 
 $(ROFF_DIR)/%: $(MAN_DIR)/%.md | $(ROFF_DIR)
-	md2man-roff $< > $@
+	$(SED) 's/%VERSION%/$(VERSION)/' $< | md2man-roff > $@
 
 $(ROFF_DIR)/%: $(MAN_DIR)/%.roff | $(ROFF_DIR)
-	cp $< $@
+	$(SED) 's/%VERSION%/$(VERSION)/' $< > $@
 
 # Debug
 compile_flags.txt: 
