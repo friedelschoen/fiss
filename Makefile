@@ -11,7 +11,7 @@ ROFF_DIR    := man
 
 # Compiler Options
 CC       ?= clang
-CFLAGS   += -I$(INCLUDE_DIR) -DVERSION=\"$(VERSION)\" -g -std=gnu99 -Werror -Wpedantic -Wpedantic -Wno-gnu-zero-variadic-macro-arguments
+CFLAGS   += -I$(INCLUDE_DIR) -DVERSION=\"$(VERSION)\" -g -std=gnu99 -Wall -Wextra -Wpedantic -Wno-gnu-zero-variadic-macro-arguments
 LDFLAGS  += -fPIE
 
 SED      ?= sed
