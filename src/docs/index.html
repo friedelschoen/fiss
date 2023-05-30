@@ -1,0 +1,333 @@
+@header fiss
+
+Aloha! You somehow landed on the website of <b>fiss</b> (<i>Friedel's Initialization and
+Service Supervision</i>). <b>fiss</b> is a supervision suite for Unix and Unix-like systems
+with the power off system initialization. This project is based on <b>runit</b> and
+other <b>daemontools</b>-based utilities.
+
+
+@title init What does an init-system do?
+
+After the kernel has loaded all the hardware stuff and setting up a working
+environment, it executes <i>/sbin/init</i> by default which mounts pseude-drives, the
+root-drive read-writable and more. This depends on your system, the package does
+include start and stop scripts and basic agetty services.
+
+After the initialization is done, services must be started. A service is a long-
+running process, which needs to be restarted if it suddenly terminates. FreeBSD
+and other BSD's as far as I know, are handling services pretty rudimentally with
+plain shell scripts and without supervision. The most Linux distributions are
+shipped with SystemD which is the opposite of FreeBSD's rc.d idea. SystemD is
+one massive and bulky project with a lot of (useless) features. I've used Void
+Linux which is shipped with <b>runit</b>, a <b>daemontools</b>-derivate with initialization.
+Unlike <b>SystemD</b>, <b>runit</b> is a fine in-between: minimal but feature-rich. Bit too
+minimal so I thought of making <b>fiss</b>!
+
+
+@title why Why fiss tho?
+
+<b>fiss</b> is a lightweight and easy-to-use tool for initializing and supervising
+long-running services on Unix-like systems. It provides a simple and reliable
+way to start, stop, and monitor services. It supports automatic restarts,
+logging, and customizable startup options. It's no fork and uses the standard
+POSIX libc without other runtime dependencies. <b>fiss</b> support all the features to
+make services efficient running. It can be compatible with <b>runit</b> and <b>daemontools</b>
+utilities and is highly customizable at runtime to make <b>fiss</b> fit your needs.
+
+
+@title compare fiss vs runit
+
+<b>runit</b> is a good init-system and is lovely to use but there are some features
+which are just missing.
+
+@list
+<b>fiss</b> has service-ordering (aka. dependencies), thus if <i>service-b</i> depends on
+<i>service-a</i>, you can configure it as a dependency and <b>fiss</b> will keep <i>service-a</i>
+running as long as <i>service-b</i> is running.
+
+<b>fiss</b> has background-services, some services just won't let you run them in
+foreground. <b>runit</b> solves this problem with <b>pause</b>, a little program which just
+waits on an incoming signal. But this solution requires extra resources and
+a process-slot. It's bearly possible to hit the process-roof but for every
+process, the kernel needs to reserve memory and manage cpu-time.
+
+<b>runit</b> has no built-in environment settings, it always runs services with a
+clear environment and you can modify it with chpst. That extends the process
+chain and cost more start-up time. <b>fiss</b> has build-in environment options for
+changing the user and group, the arguments, argv[0] or environment-variables.
+This project also includes a simplified and rewritten version of chpst, for
+compatibility use.
+
+<b>runit</b>'s controller sv is really basic. It does not need to be very beautiful
+or feature-rich, but enabling services and enabling services once (one time
+after boot) is not possible. <b>runit</b>'s <i>down</i>-file method seems more like a hack.
+<b>fiss</b> supports enabling and once-enabling by default. If you like <b>sv</b>'s
+simplicity or its helpers like <b>vsv</b> or <b>rsv</b>, there is a compatibility-layer for
+<b>runit</b> or <b>daemontools</b>
+
+finit and fsvc directly call the service executable. That means there is no
+process-chaining as <b>runit</b> does. If you are running <b>runit</b> as init (runit-init):~
+- kernel executes <b>runit-init</b>~
+- this executes <b>runit</b>~
+- <b>runit</b> forks and executes <i>/etc/runit/{1,2,3}</i>~
+- <i>/etc/runit/2</i> executes <b>runsvdir</b>~
+- <b>runsvdir</b> forks and executes <b>runsv</b>~
+- and finally <b>runsv</b> executes the underlying service executable
+
+Every fork and execute causes an overhead. Also <b>runsvdir</b> is decentralized,
+thus no central control unit can be used and every <b>runsv</b> has its own control
+unit.
+
+On the other hand this results in more security, if a executable failes due to
+a bug, the underlying executable will catch this (if implemented). Which
+implementation is better is up to yourself.</li>
+
+<b>fiss</b> and <b>runit</b> are entirely written in C, init has to be minimal and a garbage
+collector would only slow down the whole system. With C you have direct
+control of the operating system.
+
+<b>fiss</b> is written from scratch using the libc implementaions, this results in a
+readable code thus easier for contributers to dive into the codebase.
+<b>runit</b> and <b>daemontools</b> are written using the djb-library which is an
+alternative general library. It's completely fine to use the library and maybe
+it is even faster than your libc-implementation (glibc, musl, freebsd-libc).
+@endlist
+
+@title install Installation
+
+Now that you are really hyped to install <b>fiss</b>, you first have to compile it.
+
+To compile make sure you have installed the dependencies.~
+- C compiler like <b>gcc</b> or <b>clang</b> which supports the <i>gnu99</i>-standard~
+- POSIX-compliant shell like dash or bash~
+- GNU make~
+- <a href='https://github.com/sunaku/md2man'>md2man</a> to make the manuals
+
+If running <b>fiss</b>, you require to have following dependencies installed:~
+- POSIX-compliant shell like dash or bash~
+- GNU <b>awk</b>
+
+Download the last release from GitHub or clone this project with git to build
+from HEAD.
+
+@code
+git clone https://github.com/friedelschoen/fiss.git
+cd fiss/
+@endcode
+
+Then you have to compile the project with make.
+
+@code
+make binary   # to compile the executables
+make manual   # to compile the manuals
+@endcode
+
+Executables are now stored in ./bin, standard configuration-files are stored in
+./etc, runtime-required files are in ./share and manuals in ./man.
+
+
+@title voidlinux Installation on Void Linux
+
+If you don't have the source-tree yet, clone and bootstrap it with git.
+
+@code
+git clone https://github.com/void-linux/void-packages.git
+cd void-packages/
+./xbps-src binary-bootstrap
+@endcode
+
+
+<b>fiss</b> is not a official package yet, as it's too unstable to include, but you can
+add my void-packages as remote and compile.
+
+
+@code
+git remote add fiss https://github.com/friedelschoen/void-packages.git
+git pull fiss fiss
+./xbps pkg fiss
+xi fiss                                     # if xtools is installed
+sudo xbps-install -R hostdir/binpkgs fiss   # if xtools is not installed
+@endcode
+
+
+@title getting-started Getting Started
+
+<b>fiss</b> does not parse any configuration file, everything is configured through
+different files inside for example /etc/service.d.
+
+Following files are executed by finit:
+
+@list
+<i>/usr/share/fiss/start</i>~
+This is the entry point of your system (similar to <i>/etc/runit/1</i>). By default
+this script sources files in unix-order inside <i>/etc/start.d/*.sh</i>.
+
+<i>/etc/service.d/*</i>~
+In this directory the services are stored, underneath is descripted how a
+service is constructed. The utility fsvs is written to supervise a service-
+directory without issuing start and stop mechanisms.
+
+<i>/usr/share/fiss/stop</i>~
+This is the ending point of your system-lifetime (similar to <i>/etc/runit/3</i>). By
+default this script sources file in unix-order inside <i>/etc/stop.d/*.sh</i>.
+@endlist
+
+<b>zzz</b> is a utility shipped with <b>fiss</b> to suspend your system, following files are
+executed by <b>zzz</b>.
+@list
+<i>/usr/share/fiss/suspend</i>~
+This file is executed before suspending, by default this script sources
+files in unix-order inside <i>/etc/zzz.d/suspend/*.sh</i>.
+
+<i>/usr/share/fiss/resume</i>~
+This file is executed after suspending (thus before resuming), by default this script sources
+files in unix-order inside <i>/etc/zzz.d/resume/*.sh</i>.
+@endlist
+
+@title service How to create a service?
+
+Services are usually placed into <i>/etc/service.d</i>, a services is a long-running
+executable like for example sshd, which should be running the whole lifetime of
+your system. Sadly do some services terminate before your system halts because
+of an error or signaling, this is where <b>fiss</b> plays its role.
+
+@list
+<i>./run</i>~
+Usually your service runs in the foreground, in this case you can create a run
+executable, either linked to the actual binary or as a script that executes
+the service. run is meant to be running the whole time in the foreground and
+must not daemonize itself into the background as <b>fiss</b> would restart it.
+@code
+#!/bin/sh
+
+[ -r ./conf ] && . ./conf
+
+exec myservice $ARGS
+@endcode
+This example sources conf in the service-directory if present and executes
+myservice with <u>$ARGS</u>.
+
+<i>./params</i>~
+run often needs parameters, these can be defined inside params. Your
+arguments must be newline-demilitered. Usually the 0th argument is not
+included and defaults to './run', but if you want to define the 0th argument
+you can prefix the first line with '%' and the argument counting starts at 0.
+No shell-substitution will be done.
+@code
+%fiss-service
+-L
+-p 8000
+@endcode
+In this example, run would be executed with 'fiss-service' as 0th argument and
+'-L' '-p 8000'
+
+<i>./env</i>~
+This file describes environment-variables for run. This is as params a
+newline-demilitered file with key=value pairs. As for params, there is no
+shell-substitution done.
+@code
+HOME=/home/foo
+XDG_CONFIG_DIRS=/etc/
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
+
+<i>./user</i>~
+If this file is present, run will be executes as defined user and group(s).
+You can define your user as 'user' and the group will be the user group or you
+explicitly define 'user:group'. You can add multiple groups with
+'user:group:group2:group3', if user is prefixed with a colon (':'), users and
+groups will be parsed as numeric thus ':1000:1000:1001'.
+@code
+foo:foo:mysql
+@endcode
+In this example, run would be executed as 'foo' and als 'foo' as group with
+'mysql' as additional group.
+
+<i>./start</i>~
+If your services cannot be run in the foreground, you should execute link it
+to start, start is a short-running executable, if start exits it is considered
+as running. To supervise your services, it's handy to provide a pid-file
+inside your service as some services provide print its process-id to the
+console. If no pid-file is found you must implement a stop file.
+@code
+#!/bin/sh
+
+myserver --print-pid > ./pid
+@endcode
+
+<i>./pid</i>~
+This is a plain-text file containing just the PID of the service in decimal.
+
+<i>./stop</i>~
+This script is meant to stop the service, if this file exits the service is
+considered inactive. This file must not coexist with pid.
+@code
+#!/bin/sh
+
+myserver2 --stop
+@endcode
+
+<i>./depends</i>~
+This file contains newline-demilitered service-names which are dependencies of
+the service. dependencies are started before the service will be started and
+stopped if no enabled and no other service depend on it. Dependencies are just
+started, no consideration will be done that the dependency is actually active.
+
+@code
+dbus
+networking
+@endcode
+
+<i>./setup</i>~
+If this file is present and executable, it will be executed before run or
+start, it is meant for example to create files or directories.
+@code
+#!/bin/sh
+
+mkdir /var/myserver
+@endcode
+
+<i>./finish</i>~
+If this file is present and executable, it will be executed after run has
+exited or after stop was executed. This is meant to remove unnessasary files
+or directories.
+
+@code
+#!/bin/sh
+
+rm -rf /var/myserver
+@endcode
+
+<i>./log</i>~
+If this file is present, <b>fiss</b> will write the stdout and stderr of run to it.
+This will be done without any modifications.
+
+<i>./log/</i> service~
+If this directory is present and a valid service-directory, stdout and stderr
+of your service will be redirected to the run of the log-service. This is done
+with a internal pipe, thus no data will be lost of either services failes.
+
+<i>./no-log</i>~
+If this file is present, no logging will be done at all. This is meant for
+very verbose services, which would overflout the system.~
+If <i>log</i>, <i>log/</i> or <i>no-log</i> is not present, the output of will be redirected to
+/run/fiss/log/&lt;service&gt;.
+
+<i>./up-&lt;runlevel&gt;</i>~
+If this file is present, the services will be started automatically and
+restarted if this services dies. On other systems, this is called 'enabling'
+a service.
+
+<i>./once-&lt;runlevel&gt;</i>~
+If this file is present, the services will be started automatically but not
+restarted if this services dies.
+@endlist
+
+To be a valid service, <i>run</i>, <i>start</i> or <i>depends</i> must be present. If only depends is
+present, this service is a dummy service thus no actual action will be taken but
+starting and stopping dependencies.
+
+<i>start</i>, <i>stop</i>, <i>setup</i> and <i>finish</i> are executed as the same user as <b>fsvs</b> or <b>finit</b> is
+started, thus root in the most cased. <i>user</i>, <i>env</i>, <i>params</i> are not read when
+handling a background-service. Every file will be executed in the services
+directory, reading a file like './conf' will be read out of the service
+directory.
