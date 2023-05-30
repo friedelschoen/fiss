@@ -1,0 +1,32 @@
+@man fsvs 8 "MAY 2023" "%VERSION%" "fiss man page"
+
+@title name Name
+
+*fsvs* - friedel's service superviser
+
+@title synopsis Synopsis
+
+*fsvs* [options] service-dir runlevel
+
+@title description Description
+
+*fsvs* is the superviser called by *finit* but without initialization.
+
+Following options are available:
+
+@list
+*-v, --verbose*
+Prints more information, easier to debug problems
+
+*-f, --force*
+Forces the socket if existing, if called without *-f* and the socket already exists, it failes.
+
+*-V, --version*
+Prints the version and exits.
+@endlist
+
+Services can be controlled with *fsvc 8*
+
+@title authors Authors
+
+Friedel Schon <derfriedmundschoen@gmail.com>

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang=en>
+
+<head>
+  <title>Friedel's Initialization and Service Supervision</title>
+  <meta charset=utf-8 />
+  <meta name=viewport content='width=device-width,initial-scale=1' />
+  <link rel=stylesheet href=assets/style.css />
+  <script type=text/javascript src=assets/toggle-dark.js></script>
+</head>
+
+<body>
+<div id=wrapper>
+
+<a class=title id=name href=#name>Name</a>
+--------------------------------------------------------------------------------
+
+<b>shutdown</b> – bring down the system 
+<a class=title id=synopsis href=#synopsis>Synopsis</a>
+--------------------------------------------------------------------------------
+
+<b>shutdown</b> [<b>-rhP</b>] [<b>-fF</b>] [now | +mins] [message ...] 
+<a class=title id=description href=#description>Description</a>
+--------------------------------------------------------------------------------
+
+shutdown brings the system down in a secure way. All logged-in users are notified that the system is going down, and login(1) is blocked. 
+By default, shutdown puts the system into single user mode. Rebooting and halting the system can be done using the following options: 
+<ul>
+<li><b>-c</b> Cancel an ongoing shutdown. </li>
+<li><b>-f</b> Enable fast booting; skip fsck(8) on next boot. </li>
+<li><b>-F</b> Force run of fsck(8) on next boot. </li>
+<li><b>-h</b> Halt the system. </li>
+<li><b>-k</b> Don't really shutdown; only send the warning messages to everybody. </li>
+<li><b>-P</b> Poweroff the system. </li>
+<li><b>-r</b> Reboot the system. </li>
+<li><b>now</b> Shutdown without further waiting. </li>
+<li><b>+mins</b> Wait mins minutes before shutting down. </li>
+<li><b>message</b> Message displayed to all users, defaults to "system is going down". </li></ul>
+<a class=title id=unsupported href=#unsupported>Unsupported OPTIONS</a>
+--------------------------------------------------------------------------------
+
+This version of shutdown is based on runit(8), the following features are not supported: 
+<b>-t secs</b> to wait secs seconds between SIGKILL and SIGTERM on shutdown is silently ignored. 
+<b>-a</b> Use /etc/shutdown.allow. 
+<b>-H</b> Drop into boot monitor. 
+<b>-n</b> Don't call init(8). 
+<b>hh:mm</b> Absolute time specification is not implemented. 
+<a class=title id=see href=#see>See ALSO</a>
+--------------------------------------------------------------------------------
+
+fsck(8), halt(8), init(8), poweroff(8), reboot(8), fiss(8), runsvchdir(8) 
+<a class=title id=author href=#author>Author</a>
+--------------------------------------------------------------------------------
+
+Leah Neukirchen, leah@vuxu.org. 
+</div>
+</body>
+</html>
+

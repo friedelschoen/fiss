@@ -1,100 +1,91 @@
 .TH fsvc 8 "MAY 2023" "0.3.2" "fiss man page"
+
+.PP
 .SH NAME
+
 .PP
-\fB\fCfsvc\fR \- fiss' service controller
+\fB\fCfsvc\fR - fiss' service controller 
+.PP
 .SH SYNOPSIS
+
 .PP
-\fB\fCfsvc\fR \fB\fCstart\fR [\fIoptions\fP] [\fB\fC\-\-pin_\fR] <service>
+\fB\fCfsvc\fR \fB\fCstart\fR [\fIoptions\fR] [\fB\fC--pin_\fR] <service> 
 .PP
-\fB\fCfsvc\fR \fB\fCstop\fR [\fIoptions\fP] [\fB\fC\-\-pin\fR] <service>
+\fB\fCfsvc\fR \fB\fCstop\fR [\fIoptions\fR] [\fB\fC--pin\fR] <service> 
 .PP
-\fB\fCfsvc\fR \fB\fCenable\fR [\fIoptions\fP] [\fB\fC\-\-once\fR] <service>
+\fB\fCfsvc\fR \fB\fCenable\fR [\fIoptions\fR] [\fB\fC--once\fR] <service> 
 .PP
-\fB\fCfsvc\fR \fB\fCdisable\fR [\fIoptions\fP] [\fB\fC\-\-once\fR] <service>
+\fB\fCfsvc\fR \fB\fCdisable\fR [\fIoptions\fR] [\fB\fC--once\fR] <service> 
 .PP
-\fB\fCfsvc\fR \fB\fCkill\fR [\fIoptions\fP] <service> <signal|signo>
+\fB\fCfsvc\fR \fB\fCkill\fR [\fIoptions\fR] <service> <signal|signo> 
 .PP
-\fB\fCfsvc\fR \fB\fCstatus\fR [\fIoptions\fP] [\fB\fC\-\-check\fR] [<service>]
+\fB\fCfsvc\fR \fB\fCstatus\fR [\fIoptions\fR] [\fB\fC--check\fR] [<service>] 
 .PP
-\fB\fCfsvc\fR \fB\fCpause\fR [\fIoptions\fP] <service>
+\fB\fCfsvc\fR \fB\fCpause\fR [\fIoptions\fR] <service> 
 .PP
-\fB\fCfsvc\fR \fB\fCresume\fR [\fIoptions\fP] <service>
+\fB\fCfsvc\fR \fB\fCresume\fR [\fIoptions\fR] <service> 
 .PP
-\fB\fCfsvc\fR \fB\fCswitch\fR [\fIoptions\fP] [\fB\fC\-\-reset\fR] <runlevel>
+\fB\fCfsvc\fR \fB\fCswitch\fR [\fIoptions\fR] [\fB\fC--reset\fR] <runlevel> 
+.PP
 .SH DESCRIPTION
+
 .PP
-\fB\fCfsvc\fR is a command line tool for controlling services on a fiss system. It provides various commands for starting, stopping, enabling, disabling, sending signals to, checking the status of, pausing, resuming, and switching the runlevel of services.
+\fB\fCfsvc\fR is a command line tool for controlling services on a fiss system. It provides various commands for starting, stopping, enabling, disabling, sending signals to, checking the status of, pausing, resuming, and switching the runlevel of services. 
+.PP
 .SH OPTIONS
+
 .PP
-The following options are available for every command:
+The following options are available for every command: 
 .PP
-\fB\fC\-q, \-\-short\fR
-Will print brief information about the service.
+\fB\fC-q, --short\fR Will print brief information about the service. 
 .PP
-\fB\fC\-r, \-\-runlevel <runlevel>\fR
-Will use \[rs]fBrunlevel\[rs]fB instead of \fIdefault\fP\&.
+\fB\fC-r, --runlevel <runlevel>\fR Will use fBrunlevelfB instead of \fIdefault\fR. 
 .PP
-\fB\fC\-s, \-\-service\-dir <path>\fR
-Will use \fB\fCpath\fR as service directory instead of \fI/etc/fiss/service.d\fP\&.
+\fB\fC-s, --service-dir <path>\fR Will use \fB\fCpath\fR as service directory instead of \fI/etc/fiss/service.d\fR. 
 .PP
-\fB\fC\-v, \-\-verbose\fR
-Prints verbose information.
+\fB\fC-v, --verbose\fR Prints verbose information. 
 .PP
-\fB\fC\-V, \-\-version\fR
-Prints the version and exits.
+\fB\fC-V, --version\fR Prints the version and exits. 
 .PP
-The following options are available per command:
+The following options are available per command: 
 .PP
-\fB\fC\-p, \-\-pin\fR
-Pins the state. If issued with \fB\fCstart\fR it will cause the service to restart.
-If issued with \fB\fCstop\fR it will cause the service to be hold down.
+\fB\fC-p, --pin\fR Pins the state. If issued with \fB\fCstart\fR it will cause the service to restart. If issued with \fB\fCstop\fR it will cause the service to be hold down. 
 .PP
-\fB\fC\-o, \-\-once\fR
-Specifies that the service should only be enabled/disabled once and not automatically started/stopped on subsequent bootups.
+\fB\fC-o, --once\fR Specifies that the service should only be enabled/disabled once and not automatically started/stopped on subsequent bootups. 
 .PP
-\fB\fC\-c, \-\-check\fR
-Command will return \fI0\fP if the specified service is active otherwise \fI1\fP
+\fB\fC-c, --check\fR Command will return \fI0\fR if the specified service is active otherwise \fI1\fR 
 .PP
-\fB\fC\-r, \-\-reset\fR
-Specifies that the switch command should reset all running services (if manually set to up/down)
+\fB\fC-r, --reset\fR Specifies that the switch command should reset all running services (if manually set to up/down) 
+.PP
 .SH COMMANDS
+
 .PP
-The following commands are available:
+The following commands are available: 
 .PP
-\fB\fCstart\fR
-Starts the specified service. A synonym is \fB\fCup\fR\&.
+\fB\fCstart\fR Starts the specified service. A synonym is \fB\fCup\fR. 
 .PP
-\fB\fCstop\fR
-Stops the specified service. A synonym is \fB\fCdown\fR\&.
+\fB\fCstop\fR Stops the specified service. A synonym is \fB\fCdown\fR. 
 .PP
-\fB\fCenable\fR
-Enables the specified service, causing it to automatically start on subsequent bootups.
+\fB\fCenable\fR Enables the specified service, causing it to automatically start on subsequent bootups. 
 .PP
-\fB\fCdisable\fR
-Disables the specified service, causing it to not start automatically on subsequent bootups.
+\fB\fCdisable\fR Disables the specified service, causing it to not start automatically on subsequent bootups. 
 .PP
-\fB\fCkill\fR
-Sends the specified signal or signal number to the specified service. A synonym is \fB\fCsend\fR\&.
+\fB\fCkill\fR Sends the specified signal or signal number to the specified service. A synonym is \fB\fCsend\fR. 
 .PP
-\fB\fCstatus\fR
-Displays the status of the specified service. If no service is specified, displays the status of all services.
+\fB\fCstatus\fR Displays the status of the specified service. If no service is specified, displays the status of all services. 
 .PP
-\fB\fCpause\fR
-Pauses the specified service.
+\fB\fCpause\fR Pauses the specified service. 
 .PP
-\fB\fCresume\fR
-Resumes the specified service.
+\fB\fCresume\fR Resumes the specified service. 
 .PP
-\fB\fCswitch\fR
-Switches the runlevel to the specified value.
+\fB\fCswitch\fR Switches the runlevel to the specified value. 
+.PP
 .SH SEE ALSO
+
 .PP
-.BR finit (1), 
-.BR fsvc (8), 
-.BR fsvs (8), 
-.BR halt (8), 
-.BR modules-load (8), 
-.BR shutdown (8),
+finit(1), fsvc(8), fsvs(8), halt(8), modules-load(8), shutdown(8), 
+.PP
 .SH AUTHOR
+
 .PP
-Friedel Schön <\[la]derfriedmundschoen@gmail.com\[ra]>
+Friedel Schön <derfriedmundschoen@gmail.com> 

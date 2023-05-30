@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang=en>
+
+<head>
+  <title>Friedel's Initialization and Service Supervision</title>
+  <meta charset=utf-8 />
+  <meta name=viewport content='width=device-width,initial-scale=1' />
+  <link rel=stylesheet href=assets/style.css />
+  <script type=text/javascript src=assets/toggle-dark.js></script>
+</head>
+
+<body>
+<div id=wrapper>
+<span class=header><a class=title id=top href=#top>chpst(8) 0.3.2</a><span class=right><span id=toggle_dark onclick=toggle_dark()> turn the lights on </span> <a href=https://github.com/friedelschoen/fiss><img id=github alt=GitHub src=assets/github-mark.svg /></a></span></span>
+================================================================================
+
+<a class=title id=name href=#name>Name</a>
+--------------------------------------------------------------------------------
+
+<b>chpst</b> - runs a program with a changed process state 
+
+<a class=title id=synopsis href=#synopsis>Synopsis</a>
+--------------------------------------------------------------------------------
+
+<b>chpst</b> [<b>-vP012</b>] [<b>-u</b> user] [<b>-U</b> user] [<b>-b</b> argv0] [<b>-e</b> dir] [<b>-/</b> root] [<b>-n</b> inc] [<b>-l</b>|<b>-L</b> lock] [<b>-m</b> bytes] [<b>-d</b> bytes] [<b>-o</b> n] [<b>-p</b> n] [<b>-f</b> bytes] [<b>-c</b> bytes] prog [arguments...] 
+
+<a class=title id=description href=#description>Description</a>
+--------------------------------------------------------------------------------
+<ul>
+<li><b>-u [:]user[:group]</b>
+setuidgid. Set uid and gid to the user's uid and gid, as found in /etc/passwd. If user is followed by a colon and a group, set the gid to group's gid, as found in /etc/group, instead of user's gid. If group consists of a colon-separated list of group names, chpst sets the group ids of all listed groups. If user is prefixed with a colon, the user and all group arguments are interpreted as uid and gids respectivly, and not looked up in the password or group file. All initial supplementary groups are removed. </li>
+<li><b>-U [:]user[:group]</b>
+envuidgid. Set the environment variables $UID and $GID to the user's uid and gid, as found in /etc/passwd. If user is followed by a colon and a group, set $GID to the group's gid, as found in /etc/group, instead of user's gid. If user is prefixed with a colon, the user and group arguments are interpreted as uid and gid respectivly, and not looked up in the password or group file. </li>
+<li><b>-b argv0</b>
+Run prog with argv0 as the 0th argument. </li>
+<li><b>-/ root</b>
+Change the root directory to root before starting prog. </li>
+<li><b>-C pwd</b>
+Change the working directory to pwd before starting prog. When combined with -/, the working directory is changed after the chroot. </li>
+<li><b>-n inc</b>
+Add inc to the nice(2) value before starting prog. inc must be an integer, and may start with a minus or plus. </li>
+<li><b>-l lock</b>
+Open the file lock for writing, and obtain an exclusive lock on it. lock will be created if it does not exist. If lock is locked by another process, wait until a new lock can be obtained. </li>
+<li><b>-L lock</b>
+The same as -l, but fail immediately if lock is locked by another process. </li>
+<li><b>-P</b>
+Run prog in a new process group. </li>
+<li><b>-0</b>
+Close standard input before starting prog. </li>
+<li><b>-1</b>
+Close standard output before starting prog. </li>
+<li><b>-2</b>
+Close standard error before starting prog. </li></ul>
+
+<a class=title id=not-implemented href=#not-implemented>Not Implemented</a>
+--------------------------------------------------------------------------------
+
+Following options are defined in runit's chpst but are ignored by fiss' implementation. 
+<ul>
+<li><b>-e dir</b>
+Set various environment variables as specified by files in the directory dir: If dir contains a file named k whose first line is v, chpst removes the environment variable k if it exists, and then adds the environment variable k with the value v. The name k must not contain =. Spaces and tabs at the end of v are removed, and nulls in v are changed to newlines. If the file k is empty (0 bytes long), chpst removes the environment variable k if it exists, without adding a new variable. </li>
+<li><b>-m bytes</b>
+Limit the data segment, stack segment, locked physical pages, and total of all segment per process to bytes bytes each. </li>
+<li><b>-d bytes</b>
+limit data segment. Limit the data segment per process to bytes bytes. </li>
+<li><b>-o n</b>
+Limit the number of open file descriptors per process to n. </li>
+<li><b>-p n</b>
+Limit the number of processes per uid to n. </li>
+<li><b>-f bytes</b>
+Limit the output file size to bytes bytes. </li>
+<li><b>-c bytes</b>
+Limit the core file size to bytes bytes. </li>
+<li><b>-v</b>
+Print verbose messages to standard error. This includes warnings about limits unsupported by the system. </li></ul>
+<a class=title id=exit-codes href=#exit-codes>Exit Codes</a>
+--------------------------------------------------------------------------------
+
+chpst exits 100 when called with wrong options. It prints an error message and exits 111 if it has trouble changing the process state. Otherwise its exit code is the same as that of prog. 
+
+<a class=title id=author href=#author>Author</a>
+--------------------------------------------------------------------------------
+
+Based on the implementation by Gerrit Pape <pape@smarden.org>, rewritten by Friedel Schon <derfriedmundschoen@gmail.com> 
+</div>
+</body>
+</html>
+

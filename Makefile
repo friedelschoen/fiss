@@ -1,4 +1,4 @@
-VERSION = 0.3.2
+VERSION := 0.3.2
 
 # Directories
 SRC_DIR     := src
@@ -13,6 +13,7 @@ DOCS_DIR    := docs
 ASSETS_DIR  := assets
 DOC_AST_DIR := docs/assets
 MAKE_DOCS   := make-docs.py
+MAKE_MAN    := make-man.py
 
 # Compiler Options
 CC       ?= gcc
@@ -34,12 +35,12 @@ BIN_FILES     := $(patsubst $(EXEC_DIR)/%.c,$(BIN_DIR)/%,$(EXEC_FILES)) \
 				 $(patsubst $(EXEC_DIR)/%.lnk,$(BIN_DIR)/%,$(EXEC_FILES))
 INCLUDE_FILES := $(wildcard $(INCLUDE_DIR)/*.h)
 
-MAN_FILES     := $(wildcard $(MAN_DIR)/*)
-ROFF_FILES    := $(patsubst $(MAN_DIR)/%.md,$(ROFF_DIR)/%,$(MAN_FILES)) \
-				 $(patsubst $(MAN_DIR)/%.roff,$(ROFF_DIR)/%,$(MAN_FILES))
-				 
+MAN_FILES     := $(wildcard $(MAN_DIR)/*.txt)
 TEMPL_FILES   := $(wildcard $(TEMPL_DIR)/*.txt)
-DOCS_FILES    := $(patsubst $(TEMPL_DIR)/%.txt,$(DOCS_DIR)/%.html,$(TEMPL_FILES))
+
+ROFF_FILES    := $(patsubst $(MAN_DIR)/%.txt,$(ROFF_DIR)/%,$(MAN_FILES))
+DOCS_FILES    := $(patsubst $(TEMPL_DIR)/%.txt,$(DOCS_DIR)/%.html,$(TEMPL_FILES)) \
+				 $(patsubst $(MAN_DIR)/%.txt,$(DOCS_DIR)/%.html,$(MAN_FILES))
 
 # Intermediate directories
 INTERMED_DIRS := $(BIN_DIR) $(BUILD_DIR) $(ROFF_DIR) $(DOCS_DIR)
@@ -85,18 +86,16 @@ $(BIN_DIR)/%: $(EXEC_DIR)/%.sh | $(BIN_DIR)
 
 $(BIN_DIR)/%: $(EXEC_DIR)/%.lnk | $(BIN_DIR)
 	ln -sf $(shell cat $<) $@	
-	
+
+# Documentation and Manual	
 $(DOCS_DIR)/%.html: $(TEMPL_DIR)/%.txt $(DOC_AST_DIR) | $(DOCS_DIR)
 	$(SED) 's/%VERSION%/$(VERSION)/' $< | $(PYTHON) $(MAKE_DOCS) > $@
 
+$(DOCS_DIR)/%.html: $(MAN_DIR)/%.txt $(DOC_AST_DIR) | $(DOCS_DIR)
+	$(SED) 's/%VERSION%/$(VERSION)/' $< | $(PYTHON) $(MAKE_DOCS) > $@
 
-# Manual targets
-
-$(ROFF_DIR)/%: $(MAN_DIR)/%.md | $(ROFF_DIR)
-	$(SED) 's/%VERSION%/$(VERSION)/' $< | md2man-roff > $@
-
-$(ROFF_DIR)/%: $(MAN_DIR)/%.roff | $(ROFF_DIR)
-	$(SED) 's/%VERSION%/$(VERSION)/' $< > $@
+$(ROFF_DIR)/%: $(MAN_DIR)/%.txt | $(ROFF_DIR)
+	$(SED) 's/%VERSION%/$(VERSION)/' $< | $(PYTHON) $(MAKE_MAN) > $@
 
 # Debug
 compile_flags.txt: 

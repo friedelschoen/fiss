@@ -1,28 +1,32 @@
 .TH sigremap 8 "MAY 2023" "0.3.2" "fiss man page"
+
+.PP
 .SH NAME
+
 .PP
-\fB\fCsigremap\fR \- a minimal init system for Linux containers
+\fB\fCsigremap\fR - a minimal init system for Linux containers 
+.PP
 .SH SYNOPSIS
+
 .PP
-\fB\fCsigremap\fR [option] [old\-signal=new\-signal...] command [arguments ...]
+\fB\fCsigremap\fR [option] [old-signal=new-signal...] command [arguments ...] 
+.PP
 .SH DESCRIPTION
+
 .PP
-\fB\fCsigremap\fR is a simple process supervisor that forwards signals to children. It is designed to run as PID1 in minimal container environments.
+\fB\fCsigremap\fR is a simple process supervisor that forwards signals to children. It is designed to run as PID1 in minimal container environments. 
 .PP
-Optional arguments:
+Optional arguments: 
 .PP
-\fB\fC\-c, \-\-single\fR
-Run in single\-child mode. In this mode, signals are only proxied to the direct child and not any of its descendants.
+\fB\fC-c, --single\fR Run in single-child mode. In this mode, signals are only proxied to the direct child and not any of its descendants. 
 .PP
-\fB\fC\-v, \-\-verbose\fR
-Print debugging information to stderr.
+\fB\fC-v, --verbose\fR Print debugging information to stderr. 
 .PP
-\fB\fC\-V, \-\-version\fR
-Print the current version and exit.
+\fB\fC-V, --version\fR Print the current version and exit. 
 .PP
-\fB\fCold\-signal=new\-signal...\fR
-Rewrite received signal s to new signal r before proxying. To ignore (not proxy) a signal, rewrite it to 0. This option can be specified multiple times.
+\fB\fCold-signal=new-signal...\fR Rewrite received signal s to new signal r before proxying. To ignore (not proxy) a signal, rewrite it to 0. This option can be specified multiple times. 
+.PP
 .SH AUTHORS
+
 .PP
-\fB\fCsigremap\fR is based on dumb\-init by Yelp.
-Rewritten by Friedel Schon \[la]derfriedmundschoen@gmail.com\[ra]
+\fB\fCsigremap\fR is based on dumb-init by Yelp. Rewritten by Friedel Schon <derfriedmundschoen@gmail.com> 

@@ -1,4 +1,4 @@
-@header fiss
+@header fiss %VERSION%
 
 Aloha! You somehow landed on the website of *fiss* (_Friedel's Initialization and
 Service Supervision_). *fiss* is a supervision suite for Unix and Unix-like systems

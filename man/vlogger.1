@@ -1,115 +1,88 @@
 .TH vlogger 1 "MAY 2023" "0.3.2" "fiss man page"
+
+.PP
 .SH NAME
+
 .PP
-\fB\fCvlogger\fR \- log messages to syslog or an arbitrary executable
+\fB\fCvlogger\fR - log messages to syslog or an arbitrary executable 
+.PP
 .SH SYNOPSIS
+
 .PP
-\fB\fCvlogger\fR [\fB\fC\-isS\fR] [\fB\fC\-f\fR file] [\fB\fC\-p\fR pri] [\fB\fC\-t\fR tag] [message ...]
+\fB\fCvlogger\fR [\fB\fC-isS\fR] [\fB\fC-f\fR file] [\fB\fC-p\fR pri] [\fB\fC-t\fR tag] [message ...] 
+.PP
 .SH DESCRIPTION
+
 .PP
-The vlogger utility writes messages to the system log or an arbitrary executable.
+The vlogger utility writes messages to the system log or an arbitrary executable. 
 .PP
-If vlogger is executed as logger it will always use the system log and behave like the regular 
-.BR logger (1).
+If vlogger is executed as logger it will always use the system log and behave like the regular logger(1). 
 .PP
-Without message arguments vlogger reads messages from stdin or the file specified with the \-f flag. If the /etc/vlogger executable exists vlogger executes it with tag, level and facility as arguments, replacing
-the vlogger process.
+Without message arguments vlogger reads messages from stdin or the file specified with the -f flag. If the /etc/vlogger executable exists vlogger executes it with tag, level and facility as arguments, replacing the vlogger process. 
 .PP
-If vlogger is executed as a log service for 
-.BR fiss (8) 
-or another daemontools like supervision suite it uses the service name as default tag. As example if vlogger is linked to /var/service/foo/log/run it uses “foo” as tag and “daemon.notice” as pri.
+If vlogger is executed as a log service for fiss(8) or another daemontools like supervision suite it uses the service name as default tag. As example if vlogger is linked to /var/service/foo/log/run it uses “foo” as tag and “daemon.notice” as pri. 
 .PP
-The options are as follows:
+The options are as follows: 
 .PP
-\fB\fC\-f file\fR
-Read lines from the specified file. This option cannot be combine message arguments.
+\fB\fC-f file\fR Read lines from the specified file. This option cannot be combine message arguments. 
 .PP
-\fB\fC\-i\fR
-Log the PID of the vlogger process. Only supported if 
-.BR syslog (3) 
-is used.
+\fB\fC-i\fR Log the PID of the vlogger process. Only supported if syslog(3) is used. 
 .PP
-\fB\fC\-p pri\fR
-The. pri can be facility.level or just facility. See FACILITIES, LEVELS or 
-.BR syslog (3). 
-The default is “user.notice”.
+\fB\fC-p pri\fR The. pri can be facility.level or just facility. See FACILITIES, LEVELS or syslog(3). The default is “user.notice”. 
 .PP
-\fB\fC\-S\fR
-Force vlogger to use 
-.BR syslog (3) 
-even if /etc/vlogger exists.
+\fB\fC-S\fR Force vlogger to use syslog(3) even if /etc/vlogger exists. 
 .PP
-\fB\fC\-s\fR
-Output the message to standard error, as well as 
-.BR syslog (3). 
-Only supported if 
-.BR syslog (3) 
-is used.
+\fB\fC-s\fR Output the message to standard error, as well as syslog(3). Only supported if syslog(3) is used. 
 .PP
-\fB\fC\-t tag\fR
-Defines the 
-.BR openlog (3) 
-ident which is used as prefix for each log message or passed as first argument to /etc/vlogger. The default is the LOGNAME environment variable.
+\fB\fC-t tag\fR Defines the openlog(3) ident which is used as prefix for each log message or passed as first argument to /etc/vlogger. The default is the LOGNAME environment variable. 
 .PP
-\fB\fCmessage\fR
-Write the message to the system log.
+\fB\fCmessage\fR Write the message to the system log. 
+.PP
 .SH FACILITIES
+
 .PP
-auth
-authpriv
-cron
-daemon
-ftp
-kern can not be used from userspace replaced with daemon.
-lpr
-mail
-news
-syslog
-user
-uucp
-local[0\-7]
-security deprecated synonym for auth.
+auth authpriv cron daemon ftp kern can not be used from userspace replaced with daemon. lpr mail news syslog user uucp local[0-7] security deprecated synonym for auth. 
+.PP
 .SH LEVELS
+
 .PP
-emerg
-alert
-crit
-err
-warning
-notice
-info
-debug
-panic deprecated synonym for emerg.
-error deprecated synonym for err.
-warn deprecated synonym for warning.
+emerg alert crit err warning notice info debug panic deprecated synonym for emerg. error deprecated synonym for err. warn deprecated synonym for warning. 
+.PP
 .SH FILES
+
 .PP
-\fB\fC/etc/vlogger\fR
-An optional executable file that is used to handle the messages. It is executed with tag, level and facility as arguments and replaces the vlogger process.
+\fB\fC/etc/vlogger\fR An optional executable file that is used to handle the messages. It is executed with tag, level and facility as arguments and replaces the vlogger process. 
+.PP
 .SH EXIT STATUS
+
 .PP
-The vlogger utility exits 0 on success, and >0 if an error occurs.
+The vlogger utility exits 0 on success, and >0 if an error occurs. 
+.PP
 .SH EXAMPLES
+
 .PP
-\fB\fC/etc/vlogger:\fR
-.SH !/bin/sh
+\fB\fC/etc/vlogger:\fR #!/bin/sh exec svlogd /var/log/$1 
 .PP
-exec svlogd /var/log/$1
 .SH SEE ALSO
+
 .PP
-.BR logger (1), 
-.BR syslog (3), 
-.BR svlogd (8)
+logger(1), syslog(3), svlogd(8) 
+.PP
 .SH HISTORY
+
 .PP
-This program is a replacement for the logger utility provided by util\-linux and forked from daemontools.
+This program is a replacement for the logger utility provided by util-linux and forked from daemontools. 
+.PP
 .SH AUTHORS
+
 .PP
-Duncan Overbruck \[la]mail@duncano.de\[ra]
+Duncan Overbruck <mail@duncano.de> 
+.PP
 .SH LICENSE
+
 .PP
-vlogger is in the public domain.
+vlogger is in the public domain. 
 .PP
-To the extent possible under law, the creator of this work has waived all copyright and related or neighboring rights to this work.
+To the extent possible under law, the creator of this work has waived all copyright and related or neighboring rights to this work. 
 .PP
-\[la]http://creativecommons.org/publicdomain/zero/1.0/\[ra]
+http://creativecommons.org/publicdomain/zero/1.0/ 

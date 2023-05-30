@@ -11,7 +11,7 @@
 
 <body>
 <div id=wrapper>
-<span class=header><a class=title id=top href=#top>fiss</a><span class=right><span id=toggle_dark onclick=toggle_dark()> turn the lights on </span> <a href=https://github.com/friedelschoen/fiss><img id=github alt=GitHub src=assets/github-mark.svg /></a></span></span>
+<span class=header><a class=title id=top href=#top>fiss 0.3.2</a><span class=right><span id=toggle_dark onclick=toggle_dark()> turn the lights on </span> <a href=https://github.com/friedelschoen/fiss><img id=github alt=GitHub src=assets/github-mark.svg /></a></span></span>
 ================================================================================
 
 Aloha! You somehow landed on the website of <b>fiss</b> (_Friedel's Initialization and Service Supervision_). <b>fiss</b> is a supervision suite for Unix and Unix-like systems with the power off system initialization. This project is based on <b>runit</b> and other <b>daemontools</b>-based utilities. 
@@ -182,4 +182,8 @@ If this file is present, the services will be started automatically and restarte
 <li><i>./once-&lt;runlevel&gt;</i>
 If this file is present, the services will be started automatically but not restarted if this services dies. </li></ul>
 To be a valid service, <i>run</i>, <i>start</i> or <i>depends</i> must be present. If only depends is present, this service is a dummy service thus no actual action will be taken but starting and stopping dependencies. 
-<i>start</i>, <i>stop</i>, <i>setup</i> and <i>finish</i> are executed as the same user as <b>fsvs</b> or <b>finit</b> is started, thus root in the most cased. <i>user</i>, <i>env</i>, <i>params</i> are not read when handling a background-service. Every file will be executed in the services directory, reading a file like './conf' will be read out of the service directory. </div></body></html>
+<i>start</i>, <i>stop</i>, <i>setup</i> and <i>finish</i> are executed as the same user as <b>fsvs</b> or <b>finit</b> is started, thus root in the most cased. <i>user</i>, <i>env</i>, <i>params</i> are not read when handling a background-service. Every file will be executed in the services directory, reading a file like './conf' will be read out of the service directory. 
+</div>
+</body>
+</html>
+

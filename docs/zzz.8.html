@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang=en>
+
+<head>
+  <title>Friedel's Initialization and Service Supervision</title>
+  <meta charset=utf-8 />
+  <meta name=viewport content='width=device-width,initial-scale=1' />
+  <link rel=stylesheet href=assets/style.css />
+  <script type=text/javascript src=assets/toggle-dark.js></script>
+</head>
+
+<body>
+<div id=wrapper>
+
+<a class=title id=name href=#name>Name</a>
+--------------------------------------------------------------------------------
+
+zzz - suspend or hibernate your system 
+<a class=title id=synopsis href=#synopsis>Synopsis</a>
+--------------------------------------------------------------------------------
+
+<b>zzz [-nSzZRH]</b> 
+<a class=title id=description href=#description>Description</a>
+--------------------------------------------------------------------------------
+
+<b>zzz</b> is a simple utility to hibernate or suspend your computer and part of the fiss-system. It supports suspend/resume-hooks. 
+<ul>
+<li><b>-n, --noop</b> dry-run, sleep for 5sec instead of actually running ACPI actions. </li>
+<li><b>-S, --freeze</b> enter low-power idle mode </li>
+<li><b>-z, --suspend</b> suspend to RAM, this is the default behaviour of <b>zzz</b> </li>
+<li><b>-Z, --hibernate</b> hibernate to disk and power off </li>
+<li><b>-R, --reboot</b> hibernate to disk and reboot (useful for switching operating systems) </li>
+<li><b>-H, --hybrid</b> hibernate to disk and suspend </li></ul>
+<a class=title id=hooks href=#hooks>Hooks</a>
+--------------------------------------------------------------------------------
+
+Before suspending, <b>zzz</b> executes <i>/usr/share/fiss/suspend</i> which intents to execute scripts inside <i>/etc/zzz.d/suspend</i> in alphanumeric order. After resuming, <b>zzz</b> executes <i>/usr/share/fiss/resume</i> which intents to execute scripts inside <i>/etc/zzz.d/resume</i> in alphanumeric order. 
+<a class=title id=see href=#see>See ALSO</a>
+--------------------------------------------------------------------------------
+
+fiss-init(8), runsvdir(8), runsvchdir(8), sv(8), runsv(8), chpst(8), utmpset(8), svlogd(8) 
+<a class=title id=author href=#author>Author</a>
+--------------------------------------------------------------------------------
+
+Based on the version of Leah Neukirchen <leah@vuxu.org>, rewritten by Friedel Schön <derfriedmundschoen@gmail.com> 
+</div>
+</body>
+</html>
+

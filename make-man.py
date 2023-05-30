@@ -30,63 +30,45 @@ HEADER_TEMPLATE = "<span class=header><a class=title id=top href=#top>{text}</a>
 TITLE_TEMPLATE = "<a class=title id={id} href=#{id}>{text}</a>"
 
 def inline_convert(text):
-    text = re.sub(r'\*(.+?)\*', r'<b>\1</b>', text)
-    text = re.sub(r'_(.+?)_', r'<i>\1</i>', text)
-    text = re.sub(r'\[(.*?)\]\((.*?)\)', r'<a href="\2">\1</a>', text)
+    text = re.sub(r'\*(.+?)\*', r'\\fB\\fC\1\\fR', text)
+    text = re.sub(r'_(.+?)_', r'\\fI\1\\fR', text)
+#    text = re.sub(r'\[(.*?)\]\((.*?)\)', r'<a href="\2">\1</a>', text)
     return text
 
-in_code = False
 in_list = False
 
-print(PREFIX)
+#print(PREFIX)
 
 for line in sys.stdin:
     line = line.strip()
     
     # is control
     if line.startswith("@man"):
-        pass
-    elif line.startswith("@header"):
         _, text = line.split(" ", 1)
-        print(HEADER_TEMPLATE.format(text=text))
-        print(HEADER_CHAR * WIDTH)
+        print(".TH " + text)
+    elif line.startswith("@header"):
+        pass
     elif line.startswith("@title"):
         _, id, text = line.split(" ", 2)
-        print(TITLE_TEMPLATE.format(id=id, text=text))
-        print(TITLE_CHAR * WIDTH)
+        print(".SH " + text.upper())    
     elif line.startswith("@code"):
-        width = WIDTH -2
-        if in_list:
-            width -= 2
-        print('+' + '-' * width + '+')
-        in_code = True
+        pass
     elif line.startswith("@endcode"):
-        width = WIDTH -2
-        if in_list:
-            width -= 2
-        sys.stdout.write('+' + '-' * width + '+')
-        in_code = False
+        pass
     elif line.startswith("@list"):
-        sys.stdout.write("<ul>\n<li>")
         in_list = True
     elif line.startswith("@endlist"):
-        sys.stdout.write("</li></ul>")
         in_list = False
-    
-    elif in_code:
-        padding = WIDTH - 4 - len(line)
-        if in_list:
-            padding -= 2
-        if padding < 0:
-            padding = 0
-        print('| ' + line + ' ' * padding + ' |')
+
+    elif in_list and line.endswith('~'):
+        sys.stdout.write(inline_convert(line[:-1]) + '\n')
     elif line.endswith('~'):
-        print(inline_convert(line[:-1]))
+        sys.stdout.write(inline_convert(line[:-1]) + '\n.PP\n')
     elif line:
         sys.stdout.write(inline_convert(line) + ' ') 
     elif in_list: # is empty but in line
-        sys.stdout.write("</li>\n<li>")
+        sys.stdout.write("\n.PP\n")
     else: # is empty
-        print()
+        sys.stdout.write('\n.PP\n')
         
-print(SUFFIX)
+#print(SUFFIX)

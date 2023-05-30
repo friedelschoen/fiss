@@ -1,14 +1,14 @@
-# vlogger 1 "MAY 2023" "%VERSION%" "fiss man page"
+@man vlogger 1 "MAY 2023" "%VERSION%" "fiss man page"
 
-## NAME
+@title name Name
 
-`vlogger` - log messages to syslog or an arbitrary executable
+*vlogger* - log messages to syslog or an arbitrary executable
 
-## SYNOPSIS
+@title synopsis Synopsis
 
-`vlogger` \[`-isS`] \[`-f` file] \[`-p` pri] \[`-t` tag] \[message ...]
+*vlogger* [*-isS*] [*-f* file] [*-p* pri] [*-t* tag] [message ...]
 
-## DESCRIPTION
+@title description Description
 
 The vlogger utility writes messages to the system log or an arbitrary executable.
 
@@ -21,28 +21,30 @@ If vlogger is executed as a log service for fiss(8) or another daemontools like 
 
 The options are as follows:
 
-`-f file`
+@list
+*-f file*
 Read lines from the specified file. This option cannot be combine message arguments.
 
-`-i`
+*-i*
 Log the PID of the vlogger process. Only supported if syslog(3) is used.
 
-`-p pri`
+*-p pri*
 The. pri can be facility.level or just facility. See FACILITIES, LEVELS or syslog(3). The default is “user.notice”.
 
-`-S`
+*-S*
 Force vlogger to use syslog(3) even if /etc/vlogger exists.
 
-`-s`
+*-s*
 Output the message to standard error, as well as syslog(3). Only supported if syslog(3) is used.
 
-`-t tag`
+*-t tag*
 Defines the openlog(3) ident which is used as prefix for each log message or passed as first argument to /etc/vlogger. The default is the LOGNAME environment variable.
 
-`message`
+*message*
 Write the message to the system log.
+@endlist
 
-## FACILITIES
+@title facilities Facilities
 
 auth
 authpriv
@@ -59,7 +61,7 @@ uucp
 local[0-7]
 security deprecated synonym for auth.
 
-## LEVELS
+@title levels Levels
 
 emerg
 alert
@@ -73,34 +75,34 @@ panic deprecated synonym for emerg.
 error deprecated synonym for err.
 warn deprecated synonym for warning.
 
-## FILES
+@title files Files
 
-`/etc/vlogger`
+*/etc/vlogger*
 An optional executable file that is used to handle the messages. It is executed with tag, level and facility as arguments and replaces the vlogger process.
 
-## EXIT STATUS
+@title exit Exit STATUS
 
 The vlogger utility exits 0 on success, and >0 if an error occurs.
 
-## EXAMPLES
+@title examples Examples
 
-`/etc/vlogger:`
+*/etc/vlogger:*
 #!/bin/sh
 exec svlogd /var/log/$1
 
-## SEE ALSO
+@title see See ALSO
 
 logger(1), syslog(3), svlogd(8)
 
-## HISTORY
+@title history History
 
 This program is a replacement for the logger utility provided by util-linux and forked from daemontools.
 
-## AUTHORS
+@title authors Authors
 
 Duncan Overbruck <mail@duncano.de>
 
-## LICENSE
+@title license License
 
 vlogger is in the public domain.
 

@@ -1,73 +1,74 @@
-# shutdown 8 "MAY 2023" "%VERSION%" "fiss man page"
+@man shutdown 8 "MAY 2023" "%VERSION%" "fiss man page"
 
-## NAME
+@title name Name
 
-`shutdown` – bring down the system
+*shutdown* – bring down the system
 
-## SYNOPSIS
+@title synopsis Synopsis
 
-`shutdown` \[`-rhP`] \[`-fF`] \[now | +mins] \[message ...]
+*shutdown* [*-rhP*] [*-fF*] [now | +mins] [message ...]
 
-## DESCRIPTION
+@title description Description
 
 shutdown brings the system down in a secure way. All logged-in users are notified that the system is going down, and login(1) is blocked.
 
 By default, shutdown puts the system into single user mode. Rebooting and halting the system can be done using the following options:
 
-`-c`
+@list
+*-c*
 Cancel an ongoing shutdown.
 
-`-f`
+*-f*
 Enable fast booting; skip fsck(8) on next boot.
 
-`-F`
+*-F*
 Force run of fsck(8) on next boot.
 
-`-h`
+*-h*
 Halt the system.
 
-`-k`
+*-k*
 Don't really shutdown; only send the warning messages to everybody.
 
-`-P`
+*-P*
 Poweroff the system.
 
-`-r`
+*-r*
 Reboot the system.
 
-`now`
+*now*
 Shutdown without further waiting.
 
-`+mins`
+*+mins*
 Wait mins minutes before shutting down.
 
-`message`
-
+*message*
 Message displayed to all users, defaults to "system is going down".
+@endlist
 
-## UNSUPPORTED OPTIONS
+@title unsupported Unsupported OPTIONS
 
 This version of shutdown is based on runit(8), the following features are not supported:
 
-`-t secs`
+*-t secs*
 to wait secs seconds between SIGKILL and SIGTERM on shutdown is silently ignored.
 
-`-a`
+*-a*
 Use /etc/shutdown.allow.
 
-`-H`
+*-H*
 Drop into boot monitor.
 
-`-n`
+*-n*
 Don't call init(8).
 
-`hh:mm`
+*hh:mm*
 Absolute time specification is not implemented.
 
-## SEE ALSO
+@title see See ALSO
 
 fsck(8), halt(8), init(8), poweroff(8), reboot(8), fiss(8), runsvchdir(8)
 
-## AUTHOR
+@title author Author
 
 Leah Neukirchen, leah@vuxu.org.

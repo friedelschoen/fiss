@@ -1,37 +1,44 @@
-.TH modules\-load 8 "MAY 2023" "0.3.2" "fiss man page"
+.TH modules-load 8 "MAY 2023" "0.3.2" "fiss man page"
+
+.PP
 .SH NAME
+
 .PP
-\fB\fCmodules\-load\fR \- configure kernel modules at boot
+\fB\fCmodules-load\fR - configure kernel modules at boot 
+.PP
 .SH SYNOPSIS
+
 .PP
-\fB\fCmodules\-load\fR [\fB\fC\-nv\fR]
+\fB\fCmodules-load\fR [\fB\fC-nv\fR] 
+.PP
 .SH DESCRIPTION
+
 .PP
-modules\-load reads files which contain kernel modules to load during boot from the list of locations below.
+modules-load reads files which contain kernel modules to load during boot from the list of locations below. 
 .PP
-\fB\fC\-n\fR
-dry\-run mode. This option does everything but actually insert or
-delete the modules.
+\fB\fC-n\fR dry-run mode. This option does everything but actually insert or delete the modules. 
 .PP
-\fB\fC\-v\fR
-verbose mode. Print messages about what the program is doing.
+\fB\fC-v\fR verbose mode. Print messages about what the program is doing. 
+.PP
 .SH FILES
+
 .PP
-Configuration files are read from the following locations:
+Configuration files are read from the following locations: 
 .PP
-\fI/etc/modules\-load.d/*\&.conf\fP
+\fI/etc/modules-load.d/*.conf\fR 
 .PP
-\fI/run/modules\-load.d/*\&.conf\fP
+\fI/run/modules-load.d/*.conf\fR 
 .PP
-\fI/usr/lib/modules\-load.d/*\&.conf\fP
+\fI/usr/lib/modules-load.d/*.conf\fR 
 .PP
-The configuration files should simply contain a list of kernel module
-names to load, separated by newlines. Empty lines and lines whose first
-non\-whitespace character is # or ; are ignored.
+The configuration files should simply contain a list of kernel module names to load, separated by newlines. Empty lines and lines whose first non-whitespace character is # or ; are ignored. 
+.PP
 .SH HISTORY
+
 .PP
-This program is a replacement for the modules\-load utility provided by
-systemd.
+This program is a replacement for the modules-load utility provided by systemd. 
+.PP
 .SH AUTHOR
+
 .PP
-Leah Neukirchen, \[la]leah@vuxu.org\[ra]\&.
+Leah Neukirchen, leah@vuxu.org. 
