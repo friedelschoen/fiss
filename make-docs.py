@@ -1,4 +1,5 @@
 import sys
+import re
 
 WIDTH = 80
 HEADER_CHAR = '='
@@ -25,6 +26,15 @@ SUFFIX = """
 </html>
 """
 
+HEADER_TEMPLATE = "<span class=header><a class=title id=top href=#top>{text}</a><span class=right><span id=toggle_dark onclick=toggle_dark()> turn the lights on </span> <a href=https://github.com/friedelschoen/fiss><img id=github alt=GitHub src=assets/github-mark.svg /></a></span></span>"
+TITLE_TEMPLATE = "<a class=title id={id} href=#{id}>{text}</a>"
+
+def inline_convert(text):
+    text = re.sub(r'\*(.+?)\*', r'<b>\1</b>', text)
+    text = re.sub(r'_(.+?)_', r'<i>\1</i>', text)
+    text = re.sub(r'\[(.*?)\]\((.*?)\)', r'<a href="\2">\1</a>', text)
+    return text
+
 in_code = False
 in_list = False
 
@@ -36,11 +46,11 @@ for line in sys.stdin:
     # is control
     if line.startswith("@header"):
         _, text = line.split(" ", 1)
-        print(f"<span class=header><a class=title id=top href=#top>{text}</a>{HEADER_SUFFIX}</span>")
+        print(HEADER_TEMPLATE.format(text=text))
         print(HEADER_CHAR * WIDTH)
     elif line.startswith("@title"):
         _, id, text = line.split(" ", 2)
-        print(f"<a class=title id={id} href=#{id}>{text}</a>")     
+        print(TITLE_TEMPLATE.format(id=id, text=text))
         print(TITLE_CHAR * WIDTH)
     elif line.startswith("@code"):
         width = WIDTH -2
@@ -69,9 +79,9 @@ for line in sys.stdin:
             padding = 0
         print('| ' + line + ' ' * padding + ' |')
     elif line.endswith('~'):
-        print(line[:-1])
+        print(inline_convert(line[:-1]))
     elif line:
-        sys.stdout.write(line + ' ') 
+        sys.stdout.write(inline_convert(line) + ' ') 
     elif in_list: # is empty but in line
         sys.stdout.write("</li>\n<li>")
     else: # is empty

@@ -12,6 +12,7 @@ TEMPL_DIR   := src/docs
 DOCS_DIR    := docs
 ASSETS_DIR  := assets
 DOC_AST_DIR := docs/assets
+MAKE_DOCS   := make-docs.py
 
 # Compiler Options
 CC       ?= gcc
@@ -37,8 +38,8 @@ MAN_FILES     := $(wildcard $(MAN_DIR)/*)
 ROFF_FILES    := $(patsubst $(MAN_DIR)/%.md,$(ROFF_DIR)/%,$(MAN_FILES)) \
 				 $(patsubst $(MAN_DIR)/%.roff,$(ROFF_DIR)/%,$(MAN_FILES))
 				 
-TEMPL_FILES   := $(wildcard $(TEMPL_DIR)/*.html)
-DOCS_FILES    := $(patsubst $(TEMPL_DIR)/%.html,$(DOCS_DIR)/%.html,$(TEMPL_FILES))
+TEMPL_FILES   := $(wildcard $(TEMPL_DIR)/*.txt)
+DOCS_FILES    := $(patsubst $(TEMPL_DIR)/%.txt,$(DOCS_DIR)/%.html,$(TEMPL_FILES))
 
 # Intermediate directories
 INTERMED_DIRS := $(BIN_DIR) $(BUILD_DIR) $(ROFF_DIR) $(DOCS_DIR)
@@ -85,8 +86,8 @@ $(BIN_DIR)/%: $(EXEC_DIR)/%.sh | $(BIN_DIR)
 $(BIN_DIR)/%: $(EXEC_DIR)/%.lnk | $(BIN_DIR)
 	ln -sf $(shell cat $<) $@	
 	
-$(DOCS_DIR)/%.html: $(TEMPL_DIR)/%.html $(DOC_AST_DIR) | $(DOCS_DIR)
-	$(SED) 's/%VERSION%/$(VERSION)/' $< | $(PYTHON) make-docs.py > $@
+$(DOCS_DIR)/%.html: $(TEMPL_DIR)/%.txt $(DOC_AST_DIR) | $(DOCS_DIR)
+	$(SED) 's/%VERSION%/$(VERSION)/' $< | $(PYTHON) $(MAKE_DOCS) > $@
 
 
 # Manual targets
