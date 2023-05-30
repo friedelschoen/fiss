@@ -1,43 +1,12 @@
 import sys
 import re
 
-WIDTH = 80
-HEADER_CHAR = '='
-TITLE_CHAR = '-'
-HEADER_SUFFIX = "<span class=right><span id=toggle_dark onclick=toggle_dark()> turn the lights on </span> <a href=https://github.com/friedelschoen/fiss><img id=github alt=GitHub src=assets/github-mark.svg /></a></span>"
-
-PREFIX = """<!doctype html>
-<html lang=en>
-
-<head>
-  <title>Friedel's Initialization and Service Supervision</title>
-  <meta charset=utf-8 />
-  <meta name=viewport content='width=device-width,initial-scale=1' />
-  <link rel=stylesheet href=assets/style.css />
-  <script type=text/javascript src=assets/toggle-dark.js></script>
-</head>
-
-<body>
-<div id=wrapper>"""
-
-SUFFIX = """
-</div>
-</body>
-</html>
-"""
-
-HEADER_TEMPLATE = "<span class=header><a class=title id=top href=#top>{text}</a><span class=right><span id=toggle_dark onclick=toggle_dark()> turn the lights on </span> <a href=https://github.com/friedelschoen/fiss><img id=github alt=GitHub src=assets/github-mark.svg /></a></span></span>"
-TITLE_TEMPLATE = "<a class=title id={id} href=#{id}>{text}</a>"
-
 def inline_convert(text):
     text = re.sub(r'\*(.+?)\*', r'\\fB\\fC\1\\fR', text)
     text = re.sub(r'_(.+?)_', r'\\fI\1\\fR', text)
-#    text = re.sub(r'\[(.*?)\]\((.*?)\)', r'<a href="\2">\1</a>', text)
     return text
 
 in_list = False
-
-#print(PREFIX)
 
 for line in sys.stdin:
     line = line.strip()
@@ -70,5 +39,3 @@ for line in sys.stdin:
         sys.stdout.write("\n.PP\n")
     else: # is empty
         sys.stdout.write('\n.PP\n')
-        
-#print(SUFFIX)

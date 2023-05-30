@@ -1,6 +1,6 @@
 # fiss (Friedel's Initialization and Service Supervision)
 
-> 0.2.2 (May 2023)
+> 0.3.3 (May 2023)
 
 fiss is a lightweight and easy-to-use tool for initializing and supervising long-running services on Unix-like systems. It provides a simple and reliable way to start, stop, and monitor services. It supports automatic restarts, logging, and customizable startup options.
 

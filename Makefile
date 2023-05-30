@@ -1,4 +1,4 @@
-VERSION := 0.3.2
+VERSION := 0.3.3
 
 # Directories
 SRC_DIR     := src
@@ -7,8 +7,8 @@ INCLUDE_DIR := include
 BIN_DIR     := bin
 EXEC_DIR    := src/exec
 MAN_DIR     := src/man
-ROFF_DIR    := man
 TEMPL_DIR   := src/docs
+ROFF_DIR    := man
 DOCS_DIR    := docs
 ASSETS_DIR  := assets
 DOC_AST_DIR := docs/assets
@@ -42,7 +42,6 @@ ROFF_FILES    := $(patsubst $(MAN_DIR)/%.txt,$(ROFF_DIR)/%,$(MAN_FILES))
 DOCS_FILES    := $(patsubst $(TEMPL_DIR)/%.txt,$(DOCS_DIR)/%.html,$(TEMPL_FILES)) \
 				 $(patsubst $(MAN_DIR)/%.txt,$(DOCS_DIR)/%.html,$(MAN_FILES))
 
-# Intermediate directories
 INTERMED_DIRS := $(BIN_DIR) $(BUILD_DIR) $(ROFF_DIR) $(DOCS_DIR)
 
 # Magic targets
@@ -87,7 +86,7 @@ $(BIN_DIR)/%: $(EXEC_DIR)/%.sh | $(BIN_DIR)
 $(BIN_DIR)/%: $(EXEC_DIR)/%.lnk | $(BIN_DIR)
 	ln -sf $(shell cat $<) $@	
 
-# Documentation and Manual	
+# Documentation and Manual
 $(DOCS_DIR)/%.html: $(TEMPL_DIR)/%.txt $(DOC_AST_DIR) | $(DOCS_DIR)
 	$(SED) 's/%VERSION%/$(VERSION)/' $< | $(PYTHON) $(MAKE_DOCS) > $@
 
