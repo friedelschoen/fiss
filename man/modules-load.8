@@ -1,0 +1,37 @@
+.TH modules\-load 8 "MAY 2023" "0.3.2" "fiss man page"
+.SH NAME
+.PP
+\fB\fCmodules\-load\fR \- configure kernel modules at boot
+.SH SYNOPSIS
+.PP
+\fB\fCmodules\-load\fR [\fB\fC\-nv\fR]
+.SH DESCRIPTION
+.PP
+modules\-load reads files which contain kernel modules to load during boot from the list of locations below.
+.PP
+\fB\fC\-n\fR
+dry\-run mode. This option does everything but actually insert or
+delete the modules.
+.PP
+\fB\fC\-v\fR
+verbose mode. Print messages about what the program is doing.
+.SH FILES
+.PP
+Configuration files are read from the following locations:
+.PP
+\fI/etc/modules\-load.d/*\&.conf\fP
+.PP
+\fI/run/modules\-load.d/*\&.conf\fP
+.PP
+\fI/usr/lib/modules\-load.d/*\&.conf\fP
+.PP
+The configuration files should simply contain a list of kernel module
+names to load, separated by newlines. Empty lines and lines whose first
+non\-whitespace character is # or ; are ignored.
+.SH HISTORY
+.PP
+This program is a replacement for the modules\-load utility provided by
+systemd.
+.SH AUTHOR
+.PP
+Leah Neukirchen, \[la]leah@vuxu.org\[ra]\&.

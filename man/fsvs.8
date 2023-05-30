@@ -1,0 +1,26 @@
+.TH fsvs 8 "MAY 2023" "0.3.2" "fiss man page"
+.SH NAME
+.PP
+\fB\fCfsvs\fR \- friedel's service superviser
+.SH SYNOPSIS
+.PP
+\fB\fCfsvs\fR [options] service\-dir runlevel
+.SH DESCRIPTION
+.PP
+\fB\fCfsvs\fR is the superviser called by \fB\fCfinit\fR but without initialization.
+.PP
+Following options are available:
+.PP
+\fB\fC\-v, \-\-verbose\fR
+Prints more information, easier to debug problems
+.PP
+\fB\fC\-f, \-\-force\fR
+Forces the socket if existing, if called without \fB\fC\-f\fR and the socket already exists, it failes.
+.PP
+\fB\fC\-V, \-\-version\fR
+Prints the version and exits.
+.PP
+Services can be controlled with \fB\fCfsvc 8\fR
+.SH AUTHORS
+.PP
+Friedel Schon \[la]derfriedmundschoen@gmail.com\[ra]
