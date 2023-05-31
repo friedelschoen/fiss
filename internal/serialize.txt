@@ -4,7 +4,7 @@ FISS CONTROL RESPONSE
        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 FISS:  |     STATUS CHANGE     |ST|RC|FC|FL|    PID    |PS|RS|FD|SR|
        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-RUNIT: |     STATUS CHANGE     | TAIA NANO |    PID    |PS|WU|TR|SR|
+RUNIT: |     STATUS CHANGE     | (NANOSEC) |    PID    |PS|WU|TR|SR|
        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 
 STATUS CHANGE = unix seconds + 4611686018427387914ULL (tai, lower endian)
@@ -18,7 +18,7 @@ RS = restart ('u' if want up, 'd' if want down)
 FD = forced down (int boolean, unused by fiss)
 SR = state runit (0 is down, 1 is running, 2 is finishing, not available in daemontools, unused by fiss)
 
-TAIA NANO = unix nanoseconds (written, never read)
+NANOSEC = unix nanoseconds (written, never read)
 WU = wants up ('u' if want up, 'd' if want down)
 TR = was terminated (int boolean)
 
