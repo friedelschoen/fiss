@@ -81,8 +81,9 @@ typedef struct service {
 	int               return_code;       // return code or signal
 	uint8_t           fail_count;        // current fail cound
 	bool              is_log_service;    // is a log service
-	bool              paused;
-	struct service*   log_service;
+	bool              paused;            // is paused
+	struct service*   log_service;       // has a log_server otherwise NULL
+	bool              is_dependency;     // only set by service_load
 } service_t;
 
 extern service_t   services[];
@@ -116,3 +117,4 @@ void        service_stop(service_t* s);
 int         service_supervise(const char* service_dir, const char* runlevel);
 void        service_update_dependency(service_t* s);
 void        service_update_status(service_t* s);
+bool        service_is_dependency(service_t* s);

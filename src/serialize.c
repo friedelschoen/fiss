@@ -59,7 +59,8 @@ void service_encode(service_t* s, service_serial_t* buffer) {
 	buffer->return_code = s->return_code;
 	buffer->fail_count  = s->fail_count;
 
-	buffer->flags = (s->restart_file << 4) |
+	buffer->flags = (service_is_dependency(s) << 6) |
+	                (s->restart_file << 4) |
 	                (s->restart_manual << 2) |
 	                (s->last_exit << 0);
 
@@ -69,7 +70,7 @@ void service_encode(service_t* s, service_serial_t* buffer) {
 	buffer->pid[3] = (s->pid >> 24) & 0xff;
 
 	buffer->paused      = s->paused;
-	buffer->restart     = service_need_restart(s);
+	buffer->restart     = service_need_restart(s) ? 'u' : 'd';
 	buffer->force_down  = s->restart_manual == S_FORCE_DOWN;
 	buffer->state_runit = state_runit;
 }
@@ -90,6 +91,7 @@ void service_decode(service_t* s, const service_serial_t* buffer) {
 	s->state          = buffer->state;
 	s->return_code    = buffer->return_code;
 	s->fail_count     = buffer->fail_count;
+	s->is_dependency  = (buffer->flags >> 6) & 0x01;
 	s->restart_file   = (buffer->flags >> 4) & 0x03;
 	s->restart_manual = (buffer->flags >> 2) & 0x03;
 	s->last_exit      = (buffer->flags >> 0) & 0x03;
@@ -100,5 +102,5 @@ void service_decode(service_t* s, const service_serial_t* buffer) {
 	         (buffer->pid[3] << 24);
 
 	s->paused        = buffer->paused;
-	s->restart_final = buffer->restart;
+	s->restart_final = buffer->restart == 'u';
 }

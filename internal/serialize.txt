@@ -26,8 +26,9 @@ FLAGS
 -----
 
 +--+--+--+--+--+--+--+--+
-| --- |RSFIL|RSMAN|LSTEX|
+|--|ID|RSFIL|RSMAN|LSTEX|
 +--+--+--+--+--+--+--+--+
+ID    = is dependency
 RSFIL = restart file (0 = down, 2 = once, 3 = restart)
 RSMAN = restart manual override (0 = down, 1 = force down, 2 = once, 3 = restart)
 LSTEX = last exit (0 = never exitted, 1 = normally, 2 = signaled)
