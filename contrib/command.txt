@@ -1,7 +1,7 @@
 FISS COMMANDS
 =============
 
-  + new in fiss, - same as in runit, ! different behaviour
+  + new in fiss, - same as in runit, ~ different behaviour
 
 - up    (u): starts the services, pin as started
 - down  (d): stops the service, pin as stopped
@@ -13,11 +13,10 @@ FISS COMMANDS
 - pause (p): pauses the service
 - cont  (c): resumes the service
 + reset (r): resets the service (fail-count)
-+ send  (s): sends custom signal, followed by signal-byte
 - alarm (a): sends alarm
 - hup   (h): sends hup
 - int   (i): sends interrupt
 - quit  (q): sends quit
 - usr1  (1): sends usr1
 - usr2  (2): sends usr2
-! exit  (x): does nothing (actually exits the runsv instance)
+~ exit  (x): does nothing (actually exits the runsv instance)

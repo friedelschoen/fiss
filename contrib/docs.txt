@@ -1,0 +1,45 @@
+The Documentation markup (in src/docs, src/man) isn't just Markdown or whatever but
+an own language which is intended to be parsed really easy, don't expect a lot, it's just
+some ' '-splitting and regex-replacing.
+In this document I want to present the syntax.
+
+Conversion is done with the scripts make-docs.py for html and make-man.py for obviously man
+
+Blocks and Titles
+=================
+
+@header <text...>
+
+Prints the header with <text> as header-text, followed by 'shut the lights off'-button and github-link.
+It's ignored if converted to man.
+
+@man <manual> <section> <date> <version> <manual-title>
+
+Prints the manual-header.
+It's ignored if converted to html.
+
+@title <id> <text...>
+
+Prints a (section) title, <id> is used for click-to-section.
+<id> is ignored by man.
+
+@list
+...
+@endlist
+
+Make a list delimited by empty lines.
+
+@code
+...
+@endcode
+
+Make an code-block, ignored by man.
+
+
+Inline Markup
+=============
+
+*bold*
+_italic_
+[text](http://link.com) | ignored by man
+text~ | prints a newline, without interpreting something else
