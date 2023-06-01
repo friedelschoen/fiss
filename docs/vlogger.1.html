@@ -11,22 +11,30 @@
 
 <body>
 <div id=wrapper>
+<span class=header><a class=title id=top href=#top>vlogger(1) 0.3.3</a><span class=right><span id=toggle_dark onclick=toggle_dark()> turn the lights on </span> <a href=https://github.com/friedelschoen/fiss><img id=github alt=GitHub src=assets/github-mark.svg /></a></span></span>
+================================================================================
 
 <a class=title id=name href=#name>Name</a>
 --------------------------------------------------------------------------------
 
 <b>vlogger</b> - log messages to syslog or an arbitrary executable 
+
 <a class=title id=synopsis href=#synopsis>Synopsis</a>
 --------------------------------------------------------------------------------
 
 <b>vlogger</b> [<b>-isS</b>] [<b>-f</b> file] [<b>-p</b> pri] [<b>-t</b> tag] [message ...] 
+
 <a class=title id=description href=#description>Description</a>
 --------------------------------------------------------------------------------
 
 The vlogger utility writes messages to the system log or an arbitrary executable. 
+
 If vlogger is executed as logger it will always use the system log and behave like the regular logger(1). 
+
 Without message arguments vlogger reads messages from stdin or the file specified with the -f flag. If the /etc/vlogger executable exists vlogger executes it with tag, level and facility as arguments, replacing the vlogger process. 
+
 If vlogger is executed as a log service for fiss(8) or another daemontools like supervision suite it uses the service name as default tag. As example if vlogger is linked to /var/service/foo/log/run it uses “foo” as tag and “daemon.notice” as pri. 
+
 The options are as follows: 
 <ul>
 <li><b>-f file</b> Read lines from the specified file. This option cannot be combine message arguments. </li>
@@ -39,35 +47,62 @@ The options are as follows:
 <a class=title id=facilities href=#facilities>Facilities</a>
 --------------------------------------------------------------------------------
 
-auth authpriv cron daemon ftp kern can not be used from userspace replaced with daemon. lpr mail news syslog user uucp local[0-7] security deprecated synonym for auth. 
+auth
+authpriv
+cron
+daemon
+ftp
+kern can not be used from userspace replaced with daemon
+lpr
+mail
+news
+syslog
+user
+uucp
+local[0-7]
+security deprecated synonym for auth 
+
 <a class=title id=levels href=#levels>Levels</a>
 --------------------------------------------------------------------------------
 
-emerg alert crit err warning notice info debug panic deprecated synonym for emerg. error deprecated synonym for err. warn deprecated synonym for warning. 
+emerg
+alert
+crit
+err
+warning
+notice
+info
+debug
+panic deprecated synonym for emerg
+error deprecated synonym for err
+warn deprecated synonym for warning
+
+
 <a class=title id=files href=#files>Files</a>
 --------------------------------------------------------------------------------
-
-<b>/etc/vlogger</b> An optional executable file that is used to handle the messages. It is executed with tag, level and facility as arguments and replaces the vlogger process. 
+<ul>
+<li><b>/etc/vlogger</b>
+An optional executable file that is used to handle the messages. It is executed with tag, level and facility as arguments and replaces the vlogger process. </li></ul>
 <a class=title id=exit href=#exit>Exit STATUS</a>
 --------------------------------------------------------------------------------
 
-The vlogger utility exits 0 on success, and >0 if an error occurs. 
-<a class=title id=examples href=#examples>Examples</a>
---------------------------------------------------------------------------------
+The vlogger utility exits 0 on success, and &gt;0 if an error occurs. 
 
-<b>/etc/vlogger:</b> #!/bin/sh exec svlogd /var/log/$1 
-<a class=title id=see href=#see>See ALSO</a>
+<a class=title id=see href=#see>See Also</a>
 --------------------------------------------------------------------------------
 
 logger(1), syslog(3), svlogd(8) 
+
 <a class=title id=history href=#history>History</a>
 --------------------------------------------------------------------------------
 
 This program is a replacement for the logger utility provided by util-linux and forked from daemontools. 
+
 <a class=title id=authors href=#authors>Authors</a>
 --------------------------------------------------------------------------------
 
-Duncan Overbruck <mail@duncano.de> 
+Duncan Overbruck &lt;mail@duncano.de&gt; 
+
 <a class=title id=license href=#license>License</a>
 --------------------------------------------------------------------------------
 

@@ -1,19 +1,14 @@
 .TH chpst 8 "MAY 2023" "0.3.3" "fiss man page"
-
 .PP
 .SH NAME
-
 .PP
 \fB\fCchpst\fR - runs a program with a changed process state 
 .PP
-
 .PP
 .SH SYNOPSIS
-
 .PP
 \fB\fCchpst\fR [\fB\fC-vP012\fR] [\fB\fC-u\fR user] [\fB\fC-U\fR user] [\fB\fC-b\fR argv0] [\fB\fC-e\fR dir] [\fB\fC-/\fR root] [\fB\fC-n\fR inc] [\fB\fC-l\fR|\fB\fC-L\fR lock] [\fB\fC-m\fR bytes] [\fB\fC-d\fR bytes] [\fB\fC-o\fR n] [\fB\fC-p\fR n] [\fB\fC-f\fR bytes] [\fB\fC-c\fR bytes] prog [arguments...] 
 .PP
-
 .PP
 .SH DESCRIPTION
 \fB\fC-u [:]user[:group]\fR
@@ -52,10 +47,8 @@ Close standard output before starting prog.
 \fB\fC-2\fR
 Close standard error before starting prog. 
 .PP
-
 .PP
 .SH NOT IMPLEMENTED
-
 .PP
 Following options are defined in runit's chpst but are ignored by fiss' implementation. 
 .PP
@@ -84,13 +77,10 @@ Limit the core file size to bytes bytes.
 Print verbose messages to standard error. This includes warnings about limits unsupported by the system. 
 .PP
 .SH EXIT CODES
-
 .PP
 chpst exits 100 when called with wrong options. It prints an error message and exits 111 if it has trouble changing the process state. Otherwise its exit code is the same as that of prog. 
 .PP
-
 .PP
 .SH AUTHOR
-
 .PP
 Based on the implementation by Gerrit Pape <pape@smarden.org>, rewritten by Friedel Schon <derfriedmundschoen@gmail.com> 

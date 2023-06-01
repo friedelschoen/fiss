@@ -1,12 +1,15 @@
 @man shutdown 8 "MAY 2023" "%VERSION%" "fiss man page"
+@header shutdown(8) %VERSION%
 
 @title name Name
 
 *shutdown* – bring down the system
 
+
 @title synopsis Synopsis
 
 *shutdown* [*-rhP*] [*-fF*] [now | +mins] [message ...]
+
 
 @title description Description
 
@@ -49,7 +52,7 @@ Message displayed to all users, defaults to "system is going down".
 @title unsupported Unsupported OPTIONS
 
 This version of shutdown is based on runit(8), the following features are not supported:
-
+@list
 *-t secs*
 to wait secs seconds between SIGKILL and SIGTERM on shutdown is silently ignored.
 
@@ -64,10 +67,12 @@ Don't call init(8).
 
 *hh:mm*
 Absolute time specification is not implemented.
+@endlist
 
-@title see See ALSO
+@title see See Also
 
 fsck(8), halt(8), init(8), poweroff(8), reboot(8), fiss(8), runsvchdir(8)
+
 
 @title author Author
 

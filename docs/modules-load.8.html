@@ -11,15 +11,19 @@
 
 <body>
 <div id=wrapper>
+<span class=header><a class=title id=top href=#top>modules-load(8) 0.3.3</a><span class=right><span id=toggle_dark onclick=toggle_dark()> turn the lights on </span> <a href=https://github.com/friedelschoen/fiss><img id=github alt=GitHub src=assets/github-mark.svg /></a></span></span>
+================================================================================
 
 <a class=title id=name href=#name>Name</a>
 --------------------------------------------------------------------------------
 
 <b>modules-load</b> - configure kernel modules at boot 
+
 <a class=title id=synopsis href=#synopsis>Synopsis</a>
 --------------------------------------------------------------------------------
 
 <b>modules-load</b> [<b>-nv</b>] 
+
 <a class=title id=description href=#description>Description</a>
 --------------------------------------------------------------------------------
 
@@ -36,14 +40,17 @@ Configuration files are read from the following locations:
 <li><i>/run/modules-load.d/*.conf</i> </li>
 <li><i>/usr/lib/modules-load.d/*.conf</i> </li></ul>
 The configuration files should simply contain a list of kernel module names to load, separated by newlines. Empty lines and lines whose first non-whitespace character is # or ; are ignored. 
+
 <a class=title id=history href=#history>History</a>
 --------------------------------------------------------------------------------
 
 This program is a replacement for the modules-load utility provided by systemd. 
+
 <a class=title id=author href=#author>Author</a>
 --------------------------------------------------------------------------------
 
-Leah Neukirchen, leah@vuxu.org. 
+Leah Neukirchen, leah@vuxu.org (first shell-implementation) 
+Friedel Schon, derfriedmund@gmail.com (C-implementation) 
 </div>
 </body>
 </html>

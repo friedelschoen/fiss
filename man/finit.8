@@ -1,20 +1,16 @@
-.TH finit 8 "MAY 2023" "01.0" "fiss man page"
-
+.TH finit 8 "MAY 2023" "0.3.3" "fiss man page"
 .PP
 .SH NAME
-
 .PP
-fiss - a UNIX process no 1 
+\fB\fCfiss\fR - a UNIX process no 1 
+.PP
 .PP
 .SH SYNOPSIS
-
-.PP
 \fB\fCfsvc\fR when running as PID 0 (as init) 
 .PP
 \fB\fCfsvc\fR <0|6> when running regulary to controll init 
 .PP
 .SH CONTROLLING
-
 .PP
 If \fB\fCfinit\fR is invoked by any other user than \fIroot\fR, it failes. 
 .PP
@@ -23,29 +19,28 @@ If \fB\fCfinit\fR is invoked by any other user than \fIroot\fR, it failes.
 \fB\fCfinit\fR 6 reboots the system 
 .PP
 .SH DESCRIPTION
-
 .PP
 \fB\fCfiss\fR must be run as Unix process no 1 if invoked without arguments and handles the boot process in user-land. 
 .PP
 This happens in three stages: 
 .PP
+.PP
 .SH STAGE 1
-
 .PP
 \fB\fCfiss\fR runs \fI/etc/fiss/start\fR and waits for it to terminate. The system's one time tasks are done here. \fI/etc/fiss/start\fR has full control of \fI/dev/console\fR to be able to start an emergency shell if the one time initialization tasks fail. If \fI/etc/fiss/start\fR crashes, \fB\fCfinit\fR will skip stage 2 and enter stage 3. 
 .PP
+.PP
 .SH STAGE 2
-
 .PP
 \fB\fCfiss\fR starts all services in \fI/etc/fiss/service.d\fR which should not return until system shutdown; if it crashes, it will be restarted. 
 .PP
+.PP
 .SH STAGE 3
-
 .PP
 If \fB\fCfiss\fR is told to shutdown the system, it terminates stage 2 if it is running, and runs \fI/etc/fiss/stop\fR. The systems tasks to shutdown and possibly halt or reboot the system are done here. If stage 3 returns, \fB\fCfinit\fR checks if the file 
 .PP
+.PP
 .SH SIGNALS
-
 .PP
 \fB\fCfinit\fR only accepts signals in stage 2. 
 .PP
@@ -53,12 +48,12 @@ If \fB\fCfinit\fR receives a CONT signal and the file \fB\fCfinit\fR is told to 
 .PP
 if \fB\fCfinit\fR receives an INT signal, \fB\fCfinit\fR restarts the system. 
 .PP
+.PP
 .SH SEE ALSO
-
 .PP
 fiss-init(8), runsvdir(8), runsvchdir(8), sv(8), runsv(8), chpst(8), utmpset(8), svlogd(8) 
 .PP
+.PP
 .SH AUTHOR
-
 .PP
 Friedel Schön <derfriedmundschoen@gmail.com> 

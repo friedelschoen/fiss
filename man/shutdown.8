@@ -1,18 +1,16 @@
 .TH shutdown 8 "MAY 2023" "0.3.3" "fiss man page"
-
 .PP
 .SH NAME
-
 .PP
 \fB\fCshutdown\fR – bring down the system 
 .PP
+.PP
 .SH SYNOPSIS
-
 .PP
 \fB\fCshutdown\fR [\fB\fC-rhP\fR] [\fB\fC-fF\fR] [now | +mins] [message ...] 
 .PP
+.PP
 .SH DESCRIPTION
-
 .PP
 shutdown brings the system down in a secure way. All logged-in users are notified that the system is going down, and login(1) is blocked. 
 .PP
@@ -39,11 +37,8 @@ By default, shutdown puts the system into single user mode. Rebooting and haltin
 \fB\fCmessage\fR Message displayed to all users, defaults to "system is going down". 
 .PP
 .SH UNSUPPORTED OPTIONS
-
 .PP
-This version of shutdown is based on runit(8), the following features are not supported: 
-.PP
-\fB\fC-t secs\fR to wait secs seconds between SIGKILL and SIGTERM on shutdown is silently ignored. 
+This version of shutdown is based on runit(8), the following features are not supported: \fB\fC-t secs\fR to wait secs seconds between SIGKILL and SIGTERM on shutdown is silently ignored. 
 .PP
 \fB\fC-a\fR Use /etc/shutdown.allow. 
 .PP
@@ -54,11 +49,10 @@ This version of shutdown is based on runit(8), the following features are not su
 \fB\fChh:mm\fR Absolute time specification is not implemented. 
 .PP
 .SH SEE ALSO
-
 .PP
 fsck(8), halt(8), init(8), poweroff(8), reboot(8), fiss(8), runsvchdir(8) 
 .PP
+.PP
 .SH AUTHOR
-
 .PP
 Leah Neukirchen, leah@vuxu.org. 

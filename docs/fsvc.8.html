@@ -11,23 +11,27 @@
 
 <body>
 <div id=wrapper>
+<span class=header><a class=title id=top href=#top>fsvc(8) 0.3.3</a><span class=right><span id=toggle_dark onclick=toggle_dark()> turn the lights on </span> <a href=https://github.com/friedelschoen/fiss><img id=github alt=GitHub src=assets/github-mark.svg /></a></span></span>
+================================================================================
 
 <a class=title id=name href=#name>Name</a>
 --------------------------------------------------------------------------------
 
 <b>fsvc</b> - fiss' service controller 
+
 <a class=title id=synopsis href=#synopsis>Synopsis</a>
 --------------------------------------------------------------------------------
 
-<b>fsvc</b> <b>start</b> [<i>options</i>] [<b>--pin_</b>] <service> 
-<b>fsvc</b> <b>stop</b> [<i>options</i>] [<b>--pin</b>] <service> 
-<b>fsvc</b> <b>enable</b> [<i>options</i>] [<b>--once</b>] <service> 
-<b>fsvc</b> <b>disable</b> [<i>options</i>] [<b>--once</b>] <service> 
-<b>fsvc</b> <b>kill</b> [<i>options</i>] <service> <signal|signo> 
-<b>fsvc</b> <b>status</b> [<i>options</i>] [<b>--check</b>] [<service>] 
-<b>fsvc</b> <b>pause</b> [<i>options</i>] <service> 
-<b>fsvc</b> <b>resume</b> [<i>options</i>] <service> 
-<b>fsvc</b> <b>switch</b> [<i>options</i>] [<b>--reset</b>] <runlevel> 
+<b>fsvc</b> <b>start</b> [<i>options</i>] [<b>--pin_</b>] &lt;service&gt; 
+<b>fsvc</b> <b>stop</b> [<i>options</i>] [<b>--pin</b>] &lt;service&gt; 
+<b>fsvc</b> <b>enable</b> [<i>options</i>] [<b>--once</b>] &lt;service&gt; 
+<b>fsvc</b> <b>disable</b> [<i>options</i>] [<b>--once</b>] &lt;service&gt; 
+<b>fsvc</b> <b>kill</b> [<i>options</i>] &lt;service&gt; &lt;signal|signo&gt; 
+<b>fsvc</b> <b>status</b> [<i>options</i>] [<b>--check</b>] [&lt;service&gt;] 
+<b>fsvc</b> <b>pause</b> [<i>options</i>] &lt;service&gt; 
+<b>fsvc</b> <b>resume</b> [<i>options</i>] &lt;service&gt; 
+<b>fsvc</b> <b>switch</b> [<i>options</i>] [<b>--reset</b>] &lt;runlevel&gt; 
+
 <a class=title id=description href=#description>Description</a>
 --------------------------------------------------------------------------------
 
@@ -38,8 +42,8 @@
 The following options are available for every command: 
 <ul>
 <li><b>-q, --short</b> Will print brief information about the service. </li>
-<li><b>-r, --runlevel <runlevel></b> Will use fBrunlevelfB instead of <i>default</i>. </li>
-<li><b>-s, --service-dir <path></b> Will use <b>path</b> as service directory instead of <i>/etc/fiss/service.d</i>. </li>
+<li><b>-r, --runlevel &lt;runlevel&gt;</b> Will use fBrunlevelfB instead of <i>default</i>. </li>
+<li><b>-s, --service-dir &lt;path&gt;</b> Will use <b>path</b> as service directory instead of <i>/etc/fiss/service.d</i>. </li>
 <li><b>-v, --verbose</b> Prints verbose information. </li>
 <li><b>-V, --version</b> Prints the version and exits. </li>
 <li>The following options are available per command: </li>
@@ -68,7 +72,7 @@ finit(1), fsvc(8), fsvs(8), halt(8), modules-load(8), shutdown(8),
 <a class=title id=author href=#author>Author</a>
 --------------------------------------------------------------------------------
 
-Friedel Schön <derfriedmundschoen@gmail.com> 
+Friedel Schön &lt;derfriedmundschoen@gmail.com&gt; 
 </div>
 </body>
 </html>

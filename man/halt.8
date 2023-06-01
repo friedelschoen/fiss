@@ -1,14 +1,11 @@
 .TH halt 8 "MAY 2023" "0.3.3" "fiss man page"
-
 .PP
 .SH NAME
-
 .PP
-halt, reboot, poweroff - stop the system 
+\fB\fChalt\fR, \fB\fCreboot\fR, \fB\fCpoweroff\fR - stop the system 
+.PP
 .PP
 .SH SYNOPSIS
-
-.PP
 \fB\fCpoweroff\fR [\fB\fC-n\fR] [\fB\fC-f\fR] [\fB\fC-d\fR] [\fB\fC-w\fR] [\fB\fC-b\fR] 
 .PP
 \fB\fCreboot\fR [\fB\fC-n\fR] [\fB\fC-f\fR] [\fB\fC-d\fR] [\fB\fC-w\fR] [\fB\fC-b\fR] 
@@ -16,27 +13,24 @@ halt, reboot, poweroff - stop the system
 \fB\fChalt\fR [\fB\fC-n\fR] [\fB\fC-f\fR] [\fB\fC-d\fR] [\fB\fC-w\fR] [\fB\fC-b\fR] 
 .PP
 .SH DESCRIPTION
-
 .PP
 \fB\fCpoweroff\fR / \fB\fCreboot\fR / \fB\fChalt\fR tells \fB\fCinit\fR to stop running services and stop the system. Invoked without \fB\fC-f\fR, it is a shortcut for \fB\fCinit <0|6>\fR 
 .PP
-.SH OPTIONS
-
 .PP
+.SH OPTIONS
 \fB\fC-n\fR Don't sync devices, this doensn't imply that the kernel is not synced already 
 .PP
 \fB\fC-f\fR Forces halt / reboot without notifying \fB\fCinit\fR. Forcing the system to halt should be the last hope and can be dangerous, you should not try it 
 .PP
 \fB\fC-d\fR Don't write the \fIwtmp\fR record 
 .PP
-\fB\fCw\fR Only write the wtmp record, no further action 
+\fB\fC-w\fR Only write the wtmp record, no further action 
 .PP
 .SH SEE ALSO
-
 .PP
 finit(1), fsvc(8), fsvs(8), halt(8), modules-load(8), shutdown(8), 
 .PP
+.PP
 .SH AUTHOR
-
 .PP
 Based on the version of Leah Neukirchen <leah@vuxu.org>, rewritten by Friedel Schön <derfriedmundschoen@gmail.com> 

@@ -1,16 +1,20 @@
 @man sigremap 8 "MAY 2023" "%VERSION%" "fiss man page"
+@header sigremap(8) %VERSION%
 
 @title name Name
 
 *sigremap* - a minimal init system for Linux containers
 
+
 @title synopsis Synopsis
 
 *sigremap* [option] [old-signal=new-signal...] command [arguments ...]
 
+
 @title description Description
 
 *sigremap* is a simple process supervisor that forwards signals to children. It is designed to run as PID1 in minimal container environments.
+
 
 Optional arguments:
 
@@ -24,11 +28,12 @@ Print debugging information to stderr.
 *-V, --version*
 Print the current version and exit.
 
-*old-signal=new-signal...*
+*old-signal=new-signal*
 Rewrite received signal s to new signal r before proxying. To ignore (not proxy) a signal, rewrite it to 0. This option can be specified multiple times.
 @endlist
 
 @title authors Authors
 
-*sigremap* is based on dumb-init by Yelp.
-Rewritten by Friedel Schon <derfriedmundschoen@gmail.com>
+*sigremap* is based on [dumb-init by Yelp](https://github.com/Yelp/dumb-init).
+
+Rewritten by Friedel Schon &lt;derfriedmundschoen@gmail.com&gt;

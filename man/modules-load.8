@@ -1,18 +1,16 @@
 .TH modules-load 8 "MAY 2023" "0.3.3" "fiss man page"
-
 .PP
 .SH NAME
-
 .PP
 \fB\fCmodules-load\fR - configure kernel modules at boot 
 .PP
+.PP
 .SH SYNOPSIS
-
 .PP
 \fB\fCmodules-load\fR [\fB\fC-nv\fR] 
 .PP
+.PP
 .SH DESCRIPTION
-
 .PP
 modules-load reads files which contain kernel modules to load during boot from the list of locations below. 
 .PP
@@ -21,7 +19,6 @@ modules-load reads files which contain kernel modules to load during boot from t
 \fB\fC-v\fR verbose mode. Print messages about what the program is doing. 
 .PP
 .SH FILES
-
 .PP
 Configuration files are read from the following locations: 
 .PP
@@ -33,12 +30,14 @@ Configuration files are read from the following locations:
 .PP
 The configuration files should simply contain a list of kernel module names to load, separated by newlines. Empty lines and lines whose first non-whitespace character is # or ; are ignored. 
 .PP
+.PP
 .SH HISTORY
-
 .PP
 This program is a replacement for the modules-load utility provided by systemd. 
 .PP
-.SH AUTHOR
-
 .PP
-Leah Neukirchen, leah@vuxu.org. 
+.SH AUTHOR
+.PP
+Leah Neukirchen, leah@vuxu.org (first shell-implementation) 
+.PP
+Friedel Schon, derfriedmund@gmail.com (C-implementation) 

@@ -4,6 +4,8 @@ import re
 def inline_convert(text):
     text = re.sub(r'\*(.+?)\*', r'\\fB\\fC\1\\fR', text)
     text = re.sub(r'_(.+?)_', r'\\fI\1\\fR', text)
+    text = re.sub(r'\[(.*?)\]\((.*?)\)', r'\1', text)
+    text = text.replace('&lt;', '<').replace('&gt;', '>')
     return text
 
 in_list = False

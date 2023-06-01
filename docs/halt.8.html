@@ -11,14 +11,16 @@
 
 <body>
 <div id=wrapper>
+<span class=header><a class=title id=top href=#top>halt(8) 0.3.3</a><span class=right><span id=toggle_dark onclick=toggle_dark()> turn the lights on </span> <a href=https://github.com/friedelschoen/fiss><img id=github alt=GitHub src=assets/github-mark.svg /></a></span></span>
+================================================================================
 
 <a class=title id=name href=#name>Name</a>
 --------------------------------------------------------------------------------
 
-halt, reboot, poweroff - stop the system 
+<b>halt</b>, <b>reboot</b>, <b>poweroff</b> - stop the system 
+
 <a class=title id=synopsis href=#synopsis>Synopsis</a>
 --------------------------------------------------------------------------------
-
 <ul>
 <li><b>poweroff</b> [<b>-n</b>] [<b>-f</b>] [<b>-d</b>] [<b>-w</b>] [<b>-b</b>] </li>
 <li><b>reboot</b> [<b>-n</b>] [<b>-f</b>] [<b>-d</b>] [<b>-w</b>] [<b>-b</b>] </li>
@@ -26,23 +28,24 @@ halt, reboot, poweroff - stop the system
 <a class=title id=description href=#description>Description</a>
 --------------------------------------------------------------------------------
 
-<b>poweroff</b> / <b>reboot</b> / <b>halt</b> tells <b>init</b> to stop running services and stop the system. Invoked without <b>-f</b>, it is a shortcut for <b>init <0|6></b> 
+<b>poweroff</b> / <b>reboot</b> / <b>halt</b> tells <b>init</b> to stop running services and stop the system. Invoked without <b>-f</b>, it is a shortcut for <b>init &lt;0|6&gt;</b> 
+
 <a class=title id=options href=#options>Options</a>
 --------------------------------------------------------------------------------
-
 <ul>
 <li><b>-n</b> Don't sync devices, this doensn't imply that the kernel is not synced already </li>
 <li><b>-f</b> Forces halt / reboot without notifying <b>init</b>. Forcing the system to halt should be the last hope and can be dangerous, you should not try it </li>
 <li><b>-d</b> Don't write the <i>wtmp</i> record </li>
-<li><b>w</b> Only write the wtmp record, no further action </li></ul>
+<li><b>-w</b> Only write the wtmp record, no further action </li></ul>
 <a class=title id=see href=#see>See ALSO</a>
 --------------------------------------------------------------------------------
 
 finit(1), fsvc(8), fsvs(8), halt(8), modules-load(8), shutdown(8), 
+
 <a class=title id=author href=#author>Author</a>
 --------------------------------------------------------------------------------
 
-Based on the version of Leah Neukirchen <leah@vuxu.org>, rewritten by Friedel Schön <derfriedmundschoen@gmail.com> 
+Based on the version of Leah Neukirchen &lt;leah@vuxu.org&gt;, rewritten by Friedel Schön &lt;derfriedmundschoen@gmail.com&gt; 
 </div>
 </body>
 </html>

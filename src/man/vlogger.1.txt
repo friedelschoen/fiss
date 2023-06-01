@@ -1,23 +1,30 @@
 @man vlogger 1 "MAY 2023" "%VERSION%" "fiss man page"
+@header vlogger(1) %VERSION%
 
 @title name Name
 
 *vlogger* - log messages to syslog or an arbitrary executable
 
+
 @title synopsis Synopsis
 
 *vlogger* [*-isS*] [*-f* file] [*-p* pri] [*-t* tag] [message ...]
+
 
 @title description Description
 
 The vlogger utility writes messages to the system log or an arbitrary executable.
 
+
 If vlogger is executed as logger it will always use the system log and behave like the regular logger(1).
+
 
 Without message arguments vlogger reads messages from stdin or the file specified with the -f flag. If the /etc/vlogger executable exists vlogger executes it with tag, level and facility as arguments, replacing
 the vlogger process.
 
+
 If vlogger is executed as a log service for fiss(8) or another daemontools like supervision suite it uses the service name as default tag. As example if vlogger is linked to /var/service/foo/log/run it uses “foo” as tag and “daemon.notice” as pri.
+
 
 The options are as follows:
 
@@ -46,61 +53,62 @@ Write the message to the system log.
 
 @title facilities Facilities
 
-auth
-authpriv
-cron
-daemon
-ftp
-kern can not be used from userspace replaced with daemon.
-lpr
-mail
-news
-syslog
-user
-uucp
-local[0-7]
-security deprecated synonym for auth.
+auth~
+authpriv~
+cron~
+daemon~
+ftp~
+kern can not be used from userspace replaced with daemon~
+lpr~
+mail~
+news~
+syslog~
+user~
+uucp~
+local[0-7]~
+security deprecated synonym for auth
+
 
 @title levels Levels
 
-emerg
-alert
-crit
-err
-warning
-notice
-info
-debug
-panic deprecated synonym for emerg.
-error deprecated synonym for err.
-warn deprecated synonym for warning.
+emerg~
+alert~
+crit~
+err~
+warning~
+notice~
+info~
+debug~
+panic deprecated synonym for emerg~
+error deprecated synonym for err~
+warn deprecated synonym for warning~
+
 
 @title files Files
-
-*/etc/vlogger*
+@list
+*/etc/vlogger*~
 An optional executable file that is used to handle the messages. It is executed with tag, level and facility as arguments and replaces the vlogger process.
+@endlist
 
 @title exit Exit STATUS
 
-The vlogger utility exits 0 on success, and >0 if an error occurs.
+The vlogger utility exits 0 on success, and &gt;0 if an error occurs.
 
-@title examples Examples
 
-*/etc/vlogger:*
-#!/bin/sh
-exec svlogd /var/log/$1
-
-@title see See ALSO
+@title see See Also
 
 logger(1), syslog(3), svlogd(8)
+
 
 @title history History
 
 This program is a replacement for the logger utility provided by util-linux and forked from daemontools.
 
+
 @title authors Authors
 
-Duncan Overbruck <mail@duncano.de>
+Duncan Overbruck &lt;mail@duncano.de&gt;
+
 
 @title license License
 

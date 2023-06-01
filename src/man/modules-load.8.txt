@@ -1,12 +1,15 @@
 @man modules-load 8 "MAY 2023" "%VERSION%" "fiss man page"
+@header modules-load(8) %VERSION%
 
 @title name Name
 
 *modules-load* - configure kernel modules at boot
 
+
 @title synopsis Synopsis
 
 *modules-load* [*-nv*]
+
 
 @title description Description
 
@@ -37,11 +40,15 @@ The configuration files should simply contain a list of kernel module
 names to load, separated by newlines. Empty lines and lines whose first
 non-whitespace character is # or ; are ignored.
 
+
 @title history History
 
 This program is a replacement for the modules-load utility provided by
 systemd.
 
+
 @title author Author
 
-Leah Neukirchen, leah@vuxu.org.
+Leah Neukirchen, leah@vuxu.org (first shell-implementation)
+
+Friedel Schon, derfriedmund@gmail.com (C-implementation)

@@ -11,15 +11,19 @@
 
 <body>
 <div id=wrapper>
+<span class=header><a class=title id=top href=#top>shutdown(8) 0.3.3</a><span class=right><span id=toggle_dark onclick=toggle_dark()> turn the lights on </span> <a href=https://github.com/friedelschoen/fiss><img id=github alt=GitHub src=assets/github-mark.svg /></a></span></span>
+================================================================================
 
 <a class=title id=name href=#name>Name</a>
 --------------------------------------------------------------------------------
 
 <b>shutdown</b> – bring down the system 
+
 <a class=title id=synopsis href=#synopsis>Synopsis</a>
 --------------------------------------------------------------------------------
 
 <b>shutdown</b> [<b>-rhP</b>] [<b>-fF</b>] [now | +mins] [message ...] 
+
 <a class=title id=description href=#description>Description</a>
 --------------------------------------------------------------------------------
 
@@ -39,16 +43,17 @@ By default, shutdown puts the system into single user mode. Rebooting and haltin
 <a class=title id=unsupported href=#unsupported>Unsupported OPTIONS</a>
 --------------------------------------------------------------------------------
 
-This version of shutdown is based on runit(8), the following features are not supported: 
-<b>-t secs</b> to wait secs seconds between SIGKILL and SIGTERM on shutdown is silently ignored. 
-<b>-a</b> Use /etc/shutdown.allow. 
-<b>-H</b> Drop into boot monitor. 
-<b>-n</b> Don't call init(8). 
-<b>hh:mm</b> Absolute time specification is not implemented. 
-<a class=title id=see href=#see>See ALSO</a>
+This version of shutdown is based on runit(8), the following features are not supported: <ul>
+<li><b>-t secs</b> to wait secs seconds between SIGKILL and SIGTERM on shutdown is silently ignored. </li>
+<li><b>-a</b> Use /etc/shutdown.allow. </li>
+<li><b>-H</b> Drop into boot monitor. </li>
+<li><b>-n</b> Don't call init(8). </li>
+<li><b>hh:mm</b> Absolute time specification is not implemented. </li></ul>
+<a class=title id=see href=#see>See Also</a>
 --------------------------------------------------------------------------------
 
 fsck(8), halt(8), init(8), poweroff(8), reboot(8), fiss(8), runsvchdir(8) 
+
 <a class=title id=author href=#author>Author</a>
 --------------------------------------------------------------------------------
 

@@ -1,12 +1,15 @@
 @man fsvs 8 "MAY 2023" "%VERSION%" "fiss man page"
+@header fsvc(8) %VERSION%
 
 @title name Name
 
 *fsvs* - friedel's service superviser
 
+
 @title synopsis Synopsis
 
 *fsvs* [options] service-dir runlevel
+
 
 @title description Description
 
@@ -27,6 +30,7 @@ Prints the version and exits.
 
 Services can be controlled with *fsvc 8*
 
+
 @title authors Authors
 
-Friedel Schon <derfriedmundschoen@gmail.com>
+Friedel Schon &lt;derfriedmundschoen@gmail.com&gt;

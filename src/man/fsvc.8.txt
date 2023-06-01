@@ -1,28 +1,31 @@
 @man fsvc 8 "MAY 2023" "%VERSION%" "fiss man page"
+@header fsvc(8) %VERSION%
 
 @title name Name
 
 *fsvc* - fiss' service controller
 
+
 @title synopsis Synopsis
 
-*fsvc* *start* [_options_] [*--pin_*] <service>
+*fsvc* *start* [_options_] [*--pin_*] &lt;service&gt;
 
-*fsvc* *stop* [_options_] [*--pin*] <service>
+*fsvc* *stop* [_options_] [*--pin*] &lt;service&gt;
 
-*fsvc* *enable* [_options_] [*--once*] <service>
+*fsvc* *enable* [_options_] [*--once*] &lt;service&gt;
 
-*fsvc* *disable* [_options_] [*--once*] <service>
+*fsvc* *disable* [_options_] [*--once*] &lt;service&gt;
 
-*fsvc* *kill* [_options_] <service> <signal|signo>
+*fsvc* *kill* [_options_] &lt;service&gt; &lt;signal|signo&gt;
 
-*fsvc* *status* [_options_] [*--check*] [<service>]
+*fsvc* *status* [_options_] [*--check*] [&lt;service&gt;]
 
-*fsvc* *pause* [_options_] <service>
+*fsvc* *pause* [_options_] &lt;service&gt;
 
-*fsvc* *resume* [_options_] <service>
+*fsvc* *resume* [_options_] &lt;service&gt;
 
-*fsvc* *switch* [_options_] [*--reset*] <runlevel>
+*fsvc* *switch* [_options_] [*--reset*] &lt;runlevel&gt;
+
 
 @title description Description
 
@@ -36,10 +39,10 @@ The following options are available for every command:
 *-q, --short*
 Will print brief information about the service.
 
-*-r, --runlevel <runlevel>*
+*-r, --runlevel &lt;runlevel&gt;*
 Will use fBrunlevelfB instead of _default_.
 
-*-s, --service-dir <path>*
+*-s, --service-dir &lt;path&gt;*
 Will use *path* as service directory instead of _/etc/fiss/service.d_.
 
 *-v, --verbose*
@@ -103,4 +106,4 @@ finit(1), fsvc(8), fsvs(8), halt(8), modules-load(8), shutdown(8),
 
 @title author Author
 
-Friedel Schön <derfriedmundschoen@gmail.com>
+Friedel Schön &lt;derfriedmundschoen@gmail.com&gt;

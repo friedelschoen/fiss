@@ -89,5 +89,5 @@ chpst exits 100 when called with wrong options. It prints an error message and e
 
 @title author Author
 
-Based on the implementation by Gerrit Pape <pape@smarden.org>,
-rewritten by Friedel Schon <derfriedmundschoen@gmail.com>
+Based on the implementation by Gerrit Pape &lt;pape@smarden.org&gt;,
+rewritten by Friedel Schon &lt;derfriedmundschoen@gmail.com&gt;
