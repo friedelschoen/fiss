@@ -22,6 +22,7 @@ LDFLAGS  += -fPIE
 
 SED      ?= sed
 PYTHON   ?= python3
+AWK      ?= awk
 
 # Executable-specific flags
 finit_FLAGS := -static
@@ -94,7 +95,7 @@ $(DOCS_DIR)/%.html: $(MAN_DIR)/%.txt $(DOC_AST_DIR) | $(DOCS_DIR)
 	$(SED) 's/%VERSION%/$(VERSION)/' $< | $(PYTHON) $(MAKE_DOCS) > $@
 
 $(ROFF_DIR)/%: $(MAN_DIR)/%.txt | $(ROFF_DIR)
-	$(SED) 's/%VERSION%/$(VERSION)/' $< | $(PYTHON) $(MAKE_MAN) > $@
+	$(SED) 's/%VERSION%/$(VERSION)/' $< | $(PYTHON) $(MAKE_MAN) | $(AWK) '/./ { print }' > $@
 
 # Debug
 compile_flags.txt: 
