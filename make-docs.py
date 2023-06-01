@@ -4,7 +4,7 @@ import re
 WIDTH = 80
 HEADER_CHAR = '='
 TITLE_CHAR = '-'
-HEADER_SUFFIX = "<span class=right><span id=toggle_dark onclick=toggle_dark()> turn the lights on </span> <a href=https://github.com/friedelschoen/fiss><img id=github alt=GitHub src=assets/github-mark.svg /></a></span>"
+HEADER_SUFFIX = "<span class=right><span id=toggle_dark onclick=toggle_dark()> turn the lights off </span> <a href=https://github.com/friedelschoen/fiss><img id=github alt=GitHub src=assets/github-mark.svg /></a></span>"
 
 PREFIX = """<!doctype html>
 <html lang=en>
@@ -36,7 +36,7 @@ def inline_convert(text):
     return text
 
 in_code = False
-in_list = False
+in_list = None
 
 print(PREFIX)
 
@@ -67,11 +67,14 @@ for line in sys.stdin:
         sys.stdout.write('+' + '-' * width + '+')
         in_code = False
     elif line.startswith("@list"):
-        sys.stdout.write("<div class=list>* ")
-        in_list = True
+        if ' ' in line:
+            _, in_list = line.split(' ')
+        else:
+            in_list = '*'
+        sys.stdout.write(f"<div class=list>{in_list} ")
     elif line.startswith("@endlist"):
         sys.stdout.write("</div>")
-        in_list = False
+        in_list = None
     elif line == '~':
         print()
         
@@ -87,7 +90,7 @@ for line in sys.stdin:
     elif line:
         sys.stdout.write(inline_convert(line) + ' ') 
     elif in_list: # is empty but in line
-        sys.stdout.write("</div>\n<div class=list>* ")
+        sys.stdout.write(f"</div>\n<div class=list>{in_list} ")
     else: # is empty
         print('\n')
         

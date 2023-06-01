@@ -19,26 +19,34 @@
 
 <b>sigremap</b> - a minimal init system for Linux containers 
 
+
+
 <a class=title id=synopsis href=#synopsis>Synopsis</a>
 --------------------------------------------------------------------------------
 
 <b>sigremap</b> [option] [old-signal=new-signal...] command [arguments ...] 
+
+
 
 <a class=title id=description href=#description>Description</a>
 --------------------------------------------------------------------------------
 
 <b>sigremap</b> is a simple process supervisor that forwards signals to children. It is designed to run as PID1 in minimal container environments. 
 
+
+
 Optional arguments: 
-<ul>
-<li><b>-c, --single</b> Run in single-child mode. In this mode, signals are only proxied to the direct child and not any of its descendants. </li>
-<li><b>-v, --verbose</b> Print debugging information to stderr. </li>
-<li><b>-V, --version</b> Print the current version and exit. </li>
-<li><b>old-signal=new-signal</b> Rewrite received signal s to new signal r before proxying. To ignore (not proxy) a signal, rewrite it to 0. This option can be specified multiple times. </li></ul>
+
+<div class=list>* <b>-c, --single</b> Run in single-child mode. In this mode, signals are only proxied to the direct child and not any of its descendants. </div>
+<div class=list>* <b>-v, --verbose</b> Print debugging information to stderr. </div>
+<div class=list>* <b>-V, --version</b> Print the current version and exit. </div>
+<div class=list>* <b>old-signal=new-signal</b> Rewrite received signal s to new signal r before proxying. To ignore (not proxy) a signal, rewrite it to 0. This option can be specified multiple times. </div>
+
 <a class=title id=authors href=#authors>Authors</a>
 --------------------------------------------------------------------------------
 
 <b>sigremap</b> is based on <a href="https://github.com/Yelp/dumb-init">dumb-init by Yelp</a>. 
+
 Rewritten by Friedel Schon &lt;derfriedmundschoen@gmail.com&gt; 
 </div>
 </body>

@@ -1,10 +1,36 @@
 @header fiss %VERSION%
 
-Aloha! You somehow landed on the website of *fiss* (_Friedel's Initialization and
-Service Supervision_). *fiss* is a supervision suite for Unix and Unix-like systems
+Aloha! You somehow landed on the website of *fiss* (_Friedel's Initialization and Service Supervision_). *fiss* is a supervision suite for Unix and Unix-like systems
 with the power off system initialization. This project is based on *runit* and
 other *daemontools*-based utilities.
 
+@title manuals fiss' manuals
+
+@list
+[*chpst(8)*](chpst.8.html) - runs a program with a changed process state
+
+[*finit(8)*](finit.8.html) - a UNIX process no 1
+
+[*fsvc(8)*](fsvc.8.html) - fiss' service controller
+
+[*fsvs(8)*](fsvs.8.html) - fiss' service superviser
+
+[*halt(8)*](halt.8.html) - halts the system
+
+[*reboot(8)*](halt.8.html) - reboots the system
+
+[*poweroff(8)*](halt.8.html) - stop the system
+
+[*modules-load(8)*](modules-load.8.html) - configure kernel modules at boot
+
+[*shutdown(8)*](shutdown.8.html) – bring down the system
+
+[*sigremap(8)*](sigremap.8.html) - catches signals and redirects mapped signal to executable
+
+[*vlogger(1)*](vlogger.1.html) - log messages to syslog or an arbitrary executable
+
+[*zzz(8)*](zzz.8.html) - suspend or hibernate your system
+@endlist
 
 @title init What does an init-system do?
 
@@ -23,7 +49,6 @@ Linux which is shipped with *runit*, a *daemontools*-derivate with initializatio
 Unlike *SystemD*, *runit* is a fine in-between: minimal but feature-rich. Bit too
 minimal so I thought of making *fiss*!
 
-
 @title why Why fiss tho?
 
 *fiss* is a lightweight and easy-to-use tool for initializing and supervising
@@ -33,7 +58,6 @@ logging, and customizable startup options. It's no fork and uses the standard
 POSIX libc without other runtime dependencies. *fiss* support all the features to
 make services efficient running. It can be compatible with *runit* and *daemontools*
 utilities and is highly customizable at runtime to make *fiss* fit your needs.
-
 
 @title compare fiss vs runit
 
@@ -125,7 +149,6 @@ make manual   # to compile the manuals
 Executables are now stored in ./bin, standard configuration-files are stored in
 ./etc, runtime-required files are in ./share and manuals in ./man.
 
-
 @title voidlinux Installation on Void Linux
 
 If you don't have the source-tree yet, clone and bootstrap it with git.
@@ -136,19 +159,82 @@ cd void-packages/
 ./xbps-src binary-bootstrap
 @endcode
 
-
 *fiss* is not a official package yet, as it's too unstable to include, but you can
 add my void-packages as remote and compile.
-
 
 @code
 git remote add fiss https://github.com/friedelschoen/void-packages.git
 git pull fiss fiss
-./xbps pkg fiss
+./xbps-src pkg fiss
 xi fiss                                     # if xtools is installed
 sudo xbps-install -R hostdir/binpkgs fiss   # if xtools is not installed
 @endcode
 
+@title convert-runit Convert runit services
+
+The very most runit-service should work with fsvc but some not very efficient, thats why converting them is handy.
+Because runit (and fiss) only execute the _./run_ script, these scripts _can_ be pretty bulky.
+
+
+All services installed by *xbps*, thus available in [*void-packages*](https://github.com/void-linux/void-packages.git) follow
+some unwritten rules (unwritten as I haven't found them yet but services tent to follow some similarities).
+
+Services tent to follow this structure:
+
+@code
+#!/bin/sh (1)
+
+[ -r ./conf ] && . .conf (2)
+exec chpst -u user:group service -p $PORT $OPTS (3)
+@endcode
+
+(1) The _./run_-file always is a shell-executable, which executes the actual service.
+
+(2) If _./conf_ exist in the service-directory, it is sourced.
+
+(3) *chpst* is executed with some parameters like _-u_ which executes as user. *chpst* then executes service with modified state and
+predefined parameters from _./conf_.
+
+This is a foreground service, it means that the executable does not exit til the service is stopped. If the executable exits,
+you can expect the service to be down.~
+*fiss* also includes a stripped-down version of *chpst* for compability use, *fiss* includes a basic state management.
+
+You can extract the chpst-part to _./user_ and _./env_ (see below).
+
+If you executable has static parameters, thus no _./conf_ and no environment-variables, you can also pass the parameters in _./params_
+and sym-link the executable directly to _./run_.
+
+Void Linux packages always comes with a symbolic link _./supervise_ to _/run/runit/supervise.&lt;service&gt;_,
+which is meant for read-only systems running runit (expecting _/run/_ to be a temporary filesystem). If you are running a writable system,
+you can remove the link and *fiss* will create a directory. If you are running a read-only system you can either create
+the directory _/run/runit/_ and don't have to mess with runit-services or at an other location and sym-link the supervise-directories
+by yourself.
+
+
+If your _./run_ execute looks like the following, stressing the *pause*...
+
+@code
+#!/bin/sh
+
+service -p 990 start
+exec chpst -b service pause
+@endcode
+
+... and you _./finish_ like that...
+
+@code
+#!/bin/sh
+
+service stop
+@endcode
+
+... it's a runit-_background_ service which should be converted to a fiss-service.
+The service executable exits immediately, the actual service is running in the background.
+
+*pause* is a runit-hack, a program which just suspends until it is signaled by runit. It blocks a process-slot and
+the kernel still needs to care about it. *fiss* handles background-services different by calling _./start_ and _./stop_.
+
+You can safely remove the last exec line and rename _./run_ to _./start_ and _./finish_ to _./stop_ and it should work.
 
 @title getting-started Getting Started
 

@@ -3,7 +3,7 @@
 
 @title name Name
 
-zzz - suspend or hibernate your system
+*zzz* - suspend or hibernate your system
 
 
 @title synopsis Synopsis

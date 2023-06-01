@@ -69,6 +69,7 @@ $(INTERMED_DIRS):
 	mkdir -p $@
 	
 $(DOC_AST_DIR): $(ASSETS_DIR) | $(DOCS_DIR)
+	mkdir -p $@
 	cp -rv $</* $@
 
 

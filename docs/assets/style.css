@@ -10,12 +10,6 @@ body.dark {
 	color: #eee;
 }
 
-@media(max-width:999px) {
-	body {
-		font-size: 1.94vw
-	}
-}
-
 #toggle_dark {
 	background: #3c3836;
 	color: #eee;
@@ -63,23 +57,9 @@ a:hover {
 	height: 1em;
 }
 
-ul {
-	list-style: none;
-	padding: 0;
-	margin: 0;
-}
-
-li {
-	margin-left: 2ch;
+.list {
     text-indent: -2ch;	
-}
-
-li::before {
-	content: '* ';
-}
-
-.header {
-	
+	padding-left: 2ch;
 }
 
 .header .title {

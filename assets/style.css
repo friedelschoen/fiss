@@ -10,12 +10,6 @@ body.dark {
 	color: #eee;
 }
 
-@media(max-width:999px) {
-	body {
-		font-size: 1vw;
-	}
-}
-
 #toggle_dark {
 	background: #3c3836;
 	color: #eee;

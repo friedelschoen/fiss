@@ -12,9 +12,9 @@ function toggle_dark() {
 	}
 }
 
-document.addEventListener('readystatechange', function (state) {
+/*document.addEventListener('readystatechange', function (state) {
 	if (document.readyState == 'complete')
 		if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
 			toggle_dark();
 		}
-});
+});*/

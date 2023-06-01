@@ -19,37 +19,48 @@
 
 <b>modules-load</b> - configure kernel modules at boot 
 
+
+
 <a class=title id=synopsis href=#synopsis>Synopsis</a>
 --------------------------------------------------------------------------------
 
 <b>modules-load</b> [<b>-nv</b>] 
 
+
+
 <a class=title id=description href=#description>Description</a>
 --------------------------------------------------------------------------------
 
 modules-load reads files which contain kernel modules to load during boot from the list of locations below. 
-<ul>
-<li><b>-n</b> dry-run mode. This option does everything but actually insert or delete the modules. </li>
-<li><b>-v</b> verbose mode. Print messages about what the program is doing. </li></ul>
+
+<div class=list>* <b>-n</b> dry-run mode. This option does everything but actually insert or delete the modules. </div>
+<div class=list>* <b>-v</b> verbose mode. Print messages about what the program is doing. </div>
+
 <a class=title id=files href=#files>Files</a>
 --------------------------------------------------------------------------------
 
 Configuration files are read from the following locations: 
-<ul>
-<li><i>/etc/modules-load.d/*.conf</i> </li>
-<li><i>/run/modules-load.d/*.conf</i> </li>
-<li><i>/usr/lib/modules-load.d/*.conf</i> </li></ul>
+
+<div class=list>* <u>/etc/modules-load.d/*.conf</u> </div>
+<div class=list>* <u>/run/modules-load.d/*.conf</u> </div>
+<div class=list>* <u>/usr/lib/modules-load.d/*.conf</u> </div>
+
 The configuration files should simply contain a list of kernel module names to load, separated by newlines. Empty lines and lines whose first non-whitespace character is # or ; are ignored. 
+
+
 
 <a class=title id=history href=#history>History</a>
 --------------------------------------------------------------------------------
 
 This program is a replacement for the modules-load utility provided by systemd. 
 
+
+
 <a class=title id=author href=#author>Author</a>
 --------------------------------------------------------------------------------
 
 Leah Neukirchen, leah@vuxu.org (first shell-implementation) 
+
 Friedel Schon, derfriedmund@gmail.com (C-implementation) 
 </div>
 </body>
