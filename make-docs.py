@@ -31,7 +31,7 @@ TITLE_TEMPLATE = "<a class=title id={id} href=#{id}>{text}</a>"
 
 def inline_convert(text):
     text = re.sub(r'\*(.+?)\*', r'<b>\1</b>', text)
-    text = re.sub(r'_(.+?)_', r'<i>\1</i>', text)
+    text = re.sub(r'_(.+?)_', r'<u>\1</u>', text)
     text = re.sub(r'\[(.*?)\]\((.*?)\)', r'<a href="\2">\1</a>', text)
     return text
 
@@ -49,11 +49,11 @@ for line in sys.stdin:
     elif line.startswith("@header"):
         _, text = line.split(" ", 1)
         print(HEADER_TEMPLATE.format(text=text))
-        print(HEADER_CHAR * WIDTH)
+        sys.stdout.write(HEADER_CHAR * WIDTH)
     elif line.startswith("@title"):
         _, id, text = line.split(" ", 2)
         print(TITLE_TEMPLATE.format(id=id, text=text))
-        print(TITLE_CHAR * WIDTH)
+        sys.stdout.write(TITLE_CHAR * WIDTH)
     elif line.startswith("@code"):
         width = WIDTH -2
         if in_list:
@@ -67,12 +67,14 @@ for line in sys.stdin:
         sys.stdout.write('+' + '-' * width + '+')
         in_code = False
     elif line.startswith("@list"):
-        sys.stdout.write("<ul>\n<li>")
+        sys.stdout.write("<div class=list>* ")
         in_list = True
     elif line.startswith("@endlist"):
-        sys.stdout.write("</li></ul>")
+        sys.stdout.write("</div>")
         in_list = False
-    
+    elif line == '~':
+        print()
+        
     elif in_code:
         padding = WIDTH - 4 - len(line)
         if in_list:
@@ -85,8 +87,8 @@ for line in sys.stdin:
     elif line:
         sys.stdout.write(inline_convert(line) + ' ') 
     elif in_list: # is empty but in line
-        sys.stdout.write("</li>\n<li>")
+        sys.stdout.write("</div>\n<div class=list>* ")
     else: # is empty
-        print()
+        print('\n')
         
 print(SUFFIX)

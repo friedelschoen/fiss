@@ -69,7 +69,7 @@ $(INTERMED_DIRS):
 	mkdir -p $@
 	
 $(DOC_AST_DIR): $(ASSETS_DIR) | $(DOCS_DIR)
-	cp -rv $< $@
+	cp -rv $</* $@
 
 
 # Object rules
@@ -88,13 +88,13 @@ $(BIN_DIR)/%: $(EXEC_DIR)/%.lnk | $(BIN_DIR)
 	ln -sf $(shell cat $<) $@	
 
 # Documentation and Manual
-$(DOCS_DIR)/%.html: $(TEMPL_DIR)/%.txt $(DOC_AST_DIR) | $(DOCS_DIR)
+$(DOCS_DIR)/%.html: $(TEMPL_DIR)/%.txt $(DOC_AST_DIR) $(MAKE_DOCS) | $(DOCS_DIR)
 	$(SED) 's/%VERSION%/$(VERSION)/' $< | $(PYTHON) $(MAKE_DOCS) > $@
 
-$(DOCS_DIR)/%.html: $(MAN_DIR)/%.txt $(DOC_AST_DIR) | $(DOCS_DIR)
+$(DOCS_DIR)/%.html: $(MAN_DIR)/%.txt $(DOC_AST_DIR) $(MAKE_DOCS) | $(DOCS_DIR)
 	$(SED) 's/%VERSION%/$(VERSION)/' $< | $(PYTHON) $(MAKE_DOCS) > $@
 
-$(ROFF_DIR)/%: $(MAN_DIR)/%.txt | $(ROFF_DIR)
+$(ROFF_DIR)/%: $(MAN_DIR)/%.txt $(MAKE_MAN) | $(ROFF_DIR)
 	$(SED) 's/%VERSION%/$(VERSION)/' $< | $(PYTHON) $(MAKE_MAN) | $(AWK) '/./ { print }' > $@
 
 # Debug
