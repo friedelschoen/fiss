@@ -12,8 +12,8 @@ ROFF_DIR    := man
 DOCS_DIR    := docs
 ASSETS_DIR  := assets
 DOC_AST_DIR := docs/assets
-MAKE_DOCS   := make-docs.py
-MAKE_MAN    := make-man.py
+MAKE_DOCS   := tools/make-docs.py
+MAKE_MAN    := tools/make-man.py
 
 # Compiler Options
 CC       ?= gcc
