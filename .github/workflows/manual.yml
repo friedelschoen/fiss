@@ -1,0 +1,31 @@
+name: Build
+
+on:
+  push:
+    branches: ["master"]
+    paths: [ "src/docs", "src/man" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Python3
+        uses: actions/setup-python@v4
+      
+      - name: Build Documentation
+        run: make documentation
+        
+      - name: Build Manuals
+        run: make manual
+
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: Friedel Schon
+          author_email: derfriedmundschoen@gmail.com
+          message: 'adding manuals and documentation'
+          add: 'docs/ man/'
