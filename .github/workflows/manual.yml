@@ -3,7 +3,6 @@ name: Build
 on:
   push:
     branches: ["master"]
-    paths: [ "src/docs", "src/man" ]
 
 jobs:
   build:
