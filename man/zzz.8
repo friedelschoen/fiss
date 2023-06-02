@@ -1,0 +1,41 @@
+.TH zzz 8 "MAY 2023" "0.3.3" "fiss man page"
+.PP
+.SH NAME
+.PP
+\fB\fCzzz\fR - suspend or hibernate your system 
+.PP
+.PP
+.SH SYNOPSIS
+.PP
+\fB\fCzzz [-nSzZRH]\fR 
+.PP
+.PP
+.SH DESCRIPTION
+.PP
+\fB\fCzzz\fR is a simple utility to hibernate or suspend your computer and part of the fiss-system. It supports suspend/resume-hooks. 
+.PP
+\fB\fC-n, --noop\fR dry-run, sleep for 5sec instead of actually running ACPI actions. 
+.PP
+\fB\fC-S, --freeze\fR enter low-power idle mode 
+.PP
+\fB\fC-z, --suspend\fR suspend to RAM, this is the default behaviour of \fB\fCzzz\fR 
+.PP
+\fB\fC-Z, --hibernate\fR hibernate to disk and power off 
+.PP
+\fB\fC-R, --reboot\fR hibernate to disk and reboot (useful for switching operating systems) 
+.PP
+\fB\fC-H, --hybrid\fR hibernate to disk and suspend 
+.PP
+.SH HOOKS
+.PP
+Before suspending, \fB\fCzzz\fR executes \fI/usr/share/fiss/suspend\fR which intents to execute scripts inside \fI/etc/zzz.d/suspend\fR in alphanumeric order. After resuming, \fB\fCzzz\fR executes \fI/usr/share/fiss/resume\fR which intents to execute scripts inside \fI/etc/zzz.d/resume\fR in alphanumeric order. 
+.PP
+.PP
+.SH SEE ALSO
+.PP
+fiss-init(8), runsvdir(8), runsvchdir(8), sv(8), runsv(8), chpst(8), utmpset(8), svlogd(8) 
+.PP
+.PP
+.SH AUTHOR
+.PP
+Based on the version of Leah Neukirchen <leah@vuxu.org>, rewritten by Friedel Schön <derfriedmundschoen@gmail.com> 

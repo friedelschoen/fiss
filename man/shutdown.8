@@ -1,0 +1,58 @@
+.TH shutdown 8 "MAY 2023" "0.3.3" "fiss man page"
+.PP
+.SH NAME
+.PP
+\fB\fCshutdown\fR – bring down the system 
+.PP
+.PP
+.SH SYNOPSIS
+.PP
+\fB\fCshutdown\fR [\fB\fC-rhP\fR] [\fB\fC-fF\fR] [now | +mins] [message ...] 
+.PP
+.PP
+.SH DESCRIPTION
+.PP
+shutdown brings the system down in a secure way. All logged-in users are notified that the system is going down, and login(1) is blocked. 
+.PP
+By default, shutdown puts the system into single user mode. Rebooting and halting the system can be done using the following options: 
+.PP
+\fB\fC-c\fR Cancel an ongoing shutdown. 
+.PP
+\fB\fC-f\fR Enable fast booting; skip fsck(8) on next boot. 
+.PP
+\fB\fC-F\fR Force run of fsck(8) on next boot. 
+.PP
+\fB\fC-h\fR Halt the system. 
+.PP
+\fB\fC-k\fR Don't really shutdown; only send the warning messages to everybody. 
+.PP
+\fB\fC-P\fR Poweroff the system. 
+.PP
+\fB\fC-r\fR Reboot the system. 
+.PP
+\fB\fCnow\fR Shutdown without further waiting. 
+.PP
+\fB\fC+mins\fR Wait mins minutes before shutting down. 
+.PP
+\fB\fCmessage\fR Message displayed to all users, defaults to "system is going down". 
+.PP
+.SH UNSUPPORTED OPTIONS
+.PP
+This version of shutdown is based on runit(8), the following features are not supported: \fB\fC-t secs\fR to wait secs seconds between SIGKILL and SIGTERM on shutdown is silently ignored. 
+.PP
+\fB\fC-a\fR Use /etc/shutdown.allow. 
+.PP
+\fB\fC-H\fR Drop into boot monitor. 
+.PP
+\fB\fC-n\fR Don't call init(8). 
+.PP
+\fB\fChh:mm\fR Absolute time specification is not implemented. 
+.PP
+.SH SEE ALSO
+.PP
+fsck(8), halt(8), init(8), poweroff(8), reboot(8), fiss(8), runsvchdir(8) 
+.PP
+.PP
+.SH AUTHOR
+.PP
+Leah Neukirchen, leah@vuxu.org. 

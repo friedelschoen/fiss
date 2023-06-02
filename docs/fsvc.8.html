@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang=en>
+
+<head>
+  <title>Friedel's Initialization and Service Supervision</title>
+  <meta charset=utf-8 />
+  <meta name=viewport content='width=device-width,initial-scale=1' />
+  <link rel=stylesheet href=assets/style.css />
+  <script type=text/javascript src=assets/toggle-dark.js></script>
+</head>
+
+<body>
+<div id=wrapper>
+<span class=header><a class=title id=top href=#top>fsvc(8) 0.3.3</a><span class=right><span id=toggle_dark onclick=toggle_dark()> turn the lights on </span> <a href=https://github.com/friedelschoen/fiss><img id=github alt=GitHub src=assets/github-mark.svg /></a></span></span>
+================================================================================
+
+<a class=title id=name href=#name>Name</a>
+--------------------------------------------------------------------------------
+
+<b>fsvc</b> - fiss' service controller 
+
+
+
+<a class=title id=synopsis href=#synopsis>Synopsis</a>
+--------------------------------------------------------------------------------
+
+<b>fsvc</b> <b>start</b> [<u>options</u>] [<b>--pin_</b>] &lt;service&gt; 
+
+<b>fsvc</b> <b>stop</b> [<u>options</u>] [<b>--pin</b>] &lt;service&gt; 
+
+<b>fsvc</b> <b>enable</b> [<u>options</u>] [<b>--once</b>] &lt;service&gt; 
+
+<b>fsvc</b> <b>disable</b> [<u>options</u>] [<b>--once</b>] &lt;service&gt; 
+
+<b>fsvc</b> <b>kill</b> [<u>options</u>] &lt;service&gt; &lt;signal|signo&gt; 
+
+<b>fsvc</b> <b>status</b> [<u>options</u>] [<b>--check</b>] [&lt;service&gt;] 
+
+<b>fsvc</b> <b>pause</b> [<u>options</u>] &lt;service&gt; 
+
+<b>fsvc</b> <b>resume</b> [<u>options</u>] &lt;service&gt; 
+
+<b>fsvc</b> <b>switch</b> [<u>options</u>] [<b>--reset</b>] &lt;runlevel&gt; 
+
+
+
+<a class=title id=description href=#description>Description</a>
+--------------------------------------------------------------------------------
+
+<b>fsvc</b> is a command line tool for controlling services on a fiss system. It provides various commands for starting, stopping, enabling, disabling, sending signals to, checking the status of, pausing, resuming, and switching the runlevel of services. 
+
+<a class=title id=options href=#options>Options</a>
+--------------------------------------------------------------------------------
+
+The following options are available for every command: 
+
+<div class=list>* <b>-q, --short</b> Will print brief information about the service. </div>
+<div class=list>* <b>-r, --runlevel &lt;runlevel&gt;</b> Will use fBrunlevelfB instead of <u>default</u>. </div>
+<div class=list>* <b>-s, --service-dir &lt;path&gt;</b> Will use <b>path</b> as service directory instead of <u>/etc/fiss/service.d</u>. </div>
+<div class=list>* <b>-v, --verbose</b> Prints verbose information. </div>
+<div class=list>* <b>-V, --version</b> Prints the version and exits. </div>
+<div class=list>* The following options are available per command: </div>
+<div class=list>* <b>-p, --pin</b> Pins the state. If issued with <b>start</b> it will cause the service to restart. If issued with <b>stop</b> it will cause the service to be hold down. </div>
+<div class=list>* <b>-o, --once</b> Specifies that the service should only be enabled/disabled once and not automatically started/stopped on subsequent bootups. </div>
+<div class=list>* <b>-c, --check</b> Command will return <u>0</u> if the specified service is active otherwise <u>1</u> </div>
+<div class=list>* <b>-r, --reset</b> Specifies that the switch command should reset all running services (if manually set to up/down) </div>
+
+<a class=title id=commands href=#commands>Commands</a>
+--------------------------------------------------------------------------------
+
+The following commands are available: 
+
+<div class=list>* <b>start</b> Starts the specified service. A synonym is <b>up</b>. </div>
+<div class=list>* <b>stop</b> Stops the specified service. A synonym is <b>down</b>. </div>
+<div class=list>* <b>enable</b> Enables the specified service, causing it to automatically start on subsequent bootups. </div>
+<div class=list>* <b>disable</b> Disables the specified service, causing it to not start automatically on subsequent bootups. </div>
+<div class=list>* <b>kill</b> Sends the specified signal or signal number to the specified service. A synonym is <b>send</b>. </div>
+<div class=list>* <b>status</b> Displays the status of the specified service. If no service is specified, displays the status of all services. </div>
+<div class=list>* <b>pause</b> Pauses the specified service. </div>
+<div class=list>* <b>resume</b> Resumes the specified service. </div>
+<div class=list>* <b>switch</b> Switches the runlevel to the specified value. </div>
+
+<a class=title id=see href=#see>See ALSO</a>
+--------------------------------------------------------------------------------
+
+finit(1), fsvc(8), fsvs(8), halt(8), modules-load(8), shutdown(8), 
+
+<a class=title id=author href=#author>Author</a>
+--------------------------------------------------------------------------------
+
+Friedel Schön &lt;derfriedmundschoen@gmail.com&gt; 
+</div>
+</body>
+</html>
+
