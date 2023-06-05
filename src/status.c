@@ -12,9 +12,9 @@
 
 
 static void service_update_status(service_t* s) {
-	int              fd;
-	const char*      stat_human;
-	service_serial_t stat_runit;
+	int                   fd;
+	const char*           stat_human;
+	struct service_serial stat_runit;
 
 	if ((fd = openat(s->dir, "supervise/status.new", O_CREAT | O_WRONLY | O_TRUNC, 0644)) == -1) {
 		print_error("cannot open supervise/status: %s\n");

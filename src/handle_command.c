@@ -17,7 +17,7 @@ static int runit_signals[] = {
 	[X_USR2]  = SIGUSR2,
 };
 
-void service_handle_command(service_t* s, service_command_t command, char data) {
+void service_handle_command(service_t* s, char command, char data) {
 	switch (command) {
 		case X_UP:
 			s->restart_manual = S_RESTART;
@@ -88,7 +88,7 @@ void service_handle_command(service_t* s, service_command_t command, char data) 
 		case X_QUIT:
 		case X_USR1:
 		case X_USR2:
-			service_kill(s, runit_signals[command]);
+			service_kill(s, runit_signals[(int) command]);
 			break;
 		case X_RESET:
 			if (s->paused) {

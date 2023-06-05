@@ -21,10 +21,14 @@ const char* service_status_name(service_t* s) {
 			return "down";
 		case STATE_DEAD:
 			return "dead";
+		default:
+			return NULL;
 	}
 }
 
-void service_encode(service_t* s, service_serial_t* buffer) {
+void service_encode(service_t* s, void* buffer_ptr) {
+	struct service_serial* buffer = buffer_ptr;
+
 	uint64_t tai = (uint64_t) s->status_change + 4611686018427387914ULL;
 	int      state_runit;
 
@@ -76,7 +80,9 @@ void service_encode(service_t* s, service_serial_t* buffer) {
 }
 
 
-void service_decode(service_t* s, const service_serial_t* buffer) {
+void service_decode(service_t* s, const void* buffer_ptr) {
+	const struct service_serial* buffer = buffer_ptr;
+
 	uint64_t tai = ((uint64_t) buffer->status_change[0] << 56) |
 	               ((uint64_t) buffer->status_change[1] << 48) |
 	               ((uint64_t) buffer->status_change[2] << 40) |
