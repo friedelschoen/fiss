@@ -44,30 +44,6 @@ static void signal_child(int unused) {
 	service_handle_exit(s, WIFSIGNALED(status), WIFSIGNALED(status) ? WTERMSIG(status) : WEXITSTATUS(status));
 }
 
-static void check_services(void) {
-	service_t* s;
-
-	for (int i = 0; i < services_size; i++) {
-		s = &services[i];
-		if (s->state == STATE_DEAD)
-			continue;
-		if (service_need_restart(s)) {
-			if (s->state == STATE_INACTIVE) {
-				service_start(s);
-				s->status_change = time(NULL);
-				service_update_status(s);
-			}
-		} else {
-			if (s->state != STATE_INACTIVE) {
-				service_stop(s);
-				s->status_change = time(NULL);
-				service_update_status(s);
-			}
-		}
-	}
-}
-
-
 static void control_sockets(void) {
 	service_t* s;
 	char       cmd, chr;
@@ -118,7 +94,6 @@ int service_supervise(const char* service_dir_, const char* runlevel_) {
 	// accept connections and handle requests
 	while (daemon_running) {
 		service_refresh_directory();
-		check_services();
 		control_sockets();
 		sleep(SV_CHECK_INTERVAL);
 	}

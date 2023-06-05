@@ -86,14 +86,14 @@ void service_run(service_t* s) {
 	struct stat st;
 
 	if (fstatat(s->dir, "run", &st, 0) != -1 && st.st_mode & S_IXUSR) {
-		s->state = STATE_ACTIVE_FOREGROUND;
+		service_update_state(s, STATE_ACTIVE_FOREGROUND);
 	} else if (fstatat(s->dir, "start", &st, 0) != -1 && st.st_mode & S_IXUSR) {
-		s->state = STATE_STARTING;
+		service_update_state(s, STATE_STARTING);
 	} else if (fstatat(s->dir, "depends", &st, 0) != -1 && st.st_mode & S_IREAD) {
-		s->state = STATE_ACTIVE_DUMMY;
+		service_update_state(s, STATE_ACTIVE_DUMMY);
 	} else {
-		fprintf(stderr, "warn: %s: `run`, `start` or `depends` not found\n", s->name);
-		s->state = STATE_INACTIVE;
+		//		fprintf(stderr, "warn: %s: `run`, `start` or `depends` not found\n", s->name);
+		service_update_state(s, STATE_INACTIVE);
 	}
 
 	if (s->state != STATE_ACTIVE_DUMMY) {
@@ -131,8 +131,6 @@ void service_run(service_t* s) {
 			_exit(1);
 		}
 	}
-	s->status_change = time(NULL);
-	service_update_status(s);
 }
 
 void service_start(service_t* s) {
@@ -148,13 +146,12 @@ void service_start(service_t* s) {
 	}
 
 	if (fstatat(s->dir, "setup", &st, 0) != -1 && st.st_mode & S_IXUSR) {
-		s->state = STATE_SETUP;
 		if ((s->pid = fork_dup_cd_exec(s->dir, "./setup", null_fd, null_fd, null_fd)) == -1) {
 			print_error("error: cannot execute ./setup: %s\n");
-			s->state = STATE_INACTIVE;
+			service_update_state(s, STATE_INACTIVE);
+		} else {
+			service_update_state(s, STATE_SETUP);
 		}
-		s->status_change = time(NULL);
-		service_update_status(s);
 	} else {
 		service_run(s);
 	}

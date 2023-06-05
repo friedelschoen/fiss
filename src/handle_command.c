@@ -98,16 +98,11 @@ void service_handle_command(service_t* s, service_command_t command, char data) 
 
 			s->fail_count = 0;
 			if (s->state == STATE_DEAD)
-				s->state = STATE_INACTIVE;
+				service_update_state(s, STATE_INACTIVE);
 
-			s->status_change = time(NULL);
-			service_update_status(s);
 			break;
 		case X_EXIT:
 			// ignored
 			return;
 	}
-
-	s->status_change = time(NULL);
-	service_update_status(s);
 }

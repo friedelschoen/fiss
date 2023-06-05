@@ -116,5 +116,5 @@ const char* service_status_name(service_t* s);
 void        service_stop(service_t* s);
 int         service_supervise(const char* service_dir, const char* runlevel);
 void        service_update_dependency(service_t* s);
-void        service_update_status(service_t* s);
 bool        service_is_dependency(service_t* s);
+void        service_update_state(service_t* s, int state);

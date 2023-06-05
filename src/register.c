@@ -113,8 +113,7 @@ service_t* service_register(int dir, const char* name, bool is_log_service) {
 
 		strncpy(s->name, name, sizeof(s->name));
 
-		s->status_change = time(NULL);
-		service_update_status(s);
+		service_update_state(s, -1);
 	}
 
 	if (s->is_log_service) {

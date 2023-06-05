@@ -13,34 +13,23 @@ void service_stop(service_t* s) {
 	switch (s->state) {
 		case STATE_ACTIVE_DUMMY:
 			service_handle_exit(s, false, 0);
-
-			s->status_change = time(NULL);
-			service_update_status(s);
+			break;
+		case STATE_ACTIVE_BACKGROUND:
+			if ((s->pid = fork_dup_cd_exec(s->dir, "./stop", null_fd, null_fd, null_fd)) == -1) {
+				print_error("error: cannot execute ./stop: %s\n");
+				service_update_state(s, STATE_INACTIVE);
+			} else {
+				service_update_state(s, STATE_STOPPING);
+			}
 			break;
 		case STATE_ACTIVE_FOREGROUND:
 		case STATE_SETUP:
-			kill(s->pid, SIGTERM);
-
-			s->status_change = time(NULL);
-			service_update_status(s);
-			break;
-		case STATE_ACTIVE_BACKGROUND:
-			s->state = STATE_STOPPING;
-			if ((s->pid = fork_dup_cd_exec(s->dir, "./stop", null_fd, null_fd, null_fd)) == -1) {
-				print_error("error: cannot execute ./stop: %s\n");
-				s->state = STATE_INACTIVE;
-			}
-
-			s->status_change = time(NULL);
-			service_update_status(s);
-			break;
 		case STATE_STARTING:
 		case STATE_STOPPING:
 		case STATE_FINISHING:
 			kill(s->pid, SIGTERM);
 
-			s->status_change = time(NULL);
-			service_update_status(s);
+			service_update_state(s, -1);
 			break;
 		case STATE_INACTIVE:
 		case STATE_DEAD:

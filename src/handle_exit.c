@@ -14,20 +14,18 @@ static void do_finish(service_t* s) {
 	struct stat st;
 
 	if (fstatat(s->dir, "finish", &st, 0) != -1 && st.st_mode & S_IXUSR) {
-		s->state = STATE_FINISHING;
 		if ((s->pid = fork_dup_cd_exec(s->dir, "./finish", null_fd, null_fd, null_fd)) == -1) {
 			print_error("error: cannot execute ./finish: %s\n");
-			s->state = STATE_INACTIVE;
+			service_update_state(s, STATE_INACTIVE);
+		} else {
+			service_update_state(s, STATE_FINISHING);
 		}
 	} else if (s->fail_count == SV_FAIL_MAX) {
-		s->state = STATE_DEAD;
+		service_update_state(s, STATE_DEAD);
 		printf("%s died\n", s->name);
 	} else {
-		s->state = STATE_INACTIVE;
+		service_update_state(s, STATE_INACTIVE);
 	}
-
-	s->status_change = time(NULL);
-	service_update_status(s);
 }
 
 
@@ -73,16 +71,16 @@ void service_handle_exit(service_t* s, bool signaled, int return_code) {
 
 		case STATE_FINISHING:
 			if (s->fail_count == SV_FAIL_MAX) {
-				s->state = STATE_DEAD;
+				service_update_state(s, STATE_DEAD);
 				printf("%s died\n", s->name);
 			} else {
-				s->state = STATE_INACTIVE;
+				service_update_state(s, STATE_INACTIVE);
 			}
 			break;
 		case STATE_STARTING:
 			if (!signaled && return_code == 0) {
 				if (fstatat(s->dir, "stop", &st, 0) != -1 && st.st_mode & S_IXUSR) {
-					s->state = STATE_ACTIVE_BACKGROUND;
+					service_update_state(s, STATE_ACTIVE_BACKGROUND);
 				} else {
 					do_finish(s);
 				}
@@ -103,7 +101,4 @@ void service_handle_exit(service_t* s, bool signaled, int return_code) {
 		case STATE_INACTIVE:
 			printf("warn: %s died but was set to inactive\n", s->name);
 	}
-
-	s->status_change = time(NULL);
-	service_update_status(s);
 }
