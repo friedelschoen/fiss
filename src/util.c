@@ -100,14 +100,14 @@ void sigblock_all(int unblock) {
 	sigset_t ss;
 
 	sigemptyset(&ss);
-	sigfillset(&ss);
-	/*	sigaddset(&ss, SIGALRM);
-	    sigaddset(&ss, SIGCHLD);
-	    sigaddset(&ss, SIGCONT);
-	    sigaddset(&ss, SIGHUP);
-	    sigaddset(&ss, SIGINT);
-	    sigaddset(&ss, SIGPIPE);
-	    sigaddset(&ss, SIGTERM);*/
+	sigaddset(&ss, SIGALRM);
+	sigaddset(&ss, SIGCHLD);
+	sigaddset(&ss, SIGCONT);
+	sigaddset(&ss, SIGHUP);
+	sigaddset(&ss, SIGINT);
+	sigaddset(&ss, SIGPIPE);
+	sigaddset(&ss, SIGTERM);
+
 	sigprocmask(unblock, &ss, NULL);
 }
 
