@@ -33,6 +33,10 @@
 #	define SV_RUNLEVEL_DEFAULT "default"
 #endif
 
+#ifndef SV_SUPERVISE_EXEC
+#	define SV_SUPERVISE_EXEC "/sbin/fsvs"
+#endif
+
 // path to service-dir
 #ifndef SV_SERVICE_DIR
 #	define SV_SERVICE_DIR "/etc/service.d"

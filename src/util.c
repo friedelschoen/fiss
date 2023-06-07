@@ -137,3 +137,17 @@ char* progname(char* path) {
 	}
 	return path;
 }
+
+int fd_set_flag(int fd, int flags) {
+	int rc;
+
+	if ((rc = fcntl(fd, F_GETFL)) == -1)
+		return -1;
+
+	rc |= flags;
+
+	if (fcntl(fd, F_SETFL, rc) == -1)
+		return -1;
+
+	return rc;
+}

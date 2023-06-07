@@ -11,18 +11,6 @@
 #include <unistd.h>
 
 
-static int fd_set_flag(int fd, int flags) {
-	int rc;
-
-	if ((rc = fcntl(fd, F_GETFL)) == -1)
-		return -1;
-
-	if (fcntl(fd, F_SETFL, rc | flags) == -1)
-		return -1;
-
-	return 0;
-}
-
 static int init_supervise(service_t* s) {
 	int         fd;
 	struct stat st;
@@ -136,6 +124,7 @@ service_t* service_register(int dir, const char* name, bool is_log_service) {
 	else if (fstatat(s->dir, once_path, &st, 0) != -1 && st.st_mode & S_IREAD)
 		s->restart_file = S_ONCE;
 
+	service_write(s);
 
 	return s;
 }

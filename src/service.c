@@ -98,6 +98,9 @@ bool service_is_dependency(service_t* d) {
 }
 
 bool service_need_restart(service_t* s) {
+	if (!daemon_running)
+		return false;
+
 	if (s->restart_manual == S_FORCE_DOWN)
 		return service_is_dependency(s);
 

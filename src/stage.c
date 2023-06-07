@@ -1,29 +1,29 @@
+#include "stage.h"
+
 #include "config.h"
-#include "service.h"
 #include "util.h"
 
 #include <errno.h>
 #include <fcntl.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
-static const char* stage_exec[] = {
-	[0] = SV_START_EXEC,
-	[2] = SV_STOP_EXEC
+
+static char* stage_exec[][4] = {
+	[0] = { SV_START_EXEC, NULL },
+	[1] = { SV_SUPERVISE_EXEC, SV_SERVICE_DIR, SV_RUNLEVEL_DEFAULT, NULL },
+	[2] = { SV_STOP_EXEC, NULL },
 };
 
 
-void service_stage(int stage) {
-	int              pid, ttyfd, exitstat, sig = 0;
-	sigset_t         ss;
-	struct sigaction sigact = { 0 };
-
-	// stage = 0 | 2
-	if (stage != 0 && stage != 2)
-		return;
+bool handle_stage(int stage) {
+	int      pid, ttyfd, exitstat, sig = 0;
+	sigset_t ss;
+	bool     cont = true;
 
 	while ((pid = fork()) == -1) {
 		print_error("error: unable to fork for stage1: %s\n");
@@ -45,26 +45,21 @@ void service_stage(int stage) {
 
 		sigblock_all(true);
 
-
-		sigact.sa_handler = SIG_DFL;
-		sigaction(SIGCHLD, &sigact, NULL);
-		sigaction(SIGINT, &sigact, NULL);
-
-		sigact.sa_handler = SIG_IGN;
-		sigaction(SIGCONT, &sigact, NULL);
-
 		printf("enter stage %d\n", stage);
-		execl(stage_exec[stage], stage_exec[stage], NULL);
+		execv(stage_exec[stage][0], stage_exec[stage]);
 		print_error("error: unable to exec stage %d: %s\n", stage);
 		_exit(1);
 	}
 
 	sigemptyset(&ss);
 	sigaddset(&ss, SIGCHLD);
+	sigaddset(&ss, SIGUSR1);
 	sigaddset(&ss, SIGCONT);
-	sigaddset(&ss, SIGINT);
 
 	sigwait(&ss, &sig);
+
+	if (stage == 1 && sig != SIGCHLD)
+		kill(pid, SIGTERM);
 
 	if (waitpid(pid, &exitstat, 0) == -1) {
 		print_error("warn: waitpid failed: %s");
@@ -78,9 +73,11 @@ void service_stage(int stage) {
 			if (WIFSIGNALED(exitstat)) {
 				/* this is stage 1 */
 				fprintf(stderr, "stage 1 failed: skip stage 2\n");
-				daemon_running = false;
+				cont = false;
 			}
 		}
 		printf("leave stage 1\n");
 	}
+
+	return cont;
 }

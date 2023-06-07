@@ -11,7 +11,16 @@
 #include <unistd.h>
 
 
-static void service_update_status(service_t* s) {
+void service_update_state(service_t* s, int state) {
+	if (state != -1)
+		s->state = state;
+
+	s->status_change = time(NULL);
+
+	service_write(s);
+}
+
+void service_write(service_t* s) {
 	int                   fd;
 	const char*           stat_human;
 	struct service_serial stat_runit;
@@ -55,27 +64,4 @@ static void service_update_status(service_t* s) {
 	renameat(s->dir, "supervise/status.new", s->dir, "supervise/status");
 	renameat(s->dir, "supervise/stat.new", s->dir, "supervise/stat");
 	renameat(s->dir, "supervise/pid.new", s->dir, "supervise/pid");
-}
-
-void service_update_state(service_t* s, int state) {
-	if (state != -1)
-		s->state = state;
-
-	s->status_change = time(NULL);
-	service_update_status(s);
-
-	for (int i = 0; i < services_size; i++) {
-		s = &services[i];
-		if (s->state == STATE_DEAD)
-			continue;
-		if (service_need_restart(s)) {
-			if (s->state == STATE_INACTIVE) {
-				service_start(s);
-			}
-		} else {
-			if (s->state != STATE_INACTIVE) {
-				service_stop(s);
-			}
-		}
-	}
 }

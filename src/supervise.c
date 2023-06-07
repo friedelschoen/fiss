@@ -44,6 +44,25 @@ static void signal_child(int unused) {
 	service_handle_exit(s, WIFSIGNALED(status), WIFSIGNALED(status) ? WTERMSIG(status) : WEXITSTATUS(status));
 }
 
+static void update_services(void) {
+	service_t* s;
+
+	for (int i = 0; i < services_size; i++) {
+		s = &services[i];
+		if (s->state == STATE_DEAD)
+			continue;
+		if (service_need_restart(s)) {
+			if (s->state == STATE_INACTIVE) {
+				service_start(s);
+			}
+		} else {
+			if (s->state != STATE_INACTIVE) {
+				service_stop(s);
+			}
+		}
+	}
+}
+
 static void control_sockets(void) {
 	service_t* s;
 	char       cmd, chr;
@@ -66,6 +85,12 @@ static void control_sockets(void) {
 	}
 }
 
+void signal_interrupt(int signo) {
+	(void) signo;
+
+	daemon_running = false;
+}
+
 int service_supervise(const char* service_dir_, const char* runlevel_) {
 	struct sigaction sigact = { 0 };
 	service_t*       s;
@@ -74,6 +99,9 @@ int service_supervise(const char* service_dir_, const char* runlevel_) {
 
 	sigact.sa_handler = signal_child;
 	sigaction(SIGCHLD, &sigact, NULL);
+	sigact.sa_handler = signal_interrupt;
+	sigaction(SIGINT, &sigact, NULL);
+	sigaction(SIGTERM, &sigact, NULL);
 	sigact.sa_handler = SIG_IGN;
 	sigaction(SIGPIPE, &sigact, NULL);
 
@@ -95,6 +123,7 @@ int service_supervise(const char* service_dir_, const char* runlevel_) {
 	while (daemon_running) {
 		service_refresh_directory();
 		control_sockets();
+		update_services();
 		sleep(SV_CHECK_INTERVAL);
 	}
 
@@ -106,10 +135,11 @@ int service_supervise(const char* service_dir_, const char* runlevel_) {
 		service_stop(s);
 	}
 
-	start = time(NULL);
+	running = 0;
+	start   = time(NULL);
 	do {
 		sleep(1);    // sleep for one second
-		running = 0;
+		// running = 0;
 		for (int i = 0; i < services_size; i++) {
 			if (services[i].state != STATE_INACTIVE)
 				running++;

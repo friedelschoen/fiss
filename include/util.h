@@ -22,3 +22,4 @@ int          reclaim_console(void);
 void         sigblock_all(int unblock);
 long         parse_long(const char* str, const char* name);
 char*        progname(char* path);
+int          fd_set_flag(int fd, int flags);
