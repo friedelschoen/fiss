@@ -1,0 +1,169 @@
+#!/bin/bash
+
+ENABLED=
+MK_BINARIES='chpst finit fsvc fsvs halt init modules-load poweroff reboot seedrng shutdown sigremap vlogger zzz'
+
+MK_INSTALL_PREFIX=/
+MK_INSTALL_SBIN=/sbin
+MK_INSTALL_SHARE=/usr/share
+MK_INSTALL_MAN8=/usr/share/man/man8
+MK_INSTALL_DOCS=/usr/share/doc/fiss
+MK_INSTALL_ETC=/etc
+
+# Compiler Options
+MK_CC=${CC:-gcc}
+MK_CFLAGS=${CFLAGS:--g -Wall -Wextra -Wpedantic -Wno-gnu-zero-variadic-macro-arguments}
+MK_LDFLAGS=${LDFLAGS:--fPIE}
+
+# Utilities
+MK_SED=sed
+MK_PYTHON=python3
+MK_AWK=awk
+MK_MAKE_DOCS='tools/make-docs.py'
+MK_MAKE_MAN='tools/make-man.py'
+
+MK_VERBOSE=
+
+enable() {
+    if [ -z "$ENABLED" ]; then
+        ENABLED=y
+        MK_BINARIES=
+    fi
+    MK_BINARIES="$MK_BINARIES $1"
+}
+
+print_help() {
+    cat <<EOF
+./configure sets the compilation environment with given arguments
+  and run some requirement-tests
+  
+Usage: ./configure [options]
+
+--verbose ............... enables verbose command printing in make
+
+--using-cc .............. sets the C-compiler (default: \$CC or gcc)
+--using-sed ............. sets the sed-preprocessor (default: sed)
+--using-python .......... sets the python-interpreter (default: python3)
+--using-awk ............. sets the awk-interpreter (default: awk)
+--using-mkdocs .......... sets the docs generator (default: tools/mk-docs.py)
+--using-mkman ........... sets the man generator (default: tools/mk-man.py)
+
+--cflags ................ sets the C flags (default: \$CFLAGS or '-Wall -Wextra -Wpendantic -g')
+--ldflags ............... sets the linker flags (default: \$LDFLAGS)
+
+--prefix ................ sets the root-prefix (default: /)
+--install-bin ........... sets the binary-destination (default: /sbin)
+--install-etc ........... sets the config-destination (default: /etc)
+--install-share ......... sets the share-destination (default: /usr/share)
+--install-man ........... sets the man8-destination (default: /usr/share/man/man8)
+--install-docs .......... sets the docs-destination (default: /usr/share/doc)
+    
+--disable-install-bin ... disabling installing binary
+--disable-install-etc ... disabling installing config
+--disable-install-share . disabling installing share
+--disable-install-man ... disabling installing man8
+--disable-install-docs .. disabling installing docs
+        
+--enable-chpst .......... disables everything but given --enable-* and chpst
+--enable-finit .......... disables everything but given --enable-* and finit
+--enable-fsvc ........... disables everything but given --enable-* and fsvc
+--enable-fsvs ........... disables everything but given --enable-* and fsvs
+--enable-halt ........... disables everything but given --enable-* and halt
+--enable-init ........... disables everything but given --enable-* and init (link)
+--enable-modules-load ... disables everything but given --enable-* and modules-load
+--enable-poweroff ....... disables everything but given --enable-* and poweroff
+--enable-reboot ......... disables everything but given --enable-* and reboot
+--enable-seedrng ........ disables everything but given --enable-* and seedrng
+--enable-shutdown ....... disables everything but given --enable-* and shutdown
+--enable-sigremap ....... disables everything but given --enable-* and sigremap
+--enable-vlogger ........ disables everything but given --enable-* and vlogger
+--enable-zzz ............ disables everything but given --enable-* and zzz
+
+--help .................. prints this and exits
+EOF
+    
+    exit $1
+}
+
+panic() {
+    echo "error:" $@
+    exit 1
+}
+
+while [ -n "$1" ]; do
+    case $1 in
+        --using-cc) MK_CC=$2; shift 2;;
+        --using-sed) MK_SED=$2; shift 2;;
+        --using-python) MK_SED=$2; shift 2;;
+        --using-awk) MK_AWK=$2; shift 2;;
+        --using-mkdocs) MK_MAKE_DOCS=$2; shift 2;;
+        --using-mkman) MK_MAKE_MAN=$2; shift 2;;
+
+        --verbose) MK_VERBOSE=y; shift;;
+        --cflags) MK_CFLAGS=$2; shift 2;;
+        --ldflags) MK_LDFLAGS=$2; shift 2;;
+        --prefix) MK_INSTALL_PREFIX=$2; shift 2;;
+        
+        --install-bin) MK_INSTALL_SBIN=$2; shift 2;;
+        --install-etc) MK_INSTALL_ETC=$2; shift 2;;
+        --install-share) MK_INSTALL_SHARE=$2; shift 2;;
+        --install-man) MK_INSTALL_MAN8=$2; shift 2;;
+        --install-docs) MK_INSTALL_DOCS=$2; shift 2;;
+    
+        --disable-install-bin) MK_INSTALL_SBIN=; shift;;
+        --disable-install-etc) MK_INSTALL_ETC=; shift;;
+        --disable-install-share) MK_INSTALL_SHARE=; shift;;
+        --disable-install-man) MK_INSTALL_MAN8=; shift;;
+        --disable-install-docs) MK_INSTALL_DOCS=; shift;;
+        
+        --enable-chpst) enable chpst; shift;;
+        --enable-finit) enable finit; shift;;
+        --enable-fsvc) enable fsvc; shift;;
+        --enable-fsvs) enable fsvs; shift;;
+        --enable-halt) enable halt; shift;;
+        --enable-init) enable init; shift;;
+        --enable-modules-load) enable modules-load; shift;;
+        --enable-poweroff) enable poweroff; shift;;
+        --enable-reboot) enable reboot; shift;;
+        --enable-seedrng) enable seedrng; shift;;
+        --enable-shutdown) enable shutdown; shift;;
+        --enable-sigremap) enable sigremap; shift;;
+        --enable-vlogger) enable vlogger; shift;;
+        --enable-zzz) enable zzz; shift;;
+
+        --help) print_help 0;;
+        *) echo "error: unknown option '$1'"; print_help 1;;
+    esac
+done
+
+command -v $MK_CC 2>&1 > /dev/null || panic "$MK_CC is not a valid executable"
+command -v $MK_SED 2>&1 > /dev/null || panic "$MK_SED is not a valid executable"
+command -v $MK_PYTHON 2>&1 > /dev/null || panic "$MK_PYTHON is not a valid executable"
+command -v $MK_AWK 2>&1 > /dev/null || panic "$MK_AWK is not a valid executable"
+[ -r $MK_MAKE_DOCS ] || panic "$MK_MAKE_DOCS is not found"
+[ -r $MK_MAKE_MAN ] || panic "$MK_MAKE_MAN is not found"
+
+
+cat > config.mk <<EOF
+BINARIES := $MK_BINARIES
+INSTALL_PREFIX := $MK_INSTALL_PREFIX
+INSTALL_SBIN := $MK_INSTALL_SBIN
+INSTALL_SHARE := $MK_INSTALL_SHARE
+INSTALL_MAN8 := $MK_INSTALL_MAN8
+INSTALL_DOCS := $MK_INSTALL_DOCS
+INSTALL_ETC := $MK_INSTALL_ETC
+
+CC := $MK_CC
+CFLAGS := $MK_CFLAGS
+LDFLAGS := $MK_LDFLAGS
+
+SED := $MK_SED
+PYTHON := $MK_PYTHON
+AWK := $MK_AWK
+MAKE_DOCS := $MK_MAKE_DOCS
+MAKE_MAN := $MK_MAKE_MAN
+
+VERBOSE := $MK_VERBOSE
+EOF
+
+echo 'Configuring succeed!'
