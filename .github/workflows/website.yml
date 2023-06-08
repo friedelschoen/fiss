@@ -1,0 +1,21 @@
+name: Publish Documentation
+
+on:
+  push:
+    branches: 'master'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v3
+
+      - name: Generate Documentation
+        run: 'make documentation'
+
+      - name: Publish current workdir to GitHub Pages
+        uses: rayluo/github-pages-overwriter@v1.3
+        with:
+          source-directory: target/docs
+          target-branch: master
