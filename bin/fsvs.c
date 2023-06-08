@@ -1,4 +1,6 @@
-// +objects: message.o util.o supervise.o service.o start.o stop.o register.o handle_exit.o handle_command.o encode.o parse.o dependency.o pattern.o status.o
+// +objects: message.o util.o supervise.o service.o start.o stop.o
+// +objects: register.o handle_exit.o handle_command.o
+// +objects: encode.o parse.o dependency.o pattern.o status.o
 
 #include "config.h"
 #include "message.h"
