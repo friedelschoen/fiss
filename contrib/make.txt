@@ -1,0 +1,10 @@
+If you add a new c-binary or edit c-files, you probably have to modify its dependency-objects.
+This is done by a comment somewhere in the source-file (see bin/fsvs.c) in this format:
+
+// +objects: obj1.o obj2.o ...
+
+This can be done multiple times if you got a lot of linker-dependencies.
+
+For compile/linker-flags, use:
+
+// +flags: -static -Werror
