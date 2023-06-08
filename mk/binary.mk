@@ -1,3 +1,5 @@
+BINARIES := chpst finit fsvc fsvs halt init modules-load poweroff reboot seedrng shutdown sigremap vlogger zzz
+
 chpst_OBJECTS := parse.o util.o
 
 finit_OBJECTS := message.o util.o

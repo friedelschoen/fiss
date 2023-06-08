@@ -7,6 +7,13 @@ ASSETS_DIR        := assets
 TOOLS_DIR         := tools
 TARGET_DIR        := target
 
+INSTALL_PREFIX    := /
+INSTALL_SBIN      := /sbin
+INSTALL_SHARE     := /usr/share
+INSTALL_MAN8      := /usr/share/man/man8
+INSTALL_DOCS      := /usr/share/doc/fiss
+INSTALL_ETC       := /etc
+
 TARGET_OBJECT_DIR := $(TARGET_DIR)/obj
 TARGET_BIN_DIR    := $(TARGET_DIR)/bin
 TARGET_MAN_DIR    := $(TARGET_DIR)/man

@@ -27,7 +27,7 @@ other *daemontools*-based utilities.
 
 [*sigremap(8)*](sigremap.8.html) - catches signals and redirects mapped signal to executable
 
-[*vlogger(1)*](vlogger.1.html) - log messages to syslog or an arbitrary executable
+[*vlogger(8)*](vlogger.8.html) - log messages to syslog or an arbitrary executable
 
 [*zzz(8)*](zzz.8.html) - suspend or hibernate your system
 @endlist
