@@ -1,3 +1,5 @@
+// +objects: wtmp.o util.o
+
 #include "util.h"
 #include "wtmp.h"
 

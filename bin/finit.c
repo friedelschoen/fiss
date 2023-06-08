@@ -1,3 +1,6 @@
+// +objects: message.o util.o
+// +flags: -static
+
 #include "config.h"
 #include "message.h"
 #include "util.h"

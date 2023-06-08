@@ -6,22 +6,18 @@ $(TARGET_DIRS):
 $(TARGET_ASSETS_DIR): $(ASSETS_DIR) | $(TARGET_DOCS_DIR)
 	@echo "[CP] $@"
 	$(SILENT)mkdir -p $@
-	$(SILENT)cp -rv $</* $@
+	$(SILENT)cp -r $</* $@
 
 
 # Object rules
 $(TARGET_OBJECT_DIR)/%.o: $(SRC_DIR)/%.c $(INCLUDE_FILES) | $(TARGET_OBJECT_DIR)
 	@echo "[CC] $@"
-	$(SILENT)$(CC) -o $@ -c $(CFLAGS) $<
-
-$(TARGET_OBJECT_DIR)/%.o: $(BIN_DIR)/%.c $(INCLUDE_FILES) | $(TARGET_OBJECT_DIR)
-	@echo "[CC] $@"
-	$(SILENT)$(CC) -o $@ -c $(CFLAGS) $<
+	$(SILENT)$(CC) -o $@ $< -c $(CFLAGS) $(shell mk/extract-flags.sh $< $(TARGET_OBJECT_DIR))
 
 # Executables
-$(TARGET_BIN_DIR)/%: $(TARGET_OBJECT_DIR)/%.o $(OBJ_FILES) | $(TARGET_BIN_DIR)
-	@echo "[LD] $@"
-	$(SILENT)$(CC) -o $@ $< $(patsubst %,$(TARGET_OBJECT_DIR)/%,$($(notdir $@)_OBJECTS)) $($(notdir $@)_FLAGS) $(LDFLAGS)
+$(TARGET_BIN_DIR)/%: $(BIN_DIR)/%.c $(OBJ_FILES) | $(TARGET_BIN_DIR)
+	@echo "[CCLD] $@"
+	$(SILENT)$(CC) -o $@ $< $(CFLAGS) $(shell mk/extract-flags.sh $< $(TARGET_OBJECT_DIR)) $(LDFLAGS)
 
 $(TARGET_BIN_DIR)/%: $(BIN_DIR)/%.sh | $(TARGET_BIN_DIR)
 	@echo "[CP] $@"

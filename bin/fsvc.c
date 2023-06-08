@@ -1,3 +1,5 @@
+// +objects: message.o util.o decode.o signame.o
+
 #include "config.h"
 #include "message.h"
 #include "service.h"

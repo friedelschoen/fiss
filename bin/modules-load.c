@@ -1,3 +1,5 @@
+// +objects: util.o
+
 #include "util.h"
 
 #include <dirent.h>

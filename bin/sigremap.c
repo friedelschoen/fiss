@@ -20,6 +20,7 @@
     THE SOFTWARE.
     */
 
+// +objects: message.o signame.o
 
 #include "message.h"
 #include "signame.h"

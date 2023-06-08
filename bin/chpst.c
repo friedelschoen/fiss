@@ -1,3 +1,5 @@
+// +objects: parse.o util.o
+
 #include "parse.h"
 #include "util.h"
 
@@ -7,7 +9,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/file.h>
-
 
 int main(int argc, char** argv) {
 	int   opt, lockfd, lockflags, gid_len = 0;

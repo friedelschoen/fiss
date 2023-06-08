@@ -1,3 +1,5 @@
+// +objects: message.o
+
 #include "config.h"
 #include "message.h"
 #include "util.h"

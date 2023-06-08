@@ -1,5 +1,8 @@
-include config.mk
-include mk/binary.mk
+-include config.mk
+
+ifeq ($(BINARIES),)
+$(error 'config.mk' is missing, run ./configure)
+endif
 
 VERSION := 0.3.3
 
@@ -54,7 +57,6 @@ all: compile_flags.txt binary manual documentation
 clean:
 	@echo "[RM] $(TARGET_DIRS)"
 	$(SILENT)rm -rf $(TARGET_DIRS)
-	$(SILENT)rm config.mk
 
 binary: $(BIN_FILES)
 
