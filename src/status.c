@@ -65,3 +65,28 @@ void service_write(service_t* s) {
 	renameat(s->dir, "supervise/stat.new", s->dir, "supervise/stat");
 	renameat(s->dir, "supervise/pid.new", s->dir, "supervise/pid");
 }
+
+const char* service_status_name(service_t* s) {
+	switch (s->state) {
+		case STATE_SETUP:
+			return "setup";
+		case STATE_STARTING:
+			return "starting";
+		case STATE_ACTIVE_FOREGROUND:
+			return "run";
+		case STATE_ACTIVE_BACKGROUND:
+			return "run-background";
+		case STATE_ACTIVE_DUMMY:
+			return "run-dummy";
+		case STATE_FINISHING:
+			return "finishing";
+		case STATE_STOPPING:
+			return "stopping";
+		case STATE_INACTIVE:
+			return "down";
+		case STATE_DEAD:
+			return "dead";
+		default:
+			return NULL;
+	}
+}
