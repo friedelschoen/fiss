@@ -14,3 +14,9 @@ jobs:
       
       - name: Build Binaries
         run: make binary
+        
+      - name: Build Documentation
+        run: make documentation
+        
+      - name: Build Manuals
+        run: make manual
