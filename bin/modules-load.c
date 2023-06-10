@@ -111,6 +111,9 @@ int main(int argc, char** argv) {
 	read_dir("/run/modules-load.d/");
 	read_dir("/usr/lib/modules-load.d/");
 
+	if (modules_size == 0)
+		return 0;
+
 	for (int i = 0; i < modules_size; i++) {
 		printf("%s\n", modules[i]);
 	}
