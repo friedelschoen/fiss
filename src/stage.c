@@ -15,7 +15,6 @@
 
 static char* stage_exec[][4] = {
 	[0] = { SV_START_EXEC, NULL },
-	[1] = { SV_SUPERVISE_EXEC, SV_SERVICE_DIR, SV_RUNLEVEL_DEFAULT, NULL },
 	[2] = { SV_STOP_EXEC, NULL },
 };
 
