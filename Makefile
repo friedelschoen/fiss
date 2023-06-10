@@ -37,7 +37,7 @@ ROFF_FILES    := $(patsubst $(MAN_DIR)/%.txt,$(TARGET_MAN_DIR)/%,$(MAN_FILES))
 DOCS_FILES    := $(patsubst $(DOCS_DIR)/%.txt,$(TARGET_DOCS_DIR)/%.html,$(TEMPL_FILES)) \
                  $(patsubst $(MAN_DIR)/%.txt,$(TARGET_DOCS_DIR)/%.html,$(MAN_FILES))
 
-CFLAGS         += -I$(INCLUDE_DIR) -DVERSION=\"$(VERSION)\" -g -std=gnu99
+CFLAGS         += -I$(INCLUDE_DIR) -I. -DSV_VERSION=\"$(VERSION)\" -g -std=gnu99
 LDFLAGS        +=
 
 ifeq ($(VERBOSE),)
