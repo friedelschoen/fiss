@@ -85,12 +85,6 @@ static void control_sockets(void) {
 	}
 }
 
-void signal_interrupt(int signo) {
-	(void) signo;
-
-	daemon_running = false;
-}
-
 int service_supervise(const char* service_dir_, const char* runlevel_) {
 	struct sigaction sigact = { 0 };
 	service_t*       s;
@@ -99,9 +93,6 @@ int service_supervise(const char* service_dir_, const char* runlevel_) {
 
 	sigact.sa_handler = signal_child;
 	sigaction(SIGCHLD, &sigact, NULL);
-	sigact.sa_handler = signal_interrupt;
-	sigaction(SIGINT, &sigact, NULL);
-	sigaction(SIGTERM, &sigact, NULL);
 	sigact.sa_handler = SIG_IGN;
 	sigaction(SIGPIPE, &sigact, NULL);
 
@@ -160,7 +151,5 @@ int service_supervise(const char* service_dir_, const char* runlevel_) {
 
 	signal(SIGPIPE, SIG_DFL);
 	signal(SIGCHLD, SIG_DFL);
-	signal(SIGINT, SIG_DFL);
-	signal(SIGCONT, SIG_DFL);
 	return 0;
 }
