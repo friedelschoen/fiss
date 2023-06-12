@@ -7,7 +7,7 @@ install: install-binary \
 		 install-etc
 		 
 install-binary: $(BIN_FILES)
-ifeq ($(INSTALL_SBIN),)
+ifneq ($(INSTALL_SBIN),)
 	@install -vd $(INSTALL_PREFIX)/$(INSTALL_SBIN)
 	@for file in $(BIN_FILES); do \
 	    install -v -m 755 $$file $(INSTALL_PREFIX)/$(INSTALL_SBIN); \
@@ -15,7 +15,7 @@ ifeq ($(INSTALL_SBIN),)
 endif
 
 install-documentation: $(DOCS_FILES)
-ifeq ($(INSTALL_DOCS),)
+ifneq ($(INSTALL_DOCS),)
 	@install -vd $(INSTALL_PREFIX)/$(INSTALL_DOCS)
 	@for file in $(DOCS_FILES); do \
 	    install -v -m 644 $$file $(INSTALL_PREFIX)/$(INSTALL_DOCS); \
@@ -23,7 +23,7 @@ ifeq ($(INSTALL_DOCS),)
 endif
 
 install-manual: $(ROFF_FILES)
-ifeq ($(INSTALL_MAN8),)
+ifneq ($(INSTALL_MAN8),)
 	@install -vd $(INSTALL_PREFIX)/$(INSTALL_MAN8)
 	@for file in $(ROFF_FILES); do \
 	    install -v -m 644 $$file $(INSTALL_PREFIX)/$(INSTALL_MAN8); \
@@ -31,7 +31,7 @@ ifeq ($(INSTALL_MAN8),)
 endif
 
 install-share:
-ifeq ($(INSTALL_SHARE),)
+ifneq ($(INSTALL_SHARE),)
 	@install -vd $(INSTALL_PREFIX)/$(INSTALL_SHARE)/fiss
 	@for file in share/fiss/*; do \
 	    install -v -m 644 $$file $(INSTALL_PREFIX)/$(INSTALL_SHARE)/fiss; \
@@ -39,7 +39,7 @@ ifeq ($(INSTALL_SHARE),)
 endif
 
 install-etc:
-ifeq ($(INSTALL_ETC),)
+ifneq ($(INSTALL_ETC),)
 	@install -vd $(INSTALL_PREFIX)/$(INSTALL_ETC)/service.d
 	@install -vd $(INSTALL_PREFIX)/$(INSTALL_ETC)/start.d
 	@install -vd $(INSTALL_PREFIX)/$(INSTALL_ETC)/stop.d

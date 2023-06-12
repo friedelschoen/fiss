@@ -53,7 +53,10 @@ int main(int argc, char** argv) {
 		print_usage_exit(PROG_FSVS, 1);
 	}
 
-	signal(SIGINT, signal_interrupt);
+	struct sigaction sa = { 0 };
+	sa.sa_handler       = signal_interrupt;
+	sigaction(SIGINT, &sa, NULL);
+	sigaction(SIGTERM, &sa, NULL);
 
 	return service_supervise(argv[0], argv[1]);
 }
