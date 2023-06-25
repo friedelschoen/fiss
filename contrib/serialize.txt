@@ -2,9 +2,9 @@ FISS CONTROL RESPONSE
 =====================
 
        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-FISS:  |     STATUS CHANGE     |ST|RC|FC|FL|    PID    |PS|RS|FD|SR|
+FISS:  |     STATUS CHANGE     |ST|RC|FC|FL|    PID    |PS|WU|--|SR|
        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-RUNIT: |     STATUS CHANGE     | (NANOSEC) |    PID    |PS|WU|TR|SR|
+RUNIT: |     STATUS CHANGE     |  NANOSEC  |    PID    |PS|WU|TR|SR|
        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 
 STATUS CHANGE = unix seconds + 4611686018427387914ULL (tai, lower endian)
@@ -14,25 +14,25 @@ FC = fail count
 FL = flags (see below)
 PID = current pid (big endian)
 PS = is paused (int boolean)
-RS = restart ('u' if want up, 'd' if want down)
-FD = forced down (int boolean, unused by fiss)
+WU = wants up ('u' if want up, 'd' if want down)
 SR = state runit (0 is down, 1 is running, 2 is finishing, not available in daemontools, unused by fiss)
 
 NANOSEC = unix nanoseconds (written, never read)
-WU = wants up ('u' if want up, 'd' if want down)
 TR = was terminated (int boolean)
 
 FLAGS
 -----
 
 +--+--+--+--+--+--+--+--+
-|--|ID|RSFIL|RSMAN|LSTEX|
+|   --   |TR|OC|RS|LSTEX|
 +--+--+--+--+--+--+--+--+
-ID    = is dependency
-RSFIL = restart file (0 = down, 2 = once, 3 = restart)
-RSMAN = restart manual override (0 = down, 1 = force down, 2 = once, 3 = restart)
+TR    = is terminating
+OC    = started once
+RS    = should restart
 LSTEX = last exit (0 = never exitted, 1 = normally, 2 = signaled)
 -- = nothing yet
+
+; as dependency : wants-up != (restart || once)
 
 STATE
 -----

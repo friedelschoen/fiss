@@ -21,6 +21,7 @@ int         control_socket;
 int         null_fd;
 service_t*  depends[SV_DEPENDENCY_MAX][2];
 int         depends_size;
+bool        daemon_running;
 
 service_t* service_get(const char* name) {
 	for (int i = 0; i < services_size; i++) {
@@ -54,15 +55,9 @@ int service_refresh_directory(void) {
 	for (int i = 0; i < services_size; i++) {
 		s = &services[i];
 		if (fstat(s->dir, &st) == -1 || !S_ISDIR(st.st_mode)) {
-			if (s->pid)
-				kill(s->pid, SIGKILL);
+			service_stop(s);
 			close(s->dir);
 			close(s->control);
-			if (i < services_size - 1) {
-				memmove(services + i, services + i + 1, services_size - i - 1);
-				i--;
-			}
-			services_size--;
 		}
 	}
 
@@ -86,27 +81,23 @@ int service_refresh_directory(void) {
 }
 
 
-bool service_is_dependency(service_t* d) {
-	service_t* s;
-
-	for (int i = 0; i < depends_size; i++) {
-		s = depends[i][0];
-		if (depends[i][1] == d && (s->state != STATE_INACTIVE || service_need_restart(s)))
-			return true;
-	}
-	return false;
-}
-
 bool service_need_restart(service_t* s) {
+	service_t* d;
+
 	if (!daemon_running)
 		return false;
 
-	if (s->restart_manual == S_FORCE_DOWN)
-		return service_is_dependency(s);
+	if (s->restart == S_RESTART)
+		return true;
 
-	return s->restart_file == S_ONCE ||
-	       s->restart_file == S_RESTART ||
-	       s->restart_manual == S_ONCE ||
-	       s->restart_manual == S_RESTART ||
-	       service_is_dependency(s);
+	for (int i = 0; i < depends_size; i++) {
+		if (depends[i][1] != s)
+			continue;
+
+		d = depends[i][0];
+		if (service_need_restart(d))
+			return true;
+	}
+
+	return false;
 }

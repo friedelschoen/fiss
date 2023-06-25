@@ -15,8 +15,6 @@
 #include <unistd.h>
 
 
-bool daemon_running = true;
-
 static void signal_child(int unused) {
 	(void) unused;
 
@@ -49,54 +47,71 @@ static void update_services(void) {
 
 	for (int i = 0; i < services_size; i++) {
 		s = &services[i];
-		if (s->state == STATE_DEAD)
+		if (s->state == STATE_ERROR)
 			continue;
-		if (service_need_restart(s)) {
-			if (s->state == STATE_INACTIVE) {
-				service_start(s);
+
+		if (s->stop_timeout != 0) {
+			if (s->state == STATE_INACTIVE || s->state == STATE_ERROR) {
+				s->stop_timeout = 0;
+			} else if (time(NULL) - s->stop_timeout >= SV_STOP_TIMEOUT) {
+				printf(":: service '%s' doesn't terminate, killing...\n", s->name);
+				service_kill(s, SIGKILL);
+				s->stop_timeout = 0;
 			}
-		} else {
-			if (s->state != STATE_INACTIVE) {
-				service_stop(s);
-			}
+			continue;
+		}
+
+		if (s->state == STATE_INACTIVE && service_need_restart(s)) {
+			service_start(s);
 		}
 	}
 }
 
 static void control_sockets(void) {
 	service_t* s;
-	char       cmd, chr;
-	bool       read_signo = false;
+	char       cmd;
 
 	for (int i = 0; i < services_size; i++) {
 		s = &services[i];
-		while (read(s->control, &chr, 1) == 1) {
-			printf("handling '%c' from %s\n", chr, s->name);
-			if (read_signo) {
-				service_handle_command(s, cmd, chr);
-				read_signo = false;
-			} else if (chr == X_XUP || chr == X_XDOWN) {
-				cmd        = chr;
-				read_signo = true;
-			} else {
-				service_handle_command(s, cmd, 0);
-			}
+		while (read(s->control, &cmd, 1) == 1) {
+			printf("handling '%c' from %s\n", cmd, s->name);
+			service_handle_command(s, cmd);
 		}
 	}
 }
 
-int service_supervise(const char* service_dir_, const char* runlevel_) {
+void stop_dummies(void) {
+	bool cont;
+	for (int i = 0; i < services_size; i++) {
+		if (services[i].state != STATE_ACTIVE_DUMMY || services[i].restart == S_RESTART)
+			continue;
+
+		cont = false;
+		for (int i = 0; i < depends_size; i++) {
+			if (depends[i][0] != &services[i])
+				continue;
+
+			if (depends[i][1]->state != STATE_INACTIVE || depends[i][1]->state != STATE_ERROR) {
+				cont = true;
+			}
+		}
+		if (!cont) {
+			service_stop(&services[i]);
+		}
+	}
+}
+
+int service_supervise(const char* service_dir_, const char* service, bool once) {
 	struct sigaction sigact = { 0 };
 	service_t*       s;
-	time_t           start;
-	int              running;
+
+	daemon_running = true;
 
 	sigact.sa_handler = signal_child;
 	sigaction(SIGCHLD, &sigact, NULL);
 	sigact.sa_handler = SIG_IGN;
 	sigaction(SIGPIPE, &sigact, NULL);
 
-	strncpy(runlevel, runlevel_, SV_NAME_MAX);
 	service_dir_path = service_dir_;
 	if ((service_dir = open(service_dir_, O_DIRECTORY)) == -1) {
 		print_error("error: cannot open directory %s: %s\n", service_dir_);
@@ -108,46 +123,51 @@ int service_supervise(const char* service_dir_, const char* runlevel_) {
 		null_fd = 1;
 	}
 
-	printf(":: starting services on '%s'\n", runlevel);
+	printf(":: starting services\n");
 
-	// accept connections and handle requests
-	while (daemon_running) {
-		service_refresh_directory();
-		control_sockets();
-		update_services();
-		sleep(SV_CHECK_INTERVAL);
+	service_refresh_directory();
+
+	if ((s = service_get(service)) == NULL) {
+		fprintf(stderr, "error: cannot start '%s': not found\n", service);
+		goto cleanup;
 	}
 
+	s->restart = once ? S_ONCE : S_RESTART;
+	service_start(s);
+
+
+	bool cont;
+	// accept connections and handle requests
+	do {
+		if (!daemon_running) {
+			for (int i = 0; i < services_size; i++) {
+				s = &services[i];
+				service_stop(s);
+			}
+		}
+
+		service_refresh_directory();
+		stop_dummies();
+		control_sockets();
+		update_services();
+
+		sleep(SV_CHECK_INTERVAL);
+
+		cont = false;
+		for (int i = 0; i < services_size; i++) {
+			if (services[i].state != STATE_INACTIVE && services[i].state != STATE_ERROR)
+				cont = true;
+		}
+	} while (cont);
 
 	printf(":: terminating\n");
 
-	for (int i = 0; i < services_size; i++) {
-		s = &services[i];
-		service_stop(s);
-	}
-
-	running = 0;
-	start   = time(NULL);
-	do {
-		sleep(1);    // sleep for one second
-		// running = 0;
-		for (int i = 0; i < services_size; i++) {
-			if (services[i].state != STATE_INACTIVE)
-				running++;
-		}
-		printf(":: %d running...\r", running);
-	} while (running > 0 && (time(NULL) - start) < SV_STOP_TIMEOUT);
-
-	printf("\n");
-
-	for (int i = 0; i < services_size; i++) {
-		if (services[i].pid) {
-			printf(":: killing %s\n", services[i].name);
-			service_kill(&services[i], SIGKILL);
-		}
-	}
-
 	printf(":: all services stopped\n");
+
+cleanup:
+
+	close(service_dir);
+	close(null_fd);
 
 	signal(SIGPIPE, SIG_DFL);
 	signal(SIGCHLD, SIG_DFL);

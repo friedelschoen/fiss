@@ -55,7 +55,7 @@ all: compile_flags.txt binary manual documentation
 
 # Clean target
 clean:
-	@echo "[RM] $(TARGET_DIRS)"
+	@echo "[ RM ] $(TARGET_DIRS)"
 	$(SILENT)rm -rf $(TARGET_DIRS)
 
 binary: $(BIN_FILES)

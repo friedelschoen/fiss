@@ -10,6 +10,9 @@
 
 
 void service_stop(service_t* s) {
+	if (s->stop_timeout > 0)
+		return;
+
 	switch (s->state) {
 		case STATE_ACTIVE_DUMMY:
 			service_handle_exit(s, false, 0);
@@ -28,11 +31,11 @@ void service_stop(service_t* s) {
 		case STATE_STOPPING:
 		case STATE_FINISHING:
 			kill(s->pid, SIGTERM);
-
+			s->stop_timeout = time(NULL);
 			service_update_state(s, -1);
 			break;
 		case STATE_INACTIVE:
-		case STATE_DEAD:
+		case STATE_ERROR:
 			break;
 	}
 }

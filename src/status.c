@@ -15,7 +15,7 @@ void service_update_state(service_t* s, int state) {
 	if (state != -1)
 		s->state = state;
 
-	s->status_change = time(NULL);
+	s->state_change = time(NULL);
 
 	service_write(s);
 }
@@ -84,8 +84,8 @@ const char* service_status_name(service_t* s) {
 			return "stopping";
 		case STATE_INACTIVE:
 			return "down";
-		case STATE_DEAD:
-			return "dead";
+		case STATE_ERROR:
+			return "dead (error)";
 		default:
 			return NULL;
 	}

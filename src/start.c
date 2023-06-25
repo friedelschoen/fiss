@@ -41,7 +41,7 @@ static void set_pipes(service_t* s) {
 		char service_log[PATH_MAX];
 		int  log_fd;
 
-		snprintf(service_log, PATH_MAX, "%s/%s-%s.log", SV_LOG_DIR, s->name, runlevel);
+		snprintf(service_log, PATH_MAX, "%s/%s.log", SV_LOG_DIR, s->name);
 
 		if ((log_fd = open(service_log, O_CREAT | O_WRONLY | O_TRUNC, 0644)) == -1)
 			log_fd = null_fd;
@@ -136,7 +136,7 @@ void service_run(service_t* s) {
 void service_start(service_t* s) {
 	struct stat st;
 
-	if (s->state != STATE_INACTIVE)
+	if (!daemon_running || s->state != STATE_INACTIVE)
 		return;
 
 	printf("starting %s\n", s->name);

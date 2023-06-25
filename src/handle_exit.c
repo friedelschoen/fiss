@@ -21,7 +21,7 @@ static void do_finish(service_t* s) {
 			service_update_state(s, STATE_FINISHING);
 		}
 	} else if (s->fail_count == SV_FAIL_MAX) {
-		service_update_state(s, STATE_DEAD);
+		service_update_state(s, STATE_ERROR);
 		printf("%s died\n", s->name);
 	} else {
 		service_update_state(s, STATE_INACTIVE);
@@ -32,11 +32,11 @@ static void do_finish(service_t* s) {
 void service_handle_exit(service_t* s, bool signaled, int return_code) {
 	struct stat st;
 
-	s->pid = 0;
-	if (s->restart_file == S_ONCE)
-		s->restart_file = S_DOWN;
-	if (s->restart_manual == S_ONCE)
-		s->restart_manual = S_DOWN;
+	s->pid          = 0;
+	s->stop_timeout = 0;
+
+	if (s->restart == S_ONCE)
+		s->restart = S_DOWN;
 
 	switch (s->state) {
 		case STATE_SETUP:
@@ -71,7 +71,7 @@ void service_handle_exit(service_t* s, bool signaled, int return_code) {
 
 		case STATE_FINISHING:
 			if (s->fail_count == SV_FAIL_MAX) {
-				service_update_state(s, STATE_DEAD);
+				service_update_state(s, STATE_ERROR);
 				printf("%s died\n", s->name);
 			} else {
 				service_update_state(s, STATE_INACTIVE);
@@ -97,7 +97,7 @@ void service_handle_exit(service_t* s, bool signaled, int return_code) {
 			}
 			break;
 
-		case STATE_DEAD:
+		case STATE_ERROR:
 		case STATE_INACTIVE:
 			printf("warn: %s died but was set to inactive\n", s->name);
 	}

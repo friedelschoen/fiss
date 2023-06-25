@@ -15,6 +15,7 @@
 
 static const struct option long_options[] = {
 	{ "version", no_argument, 0, 'V' },
+	{ "once", no_argument, 0, 'o' },
 	{ 0 }
 };
 
@@ -25,11 +26,16 @@ static void signal_interrupt(int signum) {
 }
 
 int main(int argc, char** argv) {
-	int c;
-	while ((c = getopt_long(argc, argv, ":V", long_options, NULL)) > 0) {
+	int  c;
+	bool once = false;
+	while ((c = getopt_long(argc, argv, ":Vo", long_options, NULL)) > 0) {
 		switch (c) {
 			case 'V':
 				print_version_exit();
+				break;
+			case 'o':
+				once = true;
+				break;
 			default:
 			case '?':
 				if (optopt)
@@ -58,5 +64,5 @@ int main(int argc, char** argv) {
 	sigaction(SIGINT, &sa, NULL);
 	sigaction(SIGTERM, &sa, NULL);
 
-	return service_supervise(argv[0], argv[1]);
+	return service_supervise(argv[0], argv[1], once);
 }

@@ -1,4 +1,4 @@
-// +objects: message.o util.o decode.o signame.o
+// +objects: message.o util.o signame.o
 
 #include "config.h"
 #include "message.h"
@@ -6,6 +6,7 @@
 #include "signame.h"
 #include "util.h"
 
+#include <errno.h>
 #include <fcntl.h>
 #include <getopt.h>
 #include <limits.h>
@@ -15,42 +16,32 @@
 #include <unistd.h>
 
 
-struct ident {
-	const char* name;
-	const char* command;
-	bool        runit;
-};
-
-static struct ident command_names[] = {
-	{ "up", "u", true },                 // starts the services, pin as started
-	{ "down", "d", true },               // stops the service, pin as stopped
-	{ "xup", "U", true },                // stops the service, don't pin as stopped
-	{ "xdown", "D", true },              // stops the service, don't pin as stopped
-	{ "once", "o", true },               // same as xup
-	{ "term", "t", true },               // same as down
-	{ "kill", "k", true },               // sends kill, pin as stopped
-	{ "pause", "p", true },              // pauses the service
-	{ "cont", "c", true },               // resumes the service
-	{ "reset", "r", true },              // resets the service
-	{ "alarm", "a", true },              // sends alarm
-	{ "hup", "h", true },                // sends hup
-	{ "int", "i", true },                // sends interrupt
-	{ "quit", "q", true },               // sends quit
-	{ "1", "1", true },                  // sends usr1
-	{ "2", "2", true },                  // sends usr2
-	{ "exit", "x", true },               // does nothing
-	{ "+up", "U0", false },              // starts the service, don't modify pin
-	{ "+down", "D0", false },            // stops the service, don't modify pin
-	{ "restart", "!D0U0", false },       // restarts the service, don't modify pin
-	{ "start", "!u", true },             // start the service, pin as started, print status
-	{ "stop", "!d", true },              // stop the service, pin as stopped, print status
-	{ "status", "!", true },             // print status
-	{ "check", "!", true },              // print status
-	{ "enable", "!.e", false },          // enable service
-	{ "disable", "!.d", false },         // disable service
-	{ "enable-once", "!.e", false },     // enable service once
-	{ "disable-once", "!.d", false },    // disable service once
-	{ 0, 0, 0 }
+static const char* const command_names[][2] = {
+	{ "up", "u" },           // starts the services, pin as started
+	{ "down", "d" },         // stops the service, pin as stopped
+	{ "once", "o" },         // same as xup
+	{ "term", "t" },         // same as down
+	{ "kill", "k" },         // sends kill, pin as stopped
+	{ "pause", "p" },        // pauses the service
+	{ "cont", "c" },         // resumes the service
+	{ "reset", "r" },        // resets the service
+	{ "alarm", "a" },        // sends alarm
+	{ "hup", "h" },          // sends hup
+	{ "int", "i" },          // sends interrupt
+	{ "quit", "q" },         // sends quit
+	{ "1", "1" },            // sends usr1
+	{ "2", "2" },            // sends usr2
+	{ "usr1", "1" },         // sends usr1
+	{ "usr2", "2" },         // sends usr2
+	{ "exit", "x" },         // does nothing
+	{ "restart", "!du" },    // restarts the service, don't modify pin
+	{ "start", "!u" },       // start the service, pin as started, print status
+	{ "stop", "!d" },        // stop the service, pin as stopped, print status
+	{ "status", "!" },       // print status
+	{ "check", "!" },        // print status
+	{ "enable", "!.e" },     // enable service
+	{ "disable", "!.d" },    // disable service
+	{ 0, 0 }
 };
 
 static const struct option long_options[] = {
@@ -59,25 +50,50 @@ static const struct option long_options[] = {
 	{ 0 }
 };
 
-static int check_service(int dir, char* runlevel) {
-	int     fd;
-	ssize_t size;
+struct service_decode {
+	int     state;
+	pid_t   pid;
+	time_t  state_change;
+	bool    restart;
+	bool    once;
+	bool    is_depends;
+	bool    wants_up;
+	int     last_exit;
+	int     return_code;
+	uint8_t fail_count;
+	bool    paused;
+	bool    is_terminating;
+};
 
-	if ((fd = openat(dir, "supervise/ok", O_WRONLY | O_NONBLOCK)) == -1)
-		return -1;
-	close(fd);
+static void decode(struct service_decode* s, const struct service_serial* buffer) {
+	uint64_t tai = ((uint64_t) buffer->status_change[0] << 56) |
+	               ((uint64_t) buffer->status_change[1] << 48) |
+	               ((uint64_t) buffer->status_change[2] << 40) |
+	               ((uint64_t) buffer->status_change[3] << 32) |
+	               ((uint64_t) buffer->status_change[4] << 24) |
+	               ((uint64_t) buffer->status_change[5] << 16) |
+	               ((uint64_t) buffer->status_change[6] << 8) |
+	               ((uint64_t) buffer->status_change[7] << 0);
 
-	if ((fd = openat(dir, "supervise/runlevel", O_RDONLY)) == -1)
-		return -1;
+	s->state_change = tai - 4611686018427387914ULL;
 
-	if ((size = read(fd, runlevel, NAME_MAX)) == -1) {
-		close(fd);
-		return -1;
-	}
-	runlevel[size] = '\0';
-	close(fd);
+	s->state          = buffer->state;
+	s->return_code    = buffer->return_code;
+	s->fail_count     = buffer->fail_count;
+	s->is_terminating = (buffer->flags >> 4) & 0x01;
+	s->once           = (buffer->flags >> 3) & 0x01;
+	s->restart        = (buffer->flags >> 2) & 0x01;
+	s->last_exit      = (buffer->flags >> 0) & 0x03;
 
-	return 0;
+	s->pid = (buffer->pid[0] << 0) |
+	         (buffer->pid[1] << 8) |
+	         (buffer->pid[2] << 16) |
+	         (buffer->pid[3] << 24);
+
+	s->paused   = buffer->paused;
+	s->wants_up = buffer->restart == 'u';
+
+	s->is_depends = s->wants_up != (s->once || s->restart);
 }
 
 static time_t get_mtime(int dir) {
@@ -87,37 +103,15 @@ static time_t get_mtime(int dir) {
 	return st.st_mtim.tv_sec;
 }
 
-static int handle_command(int dir, char command, const char* runlevel) {
-	int fd;
+static int handle_command(int dir, char command) {
+	// no custom commands defined
 
-	char up_file[SV_NAME_MAX]   = "up-";
-	char once_file[SV_NAME_MAX] = "once-";
+	(void) dir, (void) command;
 
-	strcat(up_file, runlevel);
-	strcat(once_file, runlevel);
-
-	switch (command) {
-		case 'e':    // enable
-			if ((fd = openat(dir, up_file, O_WRONLY | O_TRUNC | O_CREAT, 0644)) != -1)
-				close(fd);
-			break;
-		case 'd':
-			unlinkat(dir, up_file, 0);
-			break;
-		case 'E':    // enable
-			if ((fd = openat(dir, once_file, O_WRONLY | O_TRUNC | O_CREAT, 0644)) != -1)
-				close(fd);
-			break;
-		case 'D':
-			unlinkat(dir, once_file, 0);
-			break;
-		default:
-			return -1;
-	}
-	return 0;
+	return -1;
 }
 
-static int send_command(int dir, const char* command, const char* runlevel) {
+static int send_command(int dir, const char* command) {
 	int fd;
 	if ((fd = openat(dir, "supervise/control", O_WRONLY | O_NONBLOCK)) == -1)
 		return -1;
@@ -125,7 +119,7 @@ static int send_command(int dir, const char* command, const char* runlevel) {
 	for (const char* c = command; *c != '\0'; c++) {
 		if (*c == '.') {
 			c++;
-			if (handle_command(dir, *c, runlevel) == -1)
+			if (handle_command(dir, *c) == -1)
 				return -1;
 		} else {
 			if (write(fd, c, 1) == -1)
@@ -142,7 +136,7 @@ int status(int dir) {
 	time_t                timeval;
 	const char*           timeunit = "sec";
 	struct service_serial buffer;
-	service_t             s;
+	struct service_decode s;
 
 	if ((fd = openat(dir, "supervise/status", O_RDONLY | O_NONBLOCK)) == -1)
 		return -1;
@@ -154,9 +148,9 @@ int status(int dir) {
 
 	close(fd);
 
-	service_decode(&s, &buffer);
+	decode(&s, &buffer);
 
-	timeval = time(NULL) - s.status_change;
+	timeval = time(NULL) - s.state_change;
 
 	if (timeval >= 60) {
 		timeval /= 60;
@@ -194,8 +188,8 @@ int status(int dir) {
 		case STATE_INACTIVE:
 			printf("inactive");
 			break;
-		case STATE_DEAD:
-			printf("dead");
+		case STATE_ERROR:
+			printf("dead (error)");
 			break;
 	}
 
@@ -204,26 +198,20 @@ int status(int dir) {
 
 	printf(" since %lu%s", timeval, timeunit);
 
-	if (s.restart_manual == S_ONCE && s.restart_file != S_ONCE)
-		printf(", manually started once");
-	else if (s.restart_manual == S_RESTART && s.restart_file != S_RESTART)
-		printf(", manually restart");
-	else if (s.restart_manual == S_FORCE_DOWN && s.restart_file != S_DOWN)
-		printf(", manually forced down");
+	if (s.once == S_ONCE)
+		printf(", started once");
 
-	if (s.restart_file == S_ONCE)
-		printf(", should started once");
-	else if (s.restart_file == S_RESTART)
+	if (s.restart)
 		printf(", should restart");
 
-	if (s.is_dependency)
+	if (s.is_depends)
 		printf(", started as dependency");
 
 	if (s.return_code > 0 && s.last_exit == EXIT_NORMAL)
 		printf(", exited with %d", s.return_code);
 
 	if (s.return_code > 0 && s.last_exit == EXIT_SIGNALED)
-		printf(", signaled with SIG%s", sigabbr(s.return_code));
+		printf(", crashed with SIG%s", sigabbr(s.return_code));
 
 	if (s.fail_count > 0)
 		printf(", failed %d times", s.fail_count);
@@ -234,12 +222,12 @@ int status(int dir) {
 }
 
 int main(int argc, char** argv) {
-	int opt, dir,
+	int opt, dir, fd,
 	    timeout = SV_STATUS_WAIT;
 	time_t mod, start;
 
 	const char* command = NULL;
-	char        runlevel[SV_NAME_MAX];
+	const char* service;
 
 	while ((opt = getopt_long(argc, argv, ":Vw:", long_options, NULL)) != -1) {
 		switch (opt) {
@@ -265,9 +253,9 @@ int main(int argc, char** argv) {
 		fprintf(stderr, "error: command omitted\n");
 		print_usage_exit(PROG_FSVC, 1);
 	}
-	for (struct ident* ident = command_names; ident->name != NULL; ident++) {
-		if (streq(ident->name, argv[0])) {
-			command = ident->command;
+	for (const char** ident = (void*) command_names; ident[0] != NULL; ident++) {
+		if (streq(ident[0], argv[0])) {
+			command = ident[1];
 			break;
 		}
 	}
@@ -291,25 +279,27 @@ int main(int argc, char** argv) {
 	}
 
 	for (int i = 0; i < argc; i++) {
+		service = progname(argv[i]);
+
 		if ((dir = open(argv[i], O_DIRECTORY)) == -1) {
-			fprintf(stderr, "warning: '%s' is not a valid directory\n", argv[i]);
+			fprintf(stderr, "error: %s: cannot open directory: %s\n", argv[i], strerror(errno));
 			continue;
 		}
 
-
-		if (check_service(dir, runlevel) == -1) {
-			fprintf(stderr, "warning: '%s' is not a valid service\n", argv[i]);
+		if ((fd = openat(dir, "supervise/ok", O_WRONLY | O_NONBLOCK)) == -1) {
+			fprintf(stderr, "error: %s: cannot open supervise/control: %s\n", argv[i], strerror(errno));
 			continue;
 		}
+		close(fd);
 
 		if ((mod = get_mtime(dir)) == -1) {
-			fprintf(stderr, "warning: cannot get modify-time of '%s'\n", argv[i]);
+			fprintf(stderr, "error: %s: cannot get modify-time\n", argv[i]);
 			continue;
 		}
 
 		if (command[0] != '\0') {
-			if (send_command(dir, command, runlevel) == -1) {
-				fprintf(stderr, "warning: unable to send command to '%s'\n", argv[i]);
+			if (send_command(dir, command) == -1) {
+				fprintf(stderr, "error: %s: unable to send command\n", argv[i]);
 				continue;
 			}
 		} else {
@@ -324,7 +314,7 @@ int main(int argc, char** argv) {
 			if (get_mtime(dir) == mod)
 				printf("timeout: ");
 
-			printf("%s: ", progname(argv[i]));
+			printf("%s: ", service);
 
 			if (status(dir) == -1)
 				printf("unable to access supervise/status\n");

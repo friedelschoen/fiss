@@ -28,7 +28,7 @@ H_STOP_TIMEOUT=5 # seconds
 H_NAME_MAX=128 # chars
 H_FAIL_MAX=32 # times
 H_SERVICE_MAX=128 # services
-H_RUNLEVEL_DEFAULT="default"
+H_BOOT_SERVICE="boot"
 H_CHECK_INTERVAL=3 # seconds
 H_PARAM_FILE_LINE_MAX=1024 # bytes
 H_ENV_FILE_LINE_MAX=1024 # bytes
@@ -171,7 +171,7 @@ while [ -n "$1" ]; do
         --fail-limit) H_FAIL_MAX=$2; shift 2;;
         --service-name-limit) H_NAME_MAX=$2; shift 2;;
         --service-limit) H_SERVICE_MAX=$2; shift 2;;
-        --default-runlevel) H_RUNLEVEL_DEFAULT=$2; shift 2;;
+        --boot-service) H_BOOT_SERVICE=$2; shift 2;;
         --check-interval) H_CHECK_INTERVAL=$2; shift 2;;
         --rescure-shell) H_RESCUE_SHELL=$2; shift 2;;
         --total-depends-limit) H_DEPENDENCY_MAX=$2; shift 2;;
@@ -244,7 +244,7 @@ cat > config.h <<EOF
 #define SV_USER_GROUP_MAX $H_USER_GROUP_MAX
 #define SV_VLOGGER_BUFFER $H_VLOGGER_BUFFER
 #define SV_STATUS_WAIT $H_STATUS_WAIT
-#define SV_RUNLEVEL_DEFAULT "$H_RUNLEVEL_DEFAULT"
+#define SV_BOOT_SERVICE "$H_BOOT_SERVICE"
 #define SV_LOG_DIR "$H_LOG_DIR"
 #define SV_RESCUE_SHELL "$H_RESCUE_SHELL"
 #define SV_SERVICE_DIR "$H_SERVICE_DIR"

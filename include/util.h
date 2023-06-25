@@ -2,9 +2,7 @@
 
 #include <stdio.h>
 
-#define streq(a, b)         (!strcmp((a), (b)))
-#define stringify(s)        #s
-#define static_stringify(s) stringify(s)
+#define streq(a, b) (!strcmp((a), (b)))
 
 #define print_error(msg, ...) (fprintf(stderr, msg, ##__VA_ARGS__, strerror(errno)))
 

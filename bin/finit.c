@@ -63,6 +63,8 @@ int main(int argc, const char** argv) {
 
 	printf("booting...\n");
 
+	daemon_running = true;
+
 	// stage 1
 	handle_stage(0);
 
@@ -77,7 +79,7 @@ int main(int argc, const char** argv) {
 		sigaction(SIGTERM, &sigact, NULL);
 		sigaction(SIGINT, &sigact, NULL);
 
-		service_supervise(SV_SERVICE_DIR, SV_RUNLEVEL_DEFAULT);
+		service_supervise(SV_SERVICE_DIR, SV_BOOT_SERVICE, false);
 		sigblock_all(false);
 	}
 

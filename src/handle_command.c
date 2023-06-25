@@ -17,57 +17,23 @@ static int runit_signals[] = {
 	[X_USR2]  = SIGUSR2,
 };
 
-void service_handle_command(service_t* s, char command, char data) {
-	switch (command) {
+void service_handle_command(service_t* s, char command) {
+	switch ((enum service_command) command) {
 		case X_UP:
-			s->restart_manual = S_RESTART;
+			s->restart = S_RESTART;
 			service_start(s);
 			break;
 		case X_ONCE:
-			s->restart_manual = S_ONCE;
+			s->restart = S_ONCE;
 			service_start(s);
 			break;
 		case X_DOWN:
 		case X_TERM:
-			s->restart_manual = S_FORCE_DOWN;
-			service_stop(s);
-			break;
-		case X_XUP:
-			switch (data) {
-				case 'd':
-					s->restart_manual = S_DOWN;
-					break;
-				case 'f':
-					s->restart_manual = S_FORCE_DOWN;
-					break;
-				case 'o':
-					s->restart_manual = S_ONCE;
-					break;
-				case 'u':
-					s->restart_manual = S_RESTART;
-					break;
-			}
-			service_start(s);
-			break;
-		case X_XDOWN:
-			switch (data) {
-				case 'd':
-					s->restart_manual = S_DOWN;
-					break;
-				case 'f':
-					s->restart_manual = S_FORCE_DOWN;
-					break;
-				case 'o':
-					s->restart_manual = S_ONCE;
-					break;
-				case 'u':
-					s->restart_manual = S_RESTART;
-					break;
-			}
+			s->restart = S_DOWN;
 			service_stop(s);
 			break;
 		case X_KILL:
-			s->restart_manual = S_FORCE_DOWN;
+			s->restart = S_DOWN;
 			service_kill(s, SIGKILL);
 			break;
 		case X_PAUSE:
@@ -97,7 +63,7 @@ void service_handle_command(service_t* s, char command, char data) {
 			}
 
 			s->fail_count = 0;
-			if (s->state == STATE_DEAD)
+			if (s->state == STATE_ERROR)
 				service_update_state(s, STATE_INACTIVE);
 
 			break;
