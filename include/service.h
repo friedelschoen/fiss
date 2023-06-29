@@ -99,7 +99,6 @@ void        service_handle_command(service_t* s, char command);
 void        service_handle_exit(service_t* s, bool signaled, int return_code);
 void        service_kill(service_t* s, int signal);
 bool        service_need_restart(service_t* s);
-int         service_pattern(const char* name, service_t** dest, int dest_max);
 int         service_refresh_directory(void);
 service_t*  service_register(int dir, const char* name, bool is_log_service);
 void        service_run(service_t* s);

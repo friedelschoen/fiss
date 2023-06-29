@@ -1,7 +1,5 @@
 #include "service.h"
 
-#include "pattern.h"
-
 #include <dirent.h>
 #include <errno.h>
 #include <limits.h>
@@ -29,16 +27,6 @@ service_t* service_get(const char* name) {
 			return &services[i];
 	}
 	return NULL;
-}
-
-int service_pattern(const char* name, service_t** dest, int dest_max) {
-	int size = 0;
-
-	for (int i = 0; i < services_size && size < dest_max; i++) {
-		if (pattern_test(name, services[i].name))
-			dest[size++] = &services[i];
-	}
-	return size;
 }
 
 int service_refresh_directory(void) {
