@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang=en>
+
+<head>
+  <title>Friedel's Initialization and Service Supervision</title>
+  <meta charset=utf-8 />
+  <meta name=viewport content='width=device-width,initial-scale=1' />
+  <link rel=stylesheet href=assets/style.css />
+  <script type=text/javascript src=assets/toggle-dark.js></script>
+</head>
+
+<body>
+<div id=wrapper>
+<span class=header><a class=title id=top href=#top>shutdown(8) 0.3.3</a><span class=right><span id=toggle_dark onclick=toggle_dark()> turn the lights on </span> <a href=https://github.com/friedelschoen/fiss><img id=github alt=GitHub src=assets/github-mark.svg /></a></span></span>
+================================================================================
+
+<a class=title id=name href=#name>Name</a>
+--------------------------------------------------------------------------------
+
+<b>shutdown</b> – bring down the system 
+
+
+
+<a class=title id=synopsis href=#synopsis>Synopsis</a>
+--------------------------------------------------------------------------------
+
+<b>shutdown</b> [<b>-rhP</b>] [<b>-fF</b>] [now | +mins] [message ...] 
+
+
+
+<a class=title id=description href=#description>Description</a>
+--------------------------------------------------------------------------------
+
+shutdown brings the system down in a secure way. All logged-in users are notified that the system is going down, and login(1) is blocked. 
+
+By default, shutdown puts the system into single user mode. Rebooting and halting the system can be done using the following options: 
+
+<div class=list>* <b>-c</b> Cancel an ongoing shutdown. </div>
+<div class=list>* <b>-f</b> Enable fast booting; skip fsck(8) on next boot. </div>
+<div class=list>* <b>-F</b> Force run of fsck(8) on next boot. </div>
+<div class=list>* <b>-h</b> Halt the system. </div>
+<div class=list>* <b>-k</b> Don't really shutdown; only send the warning messages to everybody. </div>
+<div class=list>* <b>-P</b> Poweroff the system. </div>
+<div class=list>* <b>-r</b> Reboot the system. </div>
+<div class=list>* <b>now</b> Shutdown without further waiting. </div>
+<div class=list>* <b>+mins</b> Wait mins minutes before shutting down. </div>
+<div class=list>* <b>message</b> Message displayed to all users, defaults to "system is going down". </div>
+
+<a class=title id=unsupported href=#unsupported>Unsupported OPTIONS</a>
+--------------------------------------------------------------------------------
+
+This version of shutdown is based on runit(8), the following features are not supported: <div class=list>* <b>-t secs</b> to wait secs seconds between SIGKILL and SIGTERM on shutdown is silently ignored. </div>
+<div class=list>* <b>-a</b> Use /etc/shutdown.allow. </div>
+<div class=list>* <b>-H</b> Drop into boot monitor. </div>
+<div class=list>* <b>-n</b> Don't call init(8). </div>
+<div class=list>* <b>hh:mm</b> Absolute time specification is not implemented. </div>
+
+<a class=title id=see href=#see>See Also</a>
+--------------------------------------------------------------------------------
+
+fsck(8), halt(8), init(8), poweroff(8), reboot(8), fiss(8), runsvchdir(8) 
+
+
+
+<a class=title id=author href=#author>Author</a>
+--------------------------------------------------------------------------------
+
+Leah Neukirchen, leah@vuxu.org. 
+</div>
+</body>
+</html>
+

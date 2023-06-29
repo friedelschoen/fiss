@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang=en>
+
+<head>
+  <title>Friedel's Initialization and Service Supervision</title>
+  <meta charset=utf-8 />
+  <meta name=viewport content='width=device-width,initial-scale=1' />
+  <link rel=stylesheet href=assets/style.css />
+  <script type=text/javascript src=assets/toggle-dark.js></script>
+</head>
+
+<body>
+<div id=wrapper>
+<span class=header><a class=title id=top href=#top>zzz(8) 0.3.3</a><span class=right><span id=toggle_dark onclick=toggle_dark()> turn the lights on </span> <a href=https://github.com/friedelschoen/fiss><img id=github alt=GitHub src=assets/github-mark.svg /></a></span></span>
+================================================================================
+
+<a class=title id=name href=#name>Name</a>
+--------------------------------------------------------------------------------
+
+<b>zzz</b> - suspend or hibernate your system 
+
+
+
+<a class=title id=synopsis href=#synopsis>Synopsis</a>
+--------------------------------------------------------------------------------
+
+<b>zzz [-nSzZRH]</b> 
+
+
+
+<a class=title id=description href=#description>Description</a>
+--------------------------------------------------------------------------------
+
+<b>zzz</b> is a simple utility to hibernate or suspend your computer and part of the fiss-system. It supports suspend/resume-hooks. 
+
+<div class=list>* <b>-n, --noop</b> dry-run, sleep for 5sec instead of actually running ACPI actions. </div>
+<div class=list>* <b>-S, --freeze</b> enter low-power idle mode </div>
+<div class=list>* <b>-z, --suspend</b> suspend to RAM, this is the default behaviour of <b>zzz</b> </div>
+<div class=list>* <b>-Z, --hibernate</b> hibernate to disk and power off </div>
+<div class=list>* <b>-R, --reboot</b> hibernate to disk and reboot (useful for switching operating systems) </div>
+<div class=list>* <b>-H, --hybrid</b> hibernate to disk and suspend </div>
+
+<a class=title id=hooks href=#hooks>Hooks</a>
+--------------------------------------------------------------------------------
+
+Before suspending, <b>zzz</b> executes <u>/usr/share/fiss/suspend</u> which intents to execute scripts inside <u>/etc/zzz.d/suspend</u> in alphanumeric order. After resuming, <b>zzz</b> executes <u>/usr/share/fiss/resume</u> which intents to execute scripts inside <u>/etc/zzz.d/resume</u> in alphanumeric order. 
+
+
+
+<a class=title id=see href=#see>See ALSO</a>
+--------------------------------------------------------------------------------
+
+fiss-init(8), runsvdir(8), runsvchdir(8), sv(8), runsv(8), chpst(8), utmpset(8), svlogd(8) 
+
+
+
+<a class=title id=author href=#author>Author</a>
+--------------------------------------------------------------------------------
+
+Based on the version of Leah Neukirchen &lt;leah@vuxu.org&gt;, rewritten by Friedel Schön &lt;derfriedmundschoen@gmail.com&gt; 
+</div>
+</body>
+</html>
+
