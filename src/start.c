@@ -52,36 +52,6 @@ static void set_pipes(service_t* s) {
 	}
 }
 
-static void set_user(void) {
-	char    buffer[SV_USER_BUFFER];
-	int     user_file;
-	ssize_t n;
-	uid_t   uid;
-	gid_t   gids[SV_USER_GROUP_MAX];
-
-	if ((user_file = open("user", O_RDONLY)) == -1)
-		return;
-
-	if ((n = read(user_file, buffer, sizeof(buffer))) == -1) {
-		print_error("error: failed reading ./user: %s\n");
-		close(user_file);
-		return;
-	}
-	buffer[n] = '\0';
-
-	if ((n = parse_ugid(buffer, &uid, gids)) <= 0) {
-		fprintf(stderr, "warn: malformatted user file\n");
-		close(user_file);
-		return;
-	}
-
-	setgroups(n, gids);
-	setgid(gids[0]);
-	setuid(uid);
-
-	close(user_file);
-}
-
 void service_run(service_t* s) {
 	struct stat st;
 
@@ -107,25 +77,10 @@ void service_run(service_t* s) {
 			fchdir(s->dir);
 			set_pipes(s);
 
-			char  args[SV_ARGUMENTS_MAX][SV_PARAM_FILE_LINE_MAX];
-			char* argv[SV_ARGUMENTS_MAX];
-			for (int i = 0; i < SV_ARGUMENTS_MAX; i++)
-				argv[i] = args[i];
-
-			char  envs[SV_ENV_MAX][SV_ENV_FILE_LINE_MAX];
-			char* envv[SV_ENV_MAX];
-			for (int i = 0; i < SV_ENV_MAX; i++)
-				envv[i] = envs[i];
-
-			parse_param_file(s, argv);
-			parse_env_file(envv);
-
-			set_user();
-
 			if (s->state == STATE_STARTING) {
-				execve("./start", argv, envv);
+				execl("./start", "./start", NULL);
 			} else {
-				execve("./run", argv, envv);
+				execl("./run", "./run", NULL);
 			}
 			print_error("error: cannot execute service: %s\n");
 			_exit(1);

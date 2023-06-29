@@ -293,42 +293,6 @@ exec myservice $ARGS
 This example sources conf in the service-directory if present and executes
 myservice with _$ARGS_.
 
-_./params_~
-run often needs parameters, these can be defined inside params. Your
-arguments must be newline-demilitered. Usually the 0th argument is not
-included and defaults to './run', but if you want to define the 0th argument
-you can prefix the first line with '%' and the argument counting starts at 0.
-No shell-substitution will be done.
-@code
-%fiss-service
--L
--p 8000
-@endcode
-In this example, run would be executed with 'fiss-service' as 0th argument and
-'-L' '-p 8000'
-
-_./env_~
-This file describes environment-variables for run. This is as params a
-newline-demilitered file with key=value pairs. As for params, there is no
-shell-substitution done.
-@code
-HOME=/home/foo
-XDG_CONFIG_DIRS=/etc/
-PATH=/bin:/sbin:/usr/bin:/usr/sbin
-@endcode
-
-_./user_~
-If this file is present, run will be executes as defined user and group(s).
-You can define your user as 'user' and the group will be the user group or you
-explicitly define 'user:group'. You can add multiple groups with
-'user:group:group2:group3', if user is prefixed with a colon (':'), users and
-groups will be parsed as numeric thus ':1000:1000:1001'.
-@code
-foo:foo:mysql
-@endcode
-In this example, run would be executed as 'foo' and als 'foo' as group with
-'mysql' as additional group.
-
 _./start_~
 If your services cannot be run in the foreground, you should execute link it
 to start, start is a short-running executable, if start exits it is considered
