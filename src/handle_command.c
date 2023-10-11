@@ -17,7 +17,7 @@ static int runit_signals[] = {
 	[X_USR2]  = SIGUSR2,
 };
 
-void service_handle_command(service_t* s, char command) {
+void service_handle_command(struct service* s, char command) {
 	switch ((enum service_command) command) {
 		case X_UP:
 			s->restart = S_RESTART;

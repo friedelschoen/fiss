@@ -17,6 +17,10 @@
 #define MAX_MODULE_COUNT 64
 
 
+const char* current_prog(void) {
+	return "modules-load";
+}
+
 static char kernel_cmdline[MAX_CMDLINE_SIZE];
 static char modules[MAX_MODULE_COUNT][MAX_MODULE_SIZE];
 static int  modules_size = 0;
@@ -30,7 +34,7 @@ static void read_cmdline(void) {
 		return;
 
 	if ((size = read(fd, kernel_cmdline, sizeof(kernel_cmdline))) == -1) {
-		print_error("cannot read /proc/cmdline: %s\n");
+		print_errno("cannot read /proc/cmdline: %s\n");
 		close(fd);
 		return;
 	}
@@ -65,7 +69,7 @@ static void read_file(const char* path) {
 	char* comment;
 
 	if ((fd = open(path, O_RDONLY)) == -1) {
-		print_error("unable to open %s: %s\n", path);
+		print_errno("unable to open %s: %s\n", path);
 		return;
 	}
 
@@ -136,6 +140,6 @@ int main(int argc, char** argv) {
 
 	execvp("modprobe", args);
 
-	print_error("cannot exec modprobe: %s");
+	print_errno("cannot exec modprobe: %s");
 	return 1;
 }

@@ -10,6 +10,10 @@
 #include <unistd.h>
 
 
+const char* current_prog(void) {
+	return "halt";
+}
+
 int main(int argc, char* argv[]) {
 	bool do_sync  = true,
 	     do_force = false,
@@ -74,7 +78,7 @@ int main(int argc, char* argv[]) {
 		} else {
 			execl("/sbin/init", "init", initarg, NULL);
 		}
-		print_error("reboot failed: %s\n");
+		print_errno("reboot failed: %s\n");
 	}
 
 	return 0;

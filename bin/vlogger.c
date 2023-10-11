@@ -13,6 +13,11 @@
 #include <sys/syslog.h>
 #include <unistd.h>
 
+
+const char* current_prog(void) {
+	return "vlogger";
+}
+
 static char pwd[PATH_MAX];
 
 typedef struct ident {
@@ -114,7 +119,7 @@ int main(int argc, char* argv[]) {
 		switch (c) {
 			case 'f':
 				if (freopen(optarg, "r", stdin) == NULL) {
-					print_error("error: unable to reopen %s: %s\n", optarg);
+					print_errno("error: unable to reopen %s: %s\n", optarg);
 					return 1;
 				}
 				break;
@@ -154,7 +159,7 @@ int main(int argc, char* argv[]) {
 				sfacility = ident->name;
 		}
 		execl("/etc/vlogger", argv0, tag ? tag : "", slevel, sfacility, NULL);
-		print_error("error: unable to exec /etc/vlogger: %s\n");
+		print_errno("error: unable to exec /etc/vlogger: %s\n");
 		exit(1);
 	}
 

@@ -10,12 +10,12 @@
 #include <unistd.h>
 
 
-static void do_finish(service_t* s) {
+static void do_finish(struct service* s) {
 	struct stat st;
 
 	if (fstatat(s->dir, "finish", &st, 0) != -1 && st.st_mode & S_IXUSR) {
 		if ((s->pid = fork_dup_cd_exec(s->dir, "./finish", null_fd, null_fd, null_fd)) == -1) {
-			print_error("error: cannot execute ./finish: %s\n");
+			print_errno("error: cannot execute ./finish: %s\n");
 			service_update_state(s, STATE_INACTIVE);
 		} else {
 			service_update_state(s, STATE_FINISHING);
@@ -24,12 +24,12 @@ static void do_finish(service_t* s) {
 		service_update_state(s, STATE_ERROR);
 		printf("%s died\n", s->name);
 	} else {
-		service_update_state(s, STATE_INACTIVE);
+		service_update_state(s, s->restart == S_ONCE ? STATE_DONE : STATE_INACTIVE);
 	}
 }
 
 
-void service_handle_exit(service_t* s, bool signaled, int return_code) {
+void service_handle_exit(struct service* s, bool signaled, int return_code) {
 	struct stat st;
 
 	s->pid          = 0;
@@ -74,7 +74,7 @@ void service_handle_exit(service_t* s, bool signaled, int return_code) {
 				service_update_state(s, STATE_ERROR);
 				printf("%s died\n", s->name);
 			} else {
-				service_update_state(s, STATE_INACTIVE);
+				service_update_state(s, s->restart == S_ONCE ? STATE_DONE : STATE_INACTIVE);
 			}
 			break;
 		case STATE_STARTING:
@@ -99,6 +99,7 @@ void service_handle_exit(service_t* s, bool signaled, int return_code) {
 
 		case STATE_ERROR:
 		case STATE_INACTIVE:
-			printf("warn: %s died but was set to inactive\n", s->name);
+		case STATE_DONE:
+			printf("unexpected error: %s died but it's inactive\n", s->name);
 	}
 }

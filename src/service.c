@@ -10,18 +10,18 @@
 #include <unistd.h>
 
 
-service_t   services[SV_SERVICE_MAX];
-int         services_size = 0;
-char        runlevel[SV_NAME_MAX];
-int         service_dir;
-const char* service_dir_path;
-int         control_socket;
-int         null_fd;
-service_t*  depends[SV_DEPENDENCY_MAX][2];
-int         depends_size;
-bool        daemon_running;
+struct service  services[SV_SERVICE_MAX];
+int             services_size = 0;
+char            runlevel[SV_NAME_MAX];
+int             service_dir;
+const char*     service_dir_path;
+int             control_socket;
+int             null_fd;
+struct service* depends[SV_DEPENDENCY_MAX][2];
+int             depends_size;
+bool            daemon_running;
 
-service_t* service_get(const char* name) {
+struct service* service_get(const char* name) {
 	for (int i = 0; i < services_size; i++) {
 		if (streq(services[i].name, name))
 			return &services[i];
@@ -30,13 +30,13 @@ service_t* service_get(const char* name) {
 }
 
 int service_refresh_directory(void) {
-	DIR*           dp;
-	struct dirent* ep;
-	struct stat    st;
-	service_t*     s;
+	DIR*            dp;
+	struct dirent*  ep;
+	struct stat     st;
+	struct service* s;
 
 	if ((dp = opendir(service_dir_path)) == NULL) {
-		print_error("error: cannot open service directory: %s\n");
+		print_errno("error: cannot open service directory: %s\n");
 		return -1;
 	}
 
@@ -69,8 +69,8 @@ int service_refresh_directory(void) {
 }
 
 
-bool service_need_restart(service_t* s) {
-	service_t* d;
+bool service_need_restart(struct service* s) {
+	struct service* d;
 
 	if (!daemon_running)
 		return false;

@@ -22,6 +22,7 @@
 
 // +objects: message.o signame.o
 
+
 #include "message.h"
 #include "signame.h"
 #include "util.h"
@@ -36,6 +37,11 @@
 #include <sys/ioctl.h>
 #include <sys/wait.h>
 #include <unistd.h>
+
+
+const char* current_prog(void) {
+	return "sigremap";
+}
 
 #define DEBUG(...)                        \
 	do {                                  \
@@ -243,14 +249,14 @@ int main(int argc, char* argv[]) {
 
 	child_pid = fork();
 	if (child_pid < 0) {
-		print_error("error: unable to fork: %s\n");
+		print_errno("error: unable to fork: %s\n");
 		return 1;
 	} else if (child_pid == 0) {
 		/* child */
 		sigprocmask(SIG_UNBLOCK, &all_signals, NULL);
 		if (use_setsid) {
 			if (setsid() == -1) {
-				print_error("error: unable to setsid: %s\n");
+				print_errno("error: unable to setsid: %s\n");
 				exit(1);
 			}
 
@@ -265,7 +271,7 @@ int main(int argc, char* argv[]) {
 		execvp(cmd[0], cmd);
 
 		// if this point is reached, exec failed, so we should exit nonzero
-		print_error("error: unable to execute %s: %s\n", cmd[0]);
+		print_errno("error: unable to execute %s: %s\n", cmd[0]);
 		_exit(2);
 	}
 

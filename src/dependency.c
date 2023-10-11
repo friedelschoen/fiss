@@ -9,7 +9,7 @@
 #include <unistd.h>
 
 
-void service_add_dependency(service_t* s, service_t* d) {
+void service_add_dependency(struct service* s, struct service* d) {
 	if (s == d)
 		return;
 
@@ -18,10 +18,10 @@ void service_add_dependency(service_t* s, service_t* d) {
 	depends_size++;
 }
 
-void service_update_dependency(service_t* s) {
-	service_t* dep;
-	int        depends_file;
-	char       line[SV_NAME_MAX];
+void service_update_dependency(struct service* s) {
+	struct service* dep;
+	int             depends_file;
+	char            line[SV_NAME_MAX];
 
 	if (s->log_service) {    // aka keep first entry (the log service) if a log service is used
 		service_add_dependency(s, s->log_service);

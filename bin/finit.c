@@ -1,6 +1,6 @@
 // +objects: message.o util.o supervise.o service.o start.o stop.o
 // +objects: register.o handle_exit.o handle_command.o
-// +objects: encode.o parse.o dependency.o status.o stage.o
+// +objects: encode.o dependency.o status.o stage.o
 // +flags: -static
 
 #include "config.h"
@@ -19,6 +19,10 @@
 #include <unistd.h>
 
 
+const char* current_prog(void) {
+	return "finit";
+}
+
 static bool do_reboot;
 
 static int handle_initctl(int argc, const char** argv) {
@@ -33,7 +37,7 @@ static int handle_initctl(int argc, const char** argv) {
 	}
 	sig = argv[1][0] == '0' ? SIGTERM : SIGINT;
 	if (kill(1, sig) == -1) {
-		print_error("error: unable to kill init: %s\n");
+		print_errno("error: unable to kill init: %s\n");
 		return 1;
 	}
 	return 0;

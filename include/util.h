@@ -4,12 +4,15 @@
 
 #define streq(a, b) (!strcmp((a), (b)))
 
-#define print_error(msg, ...) (fprintf(stderr, msg, ##__VA_ARGS__, strerror(errno)))
+#define print_errno(msg, ...) (fprintf(stderr, "%s: " msg, current_prog(), ##__VA_ARGS__, strerror(errno)))
+#define print_error(msg, ...) (fprintf(stderr, "%s: " msg, current_prog(), ##__VA_ARGS__))
 
 typedef struct {
 	int read;
 	int write;
 } pipe_t;
+
+const char* current_prog(void);    // has to be defined per program
 
 ssize_t      dgetline(int fd, char* line, size_t line_buffer);
 ssize_t      readstr(int fd, char* str);

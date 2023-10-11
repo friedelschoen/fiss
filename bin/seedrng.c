@@ -18,6 +18,10 @@
 #include <unistd.h>
 
 
+const char* current_prog(void) {
+	return "seedrng";
+}
+
 #ifndef LOCALSTATEDIR
 #	define LOCALSTATEDIR "/var/lib"
 #endif

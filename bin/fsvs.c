@@ -13,6 +13,10 @@
 #include <unistd.h>
 
 
+const char* current_prog(void) {
+	return "fsvs";
+}
+
 static const struct option long_options[] = {
 	{ "version", no_argument, 0, 'V' },
 	{ "once", no_argument, 0, 'o' },

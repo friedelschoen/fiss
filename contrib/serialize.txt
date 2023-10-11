@@ -9,7 +9,7 @@ RUNIT: |     STATUS CHANGE     |  NANOSEC  |    PID    |PS|WU|TR|SR|
 
 STATUS CHANGE = unix seconds + 4611686018427387914ULL (tai, lower endian)
 ST = state (see below)
-RC = last return code (0 if not exitted yet)
+RC = last return code (0 if not exited yet)
 FC = fail count
 FL = flags (see below)
 PID = current pid (big endian)
@@ -24,13 +24,13 @@ FLAGS
 -----
 
 +--+--+--+--+--+--+--+--+
-|   --   |TR|OC|RS|LSTEX|
+|   --   |TR|OC|RS| LEX |
 +--+--+--+--+--+--+--+--+
-TR    = is terminating
-OC    = started once
-RS    = should restart
-LSTEX = last exit (0 = never exitted, 1 = normally, 2 = signaled)
--- = nothing yet
+TR  = is terminating
+OC  = started once
+RS  = should restart
+LEX = last exit (0 = never exitted, 1 = normally, 2 = signaled)
+--- = nothing yet
 
 ; as dependency : wants-up != (restart || once)
 

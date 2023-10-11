@@ -16,6 +16,10 @@
 #include <unistd.h>
 
 
+const char* current_prog(void) {
+	return "fsvc";
+}
+
 static const char* const command_names[][2] = {
 	{ "up", "u" },           // starts the services, pin as started
 	{ "down", "d" },         // stops the service, pin as stopped

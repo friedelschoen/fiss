@@ -11,7 +11,7 @@
 #include <unistd.h>
 
 
-void service_update_state(service_t* s, int state) {
+void service_update_state(struct service* s, int state) {
 	if (state != -1)
 		s->state = state;
 
@@ -20,40 +20,40 @@ void service_update_state(service_t* s, int state) {
 	service_write(s);
 }
 
-void service_write(service_t* s) {
+void service_write(struct service* s) {
 	int                   fd;
 	const char*           stat_human;
 	struct service_serial stat_runit;
 
 	if ((fd = openat(s->dir, "supervise/status.new", O_CREAT | O_WRONLY | O_TRUNC, 0644)) == -1) {
-		print_error("cannot open supervise/status: %s\n");
+		print_errno("cannot open supervise/status: %s\n");
 		return;
 	}
 
 	service_encode(s, &stat_runit);
 
 	if (write(fd, &stat_runit, sizeof(stat_runit)) == -1) {
-		print_error("cannot write to supervise/status: %s\n");
+		print_errno("cannot write to supervise/status: %s\n");
 		return;
 	}
 
 	close(fd);
 
 	if ((fd = openat(s->dir, "supervise/stat.new", O_CREAT | O_WRONLY | O_TRUNC, 0644)) == -1) {
-		print_error("cannot create supervise/stat: %s\n");
+		print_errno("cannot create supervise/stat: %s\n");
 		return;
 	}
 
 	stat_human = service_status_name(s);
 	if (write(fd, stat_human, strlen(stat_human)) == -1) {
-		print_error("cannot write to supervise/stat: %s\n");
+		print_errno("cannot write to supervise/stat: %s\n");
 		return;
 	}
 
 	close(fd);
 
 	if ((fd = openat(s->dir, "supervise/pid.new", O_CREAT | O_WRONLY | O_TRUNC, 0644)) == -1) {
-		print_error("cannot create supervise/stat: %s\n");
+		print_errno("cannot create supervise/stat: %s\n");
 		return;
 	}
 
@@ -66,7 +66,7 @@ void service_write(service_t* s) {
 	renameat(s->dir, "supervise/pid.new", s->dir, "supervise/pid");
 }
 
-const char* service_status_name(service_t* s) {
+const char* service_status_name(struct service* s) {
 	switch (s->state) {
 		case STATE_SETUP:
 			return "setup";
@@ -84,6 +84,8 @@ const char* service_status_name(service_t* s) {
 			return "stopping";
 		case STATE_INACTIVE:
 			return "down";
+		case STATE_DONE:
+			return "done";
 		case STATE_ERROR:
 			return "dead (error)";
 		default:

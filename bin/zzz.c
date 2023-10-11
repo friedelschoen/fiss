@@ -10,15 +10,19 @@
 #include <unistd.h>
 
 
+const char* current_prog(void) {
+	return "zzz";
+}
+
 static int open_write(const char* path, const char* string) {
 	int fd;
 
 	if ((fd = open(path, O_WRONLY | O_TRUNC)) == -1) {
-		print_error("cannot open %s: %s\n", path);
+		print_errno("cannot open %s: %s\n", path);
 		return -1;
 	}
 	if (write(fd, string, strlen(string)) == -1) {
-		print_error("error writing to %s: %s\n", path);
+		print_errno("error writing to %s: %s\n", path);
 		close(fd);
 		return -1;
 	}
@@ -84,11 +88,11 @@ int main(int argc, char** argv) {
 
 	if (stat(SV_SUSPEND_EXEC, &st) == 0 && st.st_mode & S_IXUSR) {
 		if ((pid = fork()) == -1) {
-			print_error("failed to fork for " SV_SUSPEND_EXEC ": %s\n");
+			print_errno("failed to fork for " SV_SUSPEND_EXEC ": %s\n");
 			return 1;
 		} else if (pid == 0) {    // child
 			execl(SV_SUSPEND_EXEC, SV_SUSPEND_EXEC, NULL);
-			print_error("failed to execute " SV_SUSPEND_EXEC ": %s\n");
+			print_errno("failed to execute " SV_SUSPEND_EXEC ": %s\n");
 			_exit(1);
 		}
 
@@ -107,11 +111,11 @@ int main(int argc, char** argv) {
 
 	if (stat(SV_RESUME_EXEC, &st) == 0 && st.st_mode & S_IXUSR) {
 		if ((pid = fork()) == -1) {
-			print_error("failed to fork for " SV_RESUME_EXEC ": %s\n");
+			print_errno("failed to fork for " SV_RESUME_EXEC ": %s\n");
 			return 1;
 		} else if (pid == 0) {    // child
 			execl(SV_RESUME_EXEC, SV_RESUME_EXEC, NULL);
-			print_error("failed to execute " SV_RESUME_EXEC ": %s\n");
+			print_errno("failed to execute " SV_RESUME_EXEC ": %s\n");
 			_exit(1);
 		}
 

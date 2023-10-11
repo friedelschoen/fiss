@@ -18,12 +18,12 @@
 static void signal_child(int unused) {
 	(void) unused;
 
-	int        status;
-	pid_t      died_pid;
-	service_t* s = NULL;
+	int             status;
+	pid_t           died_pid;
+	struct service* s = NULL;
 
 	if ((died_pid = wait(&status)) == -1) {
-		print_error("error: cannot wait for process: %s\n");
+		print_errno("error: cannot wait for process: %s\n");
 		return;
 	}
 
@@ -43,33 +43,31 @@ static void signal_child(int unused) {
 }
 
 static void update_services(void) {
-	service_t* s;
+	struct service* s;
 
 	for (int i = 0; i < services_size; i++) {
 		s = &services[i];
+		if (s->state == STATE_INACTIVE || s->state == STATE_ERROR)
+			s->stop_timeout = 0;
+
 		if (s->state == STATE_ERROR)
 			continue;
 
 		if (s->stop_timeout != 0) {
-			if (s->state == STATE_INACTIVE || s->state == STATE_ERROR) {
-				s->stop_timeout = 0;
-			} else if (time(NULL) - s->stop_timeout >= SV_STOP_TIMEOUT) {
+			if (time(NULL) - s->stop_timeout >= SV_STOP_TIMEOUT) {
 				printf(":: service '%s' doesn't terminate, killing...\n", s->name);
 				service_kill(s, SIGKILL);
 				s->stop_timeout = 0;
 			}
-			continue;
-		}
-
-		if (s->state == STATE_INACTIVE && service_need_restart(s)) {
+		} else if (s->state == STATE_INACTIVE && service_need_restart(s)) {
 			service_start(s);
 		}
 	}
 }
 
 static void control_sockets(void) {
-	service_t* s;
-	char       cmd;
+	struct service* s;
+	char            cmd;
 
 	for (int i = 0; i < services_size; i++) {
 		s = &services[i];
@@ -103,7 +101,7 @@ void stop_dummies(void) {
 
 int service_supervise(const char* service_dir_, const char* service, bool once) {
 	struct sigaction sigact = { 0 };
-	service_t*       s;
+	struct service*  s;
 
 	daemon_running = true;
 
@@ -114,12 +112,12 @@ int service_supervise(const char* service_dir_, const char* service, bool once) 
 
 	service_dir_path = service_dir_;
 	if ((service_dir = open(service_dir_, O_DIRECTORY)) == -1) {
-		print_error("error: cannot open directory %s: %s\n", service_dir_);
+		print_errno("error: cannot open directory %s: %s\n", service_dir_);
 		return 1;
 	}
 
 	if ((null_fd = open("/dev/null", O_RDWR)) == -1) {
-		print_error("error: cannot open /dev/null: %s\n");
+		print_errno("error: cannot open /dev/null: %s\n");
 		null_fd = 1;
 	}
 

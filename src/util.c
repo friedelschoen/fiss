@@ -65,7 +65,7 @@ int fork_dup_cd_exec(int dir, const char* path, int fd0, int fd1, int fd2) {
 	pid_t pid;
 
 	if ((pid = fork()) == -1) {
-		print_error("error: cannot fork process: %s\n");
+		print_errno("error: cannot fork process: %s\n");
 		return -1;
 	} else if (pid == 0) {
 		dup2(fd0, STDIN_FILENO);
@@ -75,7 +75,7 @@ int fork_dup_cd_exec(int dir, const char* path, int fd0, int fd1, int fd2) {
 		fchdir(dir);
 
 		execl(path, path, NULL);
-		print_error("error: cannot execute stop process: %s\n");
+		print_errno("error: cannot execute stop process: %s\n");
 		_exit(1);
 	}
 	return pid;

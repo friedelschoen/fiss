@@ -35,6 +35,7 @@ enum service_state {
 	STATE_ACTIVE_DUMMY,         // dependencies started
 	STATE_STOPPING,             // ./stop running
 	STATE_FINISHING,            // ./finish running
+	STATE_DONE,                 // ./stop finished
 	STATE_ERROR,                // something went wrong
 };
 
@@ -63,51 +64,49 @@ struct service_serial {
 	uint8_t state_runit;
 };
 
-typedef struct service service_t;
-
 struct service {
-	char       name[SV_NAME_MAX];    // name of service
-	int        state;                // current state
-	pid_t      pid;                  // pid of run
-	int        dir;                  // dirfd
-	int        control;              // fd to supervise/control
-	time_t     state_change;         // last status change
-	int        restart;              // should restart on exit
-	int        last_exit;            // stopped signaled or exited
-	int        return_code;          // return code or signal
-	uint8_t    fail_count;           // current fail cound
-	bool       is_log_service;       // is a log service
-	bool       paused;               // is paused
-	time_t     stop_timeout;         // stop start-time
-	pipe_t     log_pipe;             // pipe for logging
-	service_t* log_service;          // has a log_server otherwise NULL
+	char               name[SV_NAME_MAX];    // name of service
+	enum service_state state;                // current state
+	pid_t              pid;                  // pid of run
+	int                dir;                  // dirfd
+	int                control;              // fd to supervise/control
+	time_t             state_change;         // last status change
+	int                restart;              // should restart on exit
+	enum service_exit  last_exit;            // stopped signaled or exited
+	int                return_code;          // return code or signal
+	uint8_t            fail_count;           // current fail cound
+	bool               is_log_service;       // is a log service
+	bool               paused;               // is paused
+	time_t             stop_timeout;         // stop start-time
+	pipe_t             log_pipe;             // pipe for logging
+	struct service*    log_service;          // has a log_server otherwise NULL
 };
 
-extern service_t   services[];
-extern int         services_size;
-extern int         service_dir;
-extern int         null_fd;
-extern bool        daemon_running;
-extern service_t*  depends[][2];
-extern int         depends_size;
-extern const char* service_dir_path;
+extern struct service  services[];
+extern int             services_size;
+extern int             service_dir;
+extern int             null_fd;
+extern bool            daemon_running;
+extern struct service* depends[][2];
+extern int             depends_size;
+extern const char*     service_dir_path;
 
 
-void        service_encode(service_t* s, void* buffer);
-service_t*  service_get(const char* name);
-void        service_handle_command(service_t* s, char command);
-void        service_handle_exit(service_t* s, bool signaled, int return_code);
-void        service_kill(service_t* s, int signal);
-bool        service_need_restart(service_t* s);
-int         service_refresh_directory(void);
-service_t*  service_register(int dir, const char* name, bool is_log_service);
-void        service_run(service_t* s);
-int         service_send_command(char command, char extra, const char* service, service_t* response, int response_max);
-void        service_start(service_t* s);
-const char* service_status_name(service_t* s);
-void        service_stop(service_t* s);
-int         service_supervise(const char* service_dir_, const char* service, bool once);
-void        service_update_dependency(service_t* s);
-bool        service_is_dependency(service_t* s);
-void        service_update_state(service_t* s, int state);
-void        service_write(service_t* s);
+void            service_encode(struct service* s, struct service_serial* buffer);
+struct service* service_get(const char* name);
+void            service_handle_command(struct service* s, char command);
+void            service_handle_exit(struct service* s, bool signaled, int return_code);
+void            service_kill(struct service* s, int signal);
+bool            service_need_restart(struct service* s);
+int             service_refresh_directory(void);
+struct service* service_register(int dir, const char* name, bool is_log_service);
+void            service_run(struct service* s);
+int             service_send_command(char command, char extra, const char* service, struct service* response, int response_max);
+void            service_start(struct service* s);
+const char*     service_status_name(struct service* s);
+void            service_stop(struct service* s);
+int             service_supervise(const char* service_dir_, const char* service, bool once);
+void            service_update_dependency(struct service* s);
+bool            service_is_dependency(struct service* s);
+void            service_update_state(struct service* s, int state);
+void            service_write(struct service* s);

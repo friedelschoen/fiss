@@ -25,7 +25,7 @@ bool handle_stage(int stage) {
 	bool     cont = true;
 
 	while ((pid = fork()) == -1) {
-		print_error("error: unable to fork for stage1: %s\n");
+		print_errno("error: unable to fork for stage1: %s\n");
 		sleep(5);
 	}
 	if (pid == 0) {
@@ -34,7 +34,7 @@ bool handle_stage(int stage) {
 		if (stage == 0) {
 			/* stage 1 gets full control of console */
 			if ((ttyfd = open("/dev/console", O_RDWR)) == -1) {
-				print_error("error: unable to open /dev/console: %s\n");
+				print_errno("error: unable to open /dev/console: %s\n");
 			} else {
 				ioctl(ttyfd, TIOCSCTTY, NULL);    // make the controlling process
 				dup2(ttyfd, 0);
@@ -46,7 +46,7 @@ bool handle_stage(int stage) {
 
 		printf("enter stage %d\n", stage);
 		execv(stage_exec[stage][0], stage_exec[stage]);
-		print_error("error: unable to exec stage %d: %s\n", stage);
+		print_errno("error: unable to exec stage %d: %s\n", stage);
 		_exit(1);
 	}
 
@@ -61,7 +61,7 @@ bool handle_stage(int stage) {
 		kill(pid, SIGTERM);
 
 	if (waitpid(pid, &exitstat, 0) == -1) {
-		print_error("warn: waitpid failed: %s");
+		print_errno("warn: waitpid failed: %s");
 		sleep(5);
 	}
 

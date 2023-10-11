@@ -11,7 +11,7 @@
 #include <unistd.h>
 
 
-static int init_supervise(service_t* s) {
+static int init_supervise(struct service* s) {
 	int         fd;
 	struct stat st;
 
@@ -20,27 +20,27 @@ static int init_supervise(service_t* s) {
 	}
 
 	if (fstatat(s->dir, "supervise/ok", &st, 0) == -1 && mkfifoat(s->dir, "supervise/ok", 0666) == -1) {
-		print_error("cannot create fifo at supervise/ok: %s\n");
+		print_errno("cannot create fifo at supervise/ok: %s\n");
 		return -1;
 	}
 
 	if (fstatat(s->dir, "supervise/control", &st, 0) == -1 && mkfifoat(s->dir, "supervise/control", 0644) == -1) {
-		print_error("cannot create fifo at supervise/control: %s\n");
+		print_errno("cannot create fifo at supervise/control: %s\n");
 		return -1;
 	}
 
 	if (openat(s->dir, "supervise/ok", O_RDONLY | O_NONBLOCK) == -1) {
-		print_error("cannot open supervise/ok: %s\n");
+		print_errno("cannot open supervise/ok: %s\n");
 		return -1;
 	}
 
 	if ((s->control = openat(s->dir, "supervise/control", O_RDONLY | O_NONBLOCK)) == -1) {
-		print_error("cannot open supervise/ok: %s\n");
+		print_errno("cannot open supervise/ok: %s\n");
 		return -1;
 	}
 
 	if ((fd = openat(s->dir, "supervise/lock", O_CREAT | O_WRONLY, 0644)) == -1) {
-		print_error("cannot create supervise/lock: %s\n");
+		print_errno("cannot create supervise/lock: %s\n");
 		return -1;
 	}
 	close(fd);
@@ -48,9 +48,9 @@ static int init_supervise(service_t* s) {
 	return 0;
 }
 
-service_t* service_register(int dir, const char* name, bool is_log_service) {
-	service_t*  s;
-	struct stat st;
+struct service* service_register(int dir, const char* name, bool is_log_service) {
+	struct service* s;
+	struct stat     st;
 
 	if ((s = service_get(name)) == NULL) {
 		s                 = &services[services_size++];
@@ -67,7 +67,7 @@ service_t* service_register(int dir, const char* name, bool is_log_service) {
 		s->stop_timeout   = 0;
 
 		if ((s->dir = openat(dir, name, O_DIRECTORY)) == -1) {
-			print_error("error: cannot open '%s': %s\n", name);
+			print_errno("error: cannot open '%s': %s\n", name);
 			services_size--;
 			return NULL;
 		}

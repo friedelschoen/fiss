@@ -12,7 +12,7 @@
 #include <unistd.h>
 
 
-static void set_pipes(service_t* s) {
+static void set_pipes(struct service* s) {
 	if (s->is_log_service) {
 		close(s->log_pipe.write);
 		dup2(s->log_pipe.read, STDIN_FILENO);
@@ -52,7 +52,7 @@ static void set_pipes(service_t* s) {
 	}
 }
 
-void service_run(service_t* s) {
+void service_run(struct service* s) {
 	struct stat st;
 
 	if (fstatat(s->dir, "run", &st, 0) != -1 && st.st_mode & S_IXUSR) {
@@ -68,11 +68,11 @@ void service_run(service_t* s) {
 
 	if (s->state != STATE_ACTIVE_DUMMY) {
 		if ((s->pid = fork()) == -1) {
-			print_error("error: cannot fork process: %s\n");
+			print_errno("error: cannot fork process: %s\n");
 			exit(1);
 		} else if (s->pid == 0) {    // child
 			if (setsid() == -1)
-				print_error("error: cannot setsid: %s\n");
+				print_errno("error: cannot setsid: %s\n");
 
 			fchdir(s->dir);
 			set_pipes(s);
@@ -82,13 +82,13 @@ void service_run(service_t* s) {
 			} else {
 				execl("./run", "./run", NULL);
 			}
-			print_error("error: cannot execute service: %s\n");
+			print_errno("error: cannot execute service: %s\n");
 			_exit(1);
 		}
 	}
 }
 
-void service_start(service_t* s) {
+void service_start(struct service* s) {
 	struct stat st;
 
 	if (!daemon_running || s->state != STATE_INACTIVE)
@@ -102,7 +102,7 @@ void service_start(service_t* s) {
 
 	if (fstatat(s->dir, "setup", &st, 0) != -1 && st.st_mode & S_IXUSR) {
 		if ((s->pid = fork_dup_cd_exec(s->dir, "./setup", null_fd, null_fd, null_fd)) == -1) {
-			print_error("error: cannot execute ./setup: %s\n");
+			print_errno("error: cannot execute ./setup: %s\n");
 			service_update_state(s, STATE_INACTIVE);
 		} else {
 			service_update_state(s, STATE_SETUP);
