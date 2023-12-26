@@ -44,9 +44,6 @@ int main(int argc, char** argv) {
 	} else if (streq(argv[0], "ZZZ")) {
 		new_state = "disk";
 		new_disk  = "platform";
-	} else if (streq(argv[0], "zzz-test")) {
-		new_state = NULL;
-		new_disk  = NULL;
 	} else {
 		fprintf(stderr, "error: program-name `%s` invalid\n", argv[0]);
 		return 1;
