@@ -17,6 +17,58 @@ fiss provides the following features:
 -   Status monitoring: fiss provides a simple command-line interface to check the status of a service, including its uptime, PID, and exit code.
 -   Simple configuration: fiss uses a simple directory structure to store the configuration for each service, making it easy to manage and version control.
 
+
+## Thanks to
+
+Thanks to D. J. Bernstein for [`daemontools`](http://cr.yp.to/daemontools.html) and build a sane and beautiful service management system. 
+
+Thanks to G. Pape to contribute and extend `daemontool` by building the init-system [`runit`](http://smarden.org/runit/).
+
+Thanks to the contributers of [Void Linux](`https://voidlinux.org/`) for the [`runit-tools`](https://github.com/void-linux/void-runit) to make some scripts and programs around `runit` to make it an complete init-system for linux. 
+
+Without you, `fiss` would not be possible :heart:!
+
+## Contributing
+
+Contributing is always welcome :grin:! 
+
+This is possible by issueing problems or ideas at [GitHub](https://github.com/friedelschoen/fiss/), I'll look forward to implement them.
+
+Or if you got some free time left, you can add code to this project do a pull-request! To help you on your way, a little description:
+
+| directory             | description                                           |
+|-----------------------|-------------------------------------------------------|
+| .github/              | workflows for github, like building                   |
+| assets/               | assets for the docs-website                           |
+| bin/                  | resulting executables                                 |
+| bin/*.c               | C-sources                                             |
+| bin/*.lnk             | links to other executables<sup>1</sup>                |
+| bin/*.sh              | shell-scripts                                         |
+| contrib/              | helpful files for contributing                        |
+| contrib/command.txt   | internal commands for service's `supervise/control`   |
+| contrib/docs.txt      | custom documentation and manual format in docs/       |
+| contrib/make.txt      | custom make-headers                                   |
+| contrib/serialize.txt | serialization of `supervise/status`                   |
+| docs/                 | pages to include on the website                       |
+| include/              | C-headers                                             |
+| man/                  | manuals                                               |
+| mk/                   | common files for `make`                               |
+| share/                | files for `fiss`, should be installed at `/usr/share` |
+| src/                  | C-sources for executables                             |
+| tools/                | tools for building                                    |
+| tools/make-docs.py    | converts a `.txt`-file to `.html`                     |
+| tools/make-man.py     | converts a `.txt`-file to a roff-file                 |
+| .clang-format         | format-specification for `clang-format`               |
+| configure             | configure behaviour of the resulting executables      |
+| fiss.svg              | logo of fiss                                          |
+| LICENSE               | license-text (zlib-license)                           |
+| Makefile              | makefile for gnu make                                 |
+| readme.md             | what you are reading right now                        | 
+
+- <sup>1</sup>plain text files containing the name of the symbolic link
+
+> :warning: please format your modification using `clang-format` and the `.clang-format` specifications!
+
 ## Licensing
 
 This project is licensed under the terms of the [zlib license](./LICENSE).
