@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ENABLED=
-MK_BINARIES='chpst finit fsvc fsvs halt init modules-load poweroff reboot seedrng shutdown sigremap vlogger zzz'
+MK_BINARIES='ZZZ chpst envuidgid finit fsvc fsvs halt init modules-load pgrphack poweroff reboot seedrng setlock setuidgid shutdown sigremap softlimit vlogger zzz'
 
 MK_INSTALL_PREFIX=/
 MK_INSTALL_SBIN=/sbin
@@ -82,21 +82,27 @@ Usage: ./configure [options]
 --disable-install-share . disabling installing share
 --disable-install-man ... disabling installing man8
 --disable-install-docs .. disabling installing docs
-        
---enable-chpst .......... disables everything but given --enable-* and chpst
---enable-finit .......... disables everything but given --enable-* and finit
---enable-fsvc ........... disables everything but given --enable-* and fsvc
---enable-fsvs ........... disables everything but given --enable-* and fsvs
---enable-halt ........... disables everything but given --enable-* and halt
---enable-init ........... disables everything but given --enable-* and init (link)
---enable-modules-load ... disables everything but given --enable-* and modules-load
---enable-poweroff ....... disables everything but given --enable-* and poweroff
---enable-reboot ......... disables everything but given --enable-* and reboot
---enable-seedrng ........ disables everything but given --enable-* and seedrng
---enable-shutdown ....... disables everything but given --enable-* and shutdown
---enable-sigremap ....... disables everything but given --enable-* and sigremap
---enable-vlogger ........ disables everything but given --enable-* and vlogger
---enable-zzz ............ disables everything but given --enable-* and zzz
+
+--enable-ZZZ ............ enable ZZZ
+--enable-chpst .......... enable chpst
+--enable-envuidgid ...... enable envuidgid
+--enable-finit .......... enable finit
+--enable-fsvc ........... enable fsvc
+--enable-fsvs ........... enable fsvs
+--enable-halt ........... enable halt
+--enable-init ........... enable init
+--enable-modules-load ... enable modules-load
+--enable-pgrphack ....... enable pgrphack
+--enable-poweroff ....... enable poweroff
+--enable-reboot ......... enable reboot
+--enable-seedrng ........ enable seedrng
+--enable-setlock ........ enable setlock
+--enable-setuidgid ...... enable setuidgid
+--enable-shutdown ....... enable shutdown
+--enable-sigremap ....... enable sigremap
+--enable-softlimit ...... enable softlimit
+--enable-vlogger ........ enable vlogger
+--enable-zzz ............ enable zzz
 
 --stop-timeout .......... sets the timeout whenever service must be killed
 --fail-limit ............ sets the limit a service may failed before it is declared as dead
@@ -151,19 +157,25 @@ while [ -n "$1" ]; do
         --disable-install-share) MK_INSTALL_SHARE=; shift;;
         --disable-install-man) MK_INSTALL_MAN8=; shift;;
         --disable-install-docs) MK_INSTALL_DOCS=; shift;;
-        
+
+        --enable-ZZZ) enable ZZZ; shift;;
         --enable-chpst) enable chpst; shift;;
+        --enable-envuidgid) enable envuidgid; shift;;
         --enable-finit) enable finit; shift;;
         --enable-fsvc) enable fsvc; shift;;
         --enable-fsvs) enable fsvs; shift;;
         --enable-halt) enable halt; shift;;
         --enable-init) enable init; shift;;
         --enable-modules-load) enable modules-load; shift;;
+        --enable-pgrphack) enable pgrphack; shift;;
         --enable-poweroff) enable poweroff; shift;;
         --enable-reboot) enable reboot; shift;;
         --enable-seedrng) enable seedrng; shift;;
+        --enable-setlock) enable setlock; shift;;
+        --enable-setuidgid) enable setuidgid; shift;;
         --enable-shutdown) enable shutdown; shift;;
         --enable-sigremap) enable sigremap; shift;;
+        --enable-softlimit) enable softlimit; shift;;
         --enable-vlogger) enable vlogger; shift;;
         --enable-zzz) enable zzz; shift;;
         
