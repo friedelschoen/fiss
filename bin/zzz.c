@@ -34,8 +34,23 @@ int main(int argc, char** argv) {
 	int         opt;
 	pid_t       pid;
 	struct stat st;
-	const char *new_state = "mem",
+
+	const char *new_state = NULL,
 	           *new_disk  = NULL;
+
+	if (streq(argv[0], "zzz")) {
+		new_state = "mem";
+		new_disk  = NULL;
+	} else if (streq(argv[0], "ZZZ")) {
+		new_state = "disk";
+		new_disk  = "platform";
+	} else if (streq(argv[0], "zzz-test")) {
+		new_state = NULL;
+		new_disk  = NULL;
+	} else {
+		fprintf(stderr, "error: program-name `%s` invalid\n", argv[0]);
+		return 1;
+	}
 
 	struct option long_options[] = {
 		{ "noop", no_argument, 0, 'n' },
